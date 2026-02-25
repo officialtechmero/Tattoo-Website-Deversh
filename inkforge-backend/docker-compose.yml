@@ -1,37 +1,39 @@
-version: "3.9"
-services:
-  app:
-    build: .
-    ports:
-      - "3000:3000"
-    environment:
-      POSTGRES_HOST: postgres
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: appdb
-      REDIS_HOST: redis
-    depends_on:
-      - postgres
-      - redis
-    restart: unless-stopped
-
+﻿services:
   postgres:
-    image: postgres:latest
+    image: postgres:16-alpine
+    container_name: inkforge-postgres
+    restart: unless-stopped
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: appdb
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+      POSTGRES_DB: inkforge
     ports:
       - "5432:5432"
-    restart: unless-stopped
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d inkforge"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
 
-  redis:
-    image: redis:latest
-    ports:
-      - "6379:6379"
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: inkforge-app
     restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      HOST: 0.0.0.0
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/inkforge
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "3001:3000"
 
 volumes:
   postgres_data:

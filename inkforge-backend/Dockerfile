@@ -1,18 +1,25 @@
-FROM node:22-alpine
-
-# Create app directory
+﻿# Build stage
+FROM node:22-alpine AS builder
 WORKDIR /app
 
-# Install dependencies first (better caching)
 COPY package*.json ./
+RUN npm ci
 
-RUN npm install --omit=dev
+COPY tsconfig.json ./
+COPY drizzle.config.ts ./
+COPY src ./src
 
-# Copy app source
-COPY . .
+RUN npm run build
 
-# Expose port
+# Runtime stage
+FROM node:22-alpine AS runner
+WORKDIR /app
+ENV NODE_ENV=production
+
+COPY package*.json ./
+RUN npm ci --omit=dev
+
+COPY --from=builder /app/dist ./dist
+
 EXPOSE 3000
-
-# Start app
-CMD ["npm", "start"]
+CMD ["npm", "run", "start"]
