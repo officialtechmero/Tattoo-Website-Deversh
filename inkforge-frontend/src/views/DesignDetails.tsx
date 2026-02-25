@@ -114,11 +114,11 @@ import Image from "next/image";
 import Link from "next/link";
 
 export default function DesignDetails() {
-  const params  = useParams<{ id: string }>();
-  const id      = params?.id;
-  const router  = useRouter();
+  const params = useParams<{ id: string }>();
+  const id = params?.id;
+  const router = useRouter();
 
-  const [likedIds,   setLikedIds]   = useState<Record<number, boolean>>({});
+  const [likedIds, setLikedIds] = useState<Record<number, boolean>>({});
   const [extraLikes, setExtraLikes] = useState<Record<number, number>>({});
 
   const toggleLike = useCallback((e: React.MouseEvent, designId: number) => {
@@ -153,10 +153,10 @@ export default function DesignDetails() {
           d.id !== design.id &&
           d.style !== design.style &&
           (d.category === design.category ||
-            d.theme    === design.theme    ||
+            d.theme === design.theme ||
             d.bodyPart === design.bodyPart ||
-            d.animal   === design.animal   ||
-            d.floral   === design.floral),
+            d.animal === design.animal ||
+            d.floral === design.floral),
       )
       .slice(0, 6);
   }, [design]);
@@ -166,9 +166,9 @@ export default function DesignDetails() {
   }
 
   const sessionCost = design.sessionCost || 120;
-  const sessions    = design.sessions    || 3;
-  const tip         = design.tip         || 40;
-  const total       = sessionCost * sessions + tip;
+  const sessions = design.sessions || 3;
+  const tip = design.tip || 40;
+  const total = sessionCost * sessions + tip;
 
   return (
     <div className="min-h-screen bg-background">
@@ -213,12 +213,12 @@ export default function DesignDetails() {
               Created by {design.artist || "AI Generator"}
             </p>
             <div className="space-y-3 text-sm">
-              <Detail label="Category"            value={design.category || design.style} />
-              <Detail label="Type"                value={design.type || "Blackwork"} />
-              <Detail label="Owner City"          value={design.city || "Los Angeles"} />
-              <Detail label="Session Cost"        value={`$${sessionCost}`} />
-              <Detail label="Tip"                 value={`$${tip}`} />
-              <Detail label="Sessions"            value={sessions} />
+              <Detail label="Category" value={design.category || design.style} />
+              <Detail label="Type" value={design.type || "Blackwork"} />
+              <Detail label="Owner City" value={design.city || "Los Angeles"} />
+              <Detail label="Session Cost" value={`$${sessionCost}`} />
+              <Detail label="Tip" value={`$${tip}`} />
+              <Detail label="Sessions" value={sessions} />
               <Detail label="Total Estimated Cost" value={`$${total}`} />
             </div>
             <div className="flex gap-3 mt-8">
@@ -355,16 +355,14 @@ function DesignCard({
             onClick={(e) => onLike(e, design.id)}
             aria-label={isLiked ? "Unlike" : "Like"}
             aria-pressed={isLiked}
-            className={`absolute top-2.5 right-2.5 rounded-full p-1.5 transition-all duration-200 ${
-              isLiked
+            className={`absolute top-2.5 right-2.5 rounded-full p-1.5 transition-all duration-200 ${isLiked
                 ? "bg-pink-500/20 opacity-100"
                 : "bg-background/60 opacity-0 group-hover:opacity-100 hover:bg-background/80"
-            }`}
+              }`}
           >
             <Heart
-              className={`h-3.5 w-3.5 transition-colors duration-200 ${
-                isLiked ? "fill-pink-500 text-pink-500 like-pop" : "text-foreground"
-              }`}
+              className={`h-3.5 w-3.5 transition-colors duration-200 ${isLiked ? "fill-pink-500 text-pink-500 like-pop" : "text-foreground"
+                }`}
             />
           </button>
         </div>
@@ -375,9 +373,8 @@ function DesignCard({
             {design.style}
           </span>
           <span
-            className={`flex items-center gap-1 text-[11px] transition-colors duration-200 ${
-              isLiked ? "text-pink-500" : "text-muted-foreground"
-            }`}
+            className={`flex items-center gap-1 text-[11px] transition-colors duration-200 ${isLiked ? "text-pink-500" : "text-muted-foreground"
+              }`}
           >
             <Heart
               className={`h-3 w-3 ${isLiked ? "fill-pink-500 text-pink-500" : ""}`}

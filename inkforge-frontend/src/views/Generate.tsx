@@ -71,11 +71,10 @@ export default function Generate() {
                   <button
                     key={s}
                     onClick={() => setSelectedStyle(s)}
-                    className={`rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
-                      selectedStyle === s
+                    className={`rounded-full px-3 py-1.5 text-xs font-medium transition-all ${selectedStyle === s
                         ? "bg-primary text-primary-foreground"
                         : "border border-border bg-card text-muted-foreground hover:text-foreground"
-                    }`}
+                      }`}
                   >
                     {s}
                   </button>
@@ -91,11 +90,10 @@ export default function Generate() {
                   <button
                     key={p}
                     onClick={() => setSelectedPlacement(p)}
-                    className={`rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
-                      selectedPlacement === p
+                    className={`rounded-full px-3 py-1.5 text-xs font-medium transition-all ${selectedPlacement === p
                         ? "bg-primary text-primary-foreground"
                         : "border border-border bg-card text-muted-foreground hover:text-foreground"
-                    }`}
+                      }`}
                   >
                     {p}
                   </button>
@@ -127,11 +125,10 @@ export default function Generate() {
                     <button
                       key={m}
                       onClick={() => setColorMode(m)}
-                      className={`flex-1 rounded-lg px-3 py-2 text-xs font-medium transition-all ${
-                        colorMode === m
+                      className={`flex-1 rounded-lg px-3 py-2 text-xs font-medium transition-all ${colorMode === m
                           ? "bg-primary text-primary-foreground"
                           : "border border-border bg-card text-muted-foreground"
-                      }`}
+                        }`}
                     >
                       {m === "bw" ? "Black & White" : "Color"}
                     </button>
@@ -145,11 +142,10 @@ export default function Generate() {
                     <button
                       key={w}
                       onClick={() => setLineWeight(w)}
-                      className={`flex-1 rounded-lg px-3 py-2 text-xs font-medium transition-all ${
-                        lineWeight === w
+                      className={`flex-1 rounded-lg px-3 py-2 text-xs font-medium transition-all ${lineWeight === w
                           ? "bg-primary text-primary-foreground"
                           : "border border-border bg-card text-muted-foreground"
-                      }`}
+                        }`}
                     >
                       {w}
                     </button>

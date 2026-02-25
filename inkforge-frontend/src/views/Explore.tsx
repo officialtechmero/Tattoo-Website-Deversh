@@ -24,60 +24,60 @@ const filterCategories = {
 };
 
 const valueSnippets: Record<string, { essence: string }> = {
-  Men:            { essence: "bold masculine energy" },
-  Women:          { essence: "elegant feminine expression" },
-  Forearm:        { essence: "the forearm — a highly visible canvas" },
-  "Full Sleeve":  { essence: "a full sleeve wrapping shoulder to wrist" },
-  "Half Sleeve":  { essence: "a half sleeve from shoulder to elbow" },
-  Thigh:          { essence: "the thigh — a spacious intimate canvas" },
-  Hand:           { essence: "the hand — bold placement for the fearless" },
-  Shoulder:       { essence: "the shoulder — a naturally curved frame" },
-  Wrist:          { essence: "the wrist — always in quiet view" },
-  Band:           { essence: "a band encircling the body in continuity" },
-  Back:           { essence: "the back — the body's largest epic canvas" },
-  Calf:           { essence: "the calf — strong and shapely" },
-  Chest:          { essence: "the chest — closest to the heart" },
-  Sternum:        { essence: "the sternum — centered and deeply personal" },
-  Finger:         { essence: "the finger — tiny and daring" },
-  Ankle:          { essence: "the ankle — subtle and graceful" },
-  Skull:          { essence: "skull motifs that celebrate life through mortality" },
-  Space:          { essence: "cosmic space imagery and galactic wonder" },
-  Book:           { essence: "literary and book-inspired themes" },
-  Gothic:         { essence: "gothic dark romance and dramatic shadows" },
-  Ocean:          { essence: "ocean waves and deep sea energy" },
-  Cartoon:        { essence: "playful cartoon art and nostalgic imagery" },
-  Compass:        { essence: "compass and navigation symbols" },
-  Anxiety:        { essence: "inner-storm symbolism turned into outer beauty" },
-  Strength:       { essence: "symbols of strength and hard-won resilience" },
-  Warrior:        { essence: "warrior spirit and fearless iconography" },
-  Mom:            { essence: "a heartfelt tribute to motherhood" },
-  Sister:         { essence: "a celebration of the sisterhood bond" },
-  Zodiac:         { essence: "zodiac and celestial star sign symbols" },
-  Rose:           { essence: "rose motifs dripping with passion and beauty" },
-  Flower:         { essence: "delicate floral blooms in full expression" },
-  Lotus:          { essence: "lotus flowers rising through transformation" },
-  Wildflower:     { essence: "free-spirited wildflowers growing untamed" },
-  Orchid:         { essence: "exotic orchids for the refined and rare" },
-  Dandelion:      { essence: "wishful dandelions carrying seeds of hope" },
-  Lion:           { essence: "lion imagery radiating courage and raw power" },
-  Wolf:           { essence: "wolf symbolism — loyalty, instinct, and freedom" },
-  Werewolf:       { essence: "werewolf transformation and primal duality" },
+  Men: { essence: "bold masculine energy" },
+  Women: { essence: "elegant feminine expression" },
+  Forearm: { essence: "the forearm — a highly visible canvas" },
+  "Full Sleeve": { essence: "a full sleeve wrapping shoulder to wrist" },
+  "Half Sleeve": { essence: "a half sleeve from shoulder to elbow" },
+  Thigh: { essence: "the thigh — a spacious intimate canvas" },
+  Hand: { essence: "the hand — bold placement for the fearless" },
+  Shoulder: { essence: "the shoulder — a naturally curved frame" },
+  Wrist: { essence: "the wrist — always in quiet view" },
+  Band: { essence: "a band encircling the body in continuity" },
+  Back: { essence: "the back — the body's largest epic canvas" },
+  Calf: { essence: "the calf — strong and shapely" },
+  Chest: { essence: "the chest — closest to the heart" },
+  Sternum: { essence: "the sternum — centered and deeply personal" },
+  Finger: { essence: "the finger — tiny and daring" },
+  Ankle: { essence: "the ankle — subtle and graceful" },
+  Skull: { essence: "skull motifs that celebrate life through mortality" },
+  Space: { essence: "cosmic space imagery and galactic wonder" },
+  Book: { essence: "literary and book-inspired themes" },
+  Gothic: { essence: "gothic dark romance and dramatic shadows" },
+  Ocean: { essence: "ocean waves and deep sea energy" },
+  Cartoon: { essence: "playful cartoon art and nostalgic imagery" },
+  Compass: { essence: "compass and navigation symbols" },
+  Anxiety: { essence: "inner-storm symbolism turned into outer beauty" },
+  Strength: { essence: "symbols of strength and hard-won resilience" },
+  Warrior: { essence: "warrior spirit and fearless iconography" },
+  Mom: { essence: "a heartfelt tribute to motherhood" },
+  Sister: { essence: "a celebration of the sisterhood bond" },
+  Zodiac: { essence: "zodiac and celestial star sign symbols" },
+  Rose: { essence: "rose motifs dripping with passion and beauty" },
+  Flower: { essence: "delicate floral blooms in full expression" },
+  Lotus: { essence: "lotus flowers rising through transformation" },
+  Wildflower: { essence: "free-spirited wildflowers growing untamed" },
+  Orchid: { essence: "exotic orchids for the refined and rare" },
+  Dandelion: { essence: "wishful dandelions carrying seeds of hope" },
+  Lion: { essence: "lion imagery radiating courage and raw power" },
+  Wolf: { essence: "wolf symbolism — loyalty, instinct, and freedom" },
+  Werewolf: { essence: "werewolf transformation and primal duality" },
   "Black Jaguar": { essence: "black jaguar power — sleek and commanding" },
-  Tiger:          { essence: "fierce tiger energy — electric and unstoppable" },
-  "Spider Web":   { essence: "intricate spider web patterns of patience" },
+  Tiger: { essence: "fierce tiger energy — electric and unstoppable" },
+  "Spider Web": { essence: "intricate spider web patterns of patience" },
   "Sun And Moon": { essence: "the eternal sun and moon duality" },
-  Star:           { essence: "star motifs — ancient light guiding the lost" },
-  Sunset:         { essence: "golden sunset scenes of endings and beginnings" },
-  Sun:            { essence: "radiant sun energy — the source of all warmth" },
-  Moon:           { essence: "lunar mystery and the phases of change" },
-  Sunrise:        { essence: "sunrise symbolism — the promise of every new day" },
-  Aztec:          { essence: "Aztec heritage patterns and ancient warrior gods" },
-  Egyptian:       { essence: "Egyptian mythology and Nile-born mysticism" },
-  Celtic:         { essence: "Celtic knotwork from the mists of ancient Europe" },
-  Flash:          { essence: "classic flash art — bold, timeless, walk-in cool" },
-  Henna:          { essence: "henna-inspired organic flow and intricate detail" },
-  Yakuza:         { essence: "Yakuza irezumi tradition and full-body storytelling" },
-  "Sugar Skull":  { essence: "sugar skull Day of the Dead color and joy" },
+  Star: { essence: "star motifs — ancient light guiding the lost" },
+  Sunset: { essence: "golden sunset scenes of endings and beginnings" },
+  Sun: { essence: "radiant sun energy — the source of all warmth" },
+  Moon: { essence: "lunar mystery and the phases of change" },
+  Sunrise: { essence: "sunrise symbolism — the promise of every new day" },
+  Aztec: { essence: "Aztec heritage patterns and ancient warrior gods" },
+  Egyptian: { essence: "Egyptian mythology and Nile-born mysticism" },
+  Celtic: { essence: "Celtic knotwork from the mists of ancient Europe" },
+  Flash: { essence: "classic flash art — bold, timeless, walk-in cool" },
+  Henna: { essence: "henna-inspired organic flow and intricate detail" },
+  Yakuza: { essence: "Yakuza irezumi tradition and full-body storytelling" },
+  "Sugar Skull": { essence: "sugar skull Day of the Dead color and joy" },
 };
 
 const styleDescriptions: Record<string, string> = {
@@ -135,9 +135,9 @@ function buildDescription(
   }
 
   // ── One or more filter chips active → build combined sentence ─────────
-  const genders   = activeValues.filter((v) => filterCategories.Gender.includes(v));
+  const genders = activeValues.filter((v) => filterCategories.Gender.includes(v));
   const bodyParts = activeValues.filter((v) => filterCategories["Body Part"].includes(v));
-  const themes    = activeValues.filter((v) =>
+  const themes = activeValues.filter((v) =>
     [
       ...filterCategories.Themes,
       ...filterCategories.Symbol,
@@ -148,10 +148,10 @@ function buildDescription(
     ].includes(v),
   );
 
-  const stylePrefix   = activeStyle !== "All" ? `${activeStyle} ` : "";
-  const themeEssences = themes.map((v)    => valueSnippets[v]?.essence).filter(Boolean) as string[];
-  const genderEssences= genders.map((v)   => valueSnippets[v]?.essence).filter(Boolean) as string[];
-  const bodyEssences  = bodyParts.map((v) => valueSnippets[v]?.essence).filter(Boolean) as string[];
+  const stylePrefix = activeStyle !== "All" ? `${activeStyle} ` : "";
+  const themeEssences = themes.map((v) => valueSnippets[v]?.essence).filter(Boolean) as string[];
+  const genderEssences = genders.map((v) => valueSnippets[v]?.essence).filter(Boolean) as string[];
+  const bodyEssences = bodyParts.map((v) => valueSnippets[v]?.essence).filter(Boolean) as string[];
 
   // Build sentence fragments
   const parts: string[] = [];
@@ -174,35 +174,35 @@ function buildDescription(
     activeValues.length === 1
       ? `Every piece in this selection has been chosen because it captures that feeling perfectly — browse slowly, something here was made for you.`
       : activeValues.length <= 3
-      ? `Each design in this edit has been chosen for how powerfully it brings those elements together — a small but potent collection worth exploring in full.`
-      : `With this many layers of intent stacked together, every result you see here is genuinely rare — a design that checks every one of your boxes at once.`;
+        ? `Each design in this edit has been chosen for how powerfully it brings those elements together — a small but potent collection worth exploring in full.`
+        : `With this many layers of intent stacked together, every result you see here is genuinely rare — a design that checks every one of your boxes at once.`;
 
   const coreDesc =
     parts.length > 0
       ? `${stylePrefix}tattoo${activeValues.length > 1 ? "s" : ""} ${parts.join(", ")} — a curated edit that speaks directly to a very specific kind of collector. ${closing}`
       : `A focused collection of ${stylePrefix}designs featuring ${join(
-          activeValues.map((v) => valueSnippets[v]?.essence ?? v),
-        )}. ${closing}`;
+        activeValues.map((v) => valueSnippets[v]?.essence ?? v),
+      )}. ${closing}`;
 
   // Label
   const label =
     activeValues.length === 1
       ? `${stylePrefix}${activeValues[0]}`
       : activeValues.length <= 3
-      ? activeValues.join(" · ")
-      : `${activeValues.length} Filters Active`;
+        ? activeValues.join(" · ")
+        : `${activeValues.length} Filters Active`;
 
   return { label, description: coreDesc };
 }
 
 export default function Explore() {
-  const [search, setSearch]             = useState("");
-  const [activeStyle, setActiveStyle]   = useState("All");
-  const [showFilters, setShowFilters]   = useState(false);
-  const [activeSort, setActiveSort]     = useState("Popular");
+  const [search, setSearch] = useState("");
+  const [activeStyle, setActiveStyle] = useState("All");
+  const [showFilters, setShowFilters] = useState(false);
+  const [activeSort, setActiveSort] = useState("Popular");
   const [activeFilters, setActiveFilters] = useState<ActiveFilters>(createEmptyFilters());
-  const [likedIds, setLikedIds]         = useState<Record<number, boolean>>({});
-  const [extraLikes, setExtraLikes]     = useState<Record<number, number>>({});
+  const [likedIds, setLikedIds] = useState<Record<number, boolean>>({});
+  const [extraLikes, setExtraLikes] = useState<Record<number, number>>({});
 
   const toggleLike = useCallback((e: React.MouseEvent, id: number) => {
     e.stopPropagation();
@@ -255,19 +255,19 @@ export default function Explore() {
     const filtered = flashDesigns.filter((d) => {
       if (activeStyle !== "All" && d.style !== activeStyle) return false;
       if (q && !d.style.toLowerCase().includes(q)) return false;
-      if (activeFilters.Gender.length      && d.gender    && !activeFilters.Gender.includes(d.gender))           return false;
-      if (activeFilters["Body Part"].length && d.bodyPart  && !activeFilters["Body Part"].includes(d.bodyPart))   return false;
-      if (activeFilters.Themes.length      && d.theme     && !activeFilters.Themes.includes(d.theme))            return false;
-      if (activeFilters.Symbol.length      && d.symbol    && !activeFilters.Symbol.includes(d.symbol))           return false;
-      if (activeFilters.Floral.length      && d.floral    && !activeFilters.Floral.includes(d.floral))           return false;
-      if (activeFilters.Animals.length     && d.animal    && !activeFilters.Animals.includes(d.animal))          return false;
-      if (activeFilters.Celestial.length   && d.celestial && !activeFilters.Celestial.includes(d.celestial))     return false;
-      if (activeFilters.Unique.length      && d.unique    && !activeFilters.Unique.includes(d.unique))           return false;
+      if (activeFilters.Gender.length && d.gender && !activeFilters.Gender.includes(d.gender)) return false;
+      if (activeFilters["Body Part"].length && d.bodyPart && !activeFilters["Body Part"].includes(d.bodyPart)) return false;
+      if (activeFilters.Themes.length && d.theme && !activeFilters.Themes.includes(d.theme)) return false;
+      if (activeFilters.Symbol.length && d.symbol && !activeFilters.Symbol.includes(d.symbol)) return false;
+      if (activeFilters.Floral.length && d.floral && !activeFilters.Floral.includes(d.floral)) return false;
+      if (activeFilters.Animals.length && d.animal && !activeFilters.Animals.includes(d.animal)) return false;
+      if (activeFilters.Celestial.length && d.celestial && !activeFilters.Celestial.includes(d.celestial)) return false;
+      if (activeFilters.Unique.length && d.unique && !activeFilters.Unique.includes(d.unique)) return false;
       return true;
     });
     return [...filtered].sort((a, b) => {
       if (activeSort === "Most Liked") return (b.likes || 0) - (a.likes || 0);
-      if (activeSort === "Newest")     return (b.id    || 0) - (a.id    || 0);
+      if (activeSort === "Newest") return (b.id || 0) - (a.id || 0);
       return 0;
     });
   }, [activeFilters, activeSort, activeStyle, search]);
@@ -452,7 +452,7 @@ export default function Explore() {
             {/* Grid */}
             <div className="columns-2 gap-3 sm:columns-2 xl:columns-3 [column-fill:_balance]">
               {sorted.map((design, i) => {
-                const isLiked      = !!likedIds[design.id];
+                const isLiked = !!likedIds[design.id];
                 const displayLikes = (design.likes || 0) + (extraLikes[design.id] || 0);
                 return (
                   <article key={design.id}
