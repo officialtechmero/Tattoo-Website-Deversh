@@ -1,3 +1,5 @@
+"use client";
+
 import { useParams, useRouter } from "next/navigation";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
@@ -98,3 +100,4 @@ function Detail({ label, value }) {
     </div>
   );
 }
+

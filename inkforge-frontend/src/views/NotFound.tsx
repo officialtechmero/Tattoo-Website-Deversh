@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -26,3 +28,4 @@ const NotFound = () => {
 };
 
 export default NotFound;
+

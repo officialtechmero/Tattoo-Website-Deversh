@@ -1,8 +1,8 @@
 import { useState } from "react";
+import Image from "next/image";
 import { Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { flashDesigns, styles } from "@/lib/data";
-import { motion } from "framer-motion";
 
 const filterTabs = ["All", ...styles] as const;
 
@@ -43,18 +43,17 @@ export function FlashLibrary() {
         {/* Grid */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((design, i) => (
-            <motion.div
+            <div
               key={design.id}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.05 }}
               className="group card-hover overflow-hidden rounded-xl border border-border bg-card"
             >
               <div className="relative aspect-square overflow-hidden">
-                <img
+                <Image
                   src={design.image}
                   alt={`${design.style} tattoo`}
+                  fill
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  loading="lazy"
                   className="h-full w-full object-cover grayscale transition-all duration-500 group-hover:grayscale-0 group-hover:scale-105"
                 />
               </div>
@@ -67,7 +66,7 @@ export function FlashLibrary() {
                   <span className="text-xs">{design.likes}</span>
                 </div>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
       </div>

@@ -1,7 +1,7 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Sparkles, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { motion } from "framer-motion";
 import { tattooSamples } from "@/lib/data";
 
 const INK_PARTICLE_COUNT = 20;
@@ -46,11 +46,7 @@ export function HeroSection() {
       <InkParticles />
 
       <div className="container relative z-10 mx-auto px-4 py-20 text-center">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7 }}
-        >
+        <div>
           <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-2.5 text-sm text-primary">
             <Sparkles className="h-4 w-4" />
             AI-Powered Tattoo Design
@@ -79,7 +75,7 @@ export function HeroSection() {
               </Button>
             </Link>
           </div>
-        </motion.div>
+        </div>
       </div>
 
       {/* Auto-scrolling tattoo samples */}
@@ -92,9 +88,13 @@ export function HeroSection() {
               key={i}
               className="h-56 w-56 shrink-0 overflow-hidden rounded-sm border border-border"
             >
-              <img
+              <Image
                 src={img}
                 alt={`Tattoo sample ${i + 1}`}
+                width={224}
+                height={224}
+                sizes="224px"
+                loading="lazy"
                 className="h-full w-full object-cover grayscale hover:grayscale-0 transition-all duration-500"
               />
             </div>

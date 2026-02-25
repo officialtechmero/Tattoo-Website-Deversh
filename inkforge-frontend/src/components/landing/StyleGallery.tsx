@@ -1,5 +1,5 @@
+import Image from "next/image";
 import { tattooSamples, styles } from "@/lib/data";
-import { motion } from "framer-motion";
 
 export function StyleGallery() {
   return (
@@ -14,19 +14,19 @@ export function StyleGallery() {
 
         <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
           {styles.map((style, i) => (
-            <motion.div
+            <div
               key={style}
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.05 }}
               className="group flex-shrink-0 w-44 cursor-pointer"
             >
               <div className="relative overflow-hidden rounded-2xl border border-border bg-card">
                 <div className="aspect-square overflow-hidden">
-                  <img
+                  <Image
                     src={tattooSamples[i]}
                     alt={style}
+                    width={176}
+                    height={176}
+                    sizes="176px"
+                    loading="lazy"
                     className="h-full w-full object-cover grayscale transition-all duration-500 group-hover:grayscale-0 group-hover:scale-110"
                   />
                 </div>
@@ -35,7 +35,7 @@ export function StyleGallery() {
                   <span className="font-display text-sm font-semibold tracking-widest">{style}</span>
                 </div>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
       </div>

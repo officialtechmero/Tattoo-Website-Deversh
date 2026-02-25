@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { pricingPlans } from "@/lib/data";
-import { motion } from "framer-motion";
 
 export function PricingSection() {
   const [yearly, setYearly] = useState(false);
@@ -39,13 +38,9 @@ export function PricingSection() {
         </div>
 
         <div className="mx-auto grid max-w-5xl gap-6 md:grid-cols-3">
-          {pricingPlans.map((plan, i) => (
-            <motion.div
+          {pricingPlans.map((plan) => (
+            <div
               key={plan.name}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
               className={`card-hover rounded-2xl border p-8 ${
                 plan.highlighted
                   ? "border-primary glow-violet bg-card"
@@ -84,7 +79,7 @@ export function PricingSection() {
                   </li>
                 ))}
               </ul>
-            </motion.div>
+            </div>
           ))}
         </div>
       </div>

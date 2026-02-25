@@ -1,3 +1,5 @@
+"use client";
+
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { PricingSection } from "@/components/landing/PricingSection";
@@ -53,3 +55,4 @@ export default function Pricing() {
     </div>
   );
 }
+

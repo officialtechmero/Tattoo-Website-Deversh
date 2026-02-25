@@ -1,5 +1,4 @@
 import { PenLine, Palette, Download } from "lucide-react";
-import { motion } from "framer-motion";
 
 const steps = [
   {
@@ -34,13 +33,9 @@ export function HowItWorks() {
         </div>
 
         <div className="grid gap-8 md:grid-cols-3">
-          {steps.map((step, i) => (
-            <motion.div
+          {steps.map((step) => (
+            <div
               key={step.step}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.15 }}
               className="card-hover rounded-2xl border border-border bg-card p-8 text-center"
             >
               <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-primary/10">
@@ -49,7 +44,7 @@ export function HowItWorks() {
               <span className="font-display text-lg font-bold text-primary">{step.step}</span>
               <h3 className="mt-2 font-display text-xl font-bold tracking-wider">{step.title}</h3>
               <p className="mt-3 text-sm text-muted-foreground">{step.description}</p>
-            </motion.div>
+            </div>
           ))}
         </div>
       </div>

@@ -1,6 +1,6 @@
+import Image from "next/image";
 import { Star } from "lucide-react";
 import { testimonials } from "@/lib/data";
-import { motion } from "framer-motion";
 
 export function Testimonials() {
   return (
@@ -15,12 +15,8 @@ export function Testimonials() {
 
         <div className="grid gap-6 md:grid-cols-3">
           {testimonials.map((t, i) => (
-            <motion.div
+            <div
               key={t.name}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
               className="card-hover rounded-2xl border border-border bg-card p-6"
             >
               <div className="mb-4 flex gap-1">
@@ -30,10 +26,17 @@ export function Testimonials() {
               </div>
               <p className="mb-6 text-sm text-muted-foreground italic">"{t.quote}"</p>
               <div className="flex items-center gap-3">
-                <img src={t.avatar} alt={t.name} className="h-10 w-10 rounded-full" />
+                <Image
+                  src={t.avatar}
+                  alt={t.name}
+                  width={40}
+                  height={40}
+                  loading="lazy"
+                  className="h-10 w-10 rounded-full"
+                />
                 <span className="text-sm font-semibold">{t.name}</span>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
       </div>

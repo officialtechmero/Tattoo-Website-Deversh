@@ -3,7 +3,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { motion, AnimatePresence } from "framer-motion";
 
 const navLinks = [
   { label: "Home", to: "/" },
@@ -61,47 +60,41 @@ export function Navbar() {
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
           className="text-foreground md:hidden"
+          aria-label={mobileOpen ? "Close navigation menu" : "Open navigation menu"}
         >
           {mobileOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
         </button>
       </div>
 
       {/* Mobile menu */}
-      <AnimatePresence>
-        {mobileOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="border-b border-border bg-background md:hidden"
-          >
-            <div className="flex flex-col gap-1 p-4">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.to}
-                  href={link.to}
-                  onClick={() => setMobileOpen(false)}
-                  className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                    pathname === link.to
-                      ? "text-primary bg-primary/10"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  {link.label}
-                </Link>
-              ))}
-              <div className="mt-3 flex gap-2">
-                <Link href="/login" className="flex-1" onClick={() => setMobileOpen(false)}>
-                  <Button variant="outline" className="w-full border-border">Login</Button>
-                </Link>
-                <Link href="/signup" className="flex-1" onClick={() => setMobileOpen(false)}>
-                  <Button className="btn-glow w-full border-0 text-primary-foreground">Start Free</Button>
-                </Link>
-              </div>
+      {mobileOpen && (
+        <div className="border-b border-border bg-background md:hidden">
+          <div className="flex flex-col gap-1 p-4">
+            {navLinks.map((link) => (
+              <Link
+                key={link.to}
+                href={link.to}
+                onClick={() => setMobileOpen(false)}
+                className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                  pathname === link.to
+                    ? "text-primary bg-primary/10"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {link.label}
+              </Link>
+            ))}
+            <div className="mt-3 flex gap-2">
+              <Link href="/login" className="flex-1" onClick={() => setMobileOpen(false)}>
+                <Button variant="outline" className="w-full border-border">Login</Button>
+              </Link>
+              <Link href="/signup" className="flex-1" onClick={() => setMobileOpen(false)}>
+                <Button className="btn-glow w-full border-0 text-primary-foreground">Start Free</Button>
+              </Link>
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          </div>
+        </div>
+      )}
     </nav>
   );
 }
