@@ -4,21 +4,33 @@ import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { tattooSamples } from "@/lib/data";
 
+const INK_PARTICLE_COUNT = 20;
+
+function pseudoRandom(index: number, salt: number) {
+  let x = ((index + 1) * 0x9e3779b1) ^ (salt * 0x85ebca6b);
+  x = Math.imul(x ^ (x >>> 16), 0x7feb352d);
+  x = Math.imul(x ^ (x >>> 15), 0x846ca68b);
+  x = (x ^ (x >>> 16)) >>> 0;
+  return x / 4294967296;
+}
+
+const inkParticleStyles = Array.from({ length: INK_PARTICLE_COUNT }, (_, i) => ({
+  width: `${(pseudoRandom(i, 1) * 6 + 2).toFixed(3)}px`,
+  height: `${(pseudoRandom(i, 2) * 6 + 2).toFixed(3)}px`,
+  left: `${(pseudoRandom(i, 3) * 100).toFixed(3)}%`,
+  top: `${(pseudoRandom(i, 4) * 100).toFixed(3)}%`,
+  animationDelay: `${(pseudoRandom(i, 5) * 6).toFixed(3)}s`,
+  animationDuration: `${(pseudoRandom(i, 6) * 4 + 4).toFixed(3)}s`,
+}));
+
 function InkParticles() {
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {Array.from({ length: 20 }).map((_, i) => (
+      {inkParticleStyles.map((style, i) => (
         <div
           key={i}
           className="absolute rounded-full bg-primary/20 animate-float"
-          style={{
-            width: `${Math.random() * 6 + 2}px`,
-            height: `${Math.random() * 6 + 2}px`,
-            left: `${Math.random() * 100}%`,
-            top: `${Math.random() * 100}%`,
-            animationDelay: `${Math.random() * 6}s`,
-            animationDuration: `${Math.random() * 4 + 4}s`,
-          }}
+          style={style}
         />
       ))}
       <div className="absolute inset-0 ink-gradient" />

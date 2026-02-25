@@ -72,7 +72,7 @@ export const flashDesigns: TattooDesign[] = Array.from({ length: 24 }, (_, i) =>
   id: i + 1,
   image: tattooSamples[i % 8],
   style: styles[i % 8],
-  likes: Math.floor(Math.random() * 500) + 50,
+  likes: 50 + ((i * 73 + 191) % 500),
   placement: ["Forearm", "Upper Arm", "Chest", "Back", "Ankle", "Wrist"][i % 6],
   date: `2025-0${(i % 9) + 1}-${String((i % 28) + 1).padStart(2, "0")}`,
 }));
