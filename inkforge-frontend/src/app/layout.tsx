@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type { Viewport } from "next";
 import type { ReactNode } from "react";
 import { Bebas_Neue, DM_Sans, DM_Serif_Display } from "next/font/google";
 import "../index.css";
@@ -70,6 +71,13 @@ export const metadata: Metadata = {
       "max-video-preview": -1,
     },
   },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#c8f04d",
+  colorScheme: "dark",
 };
 
 export default function RootLayout({

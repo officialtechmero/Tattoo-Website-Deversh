@@ -322,28 +322,6 @@ export default function Explore() {
     <div className="min-h-screen bg-background">
       <Navbar />
 
-      <style>{`
-        .filter-scroll { scrollbar-width: thin; scrollbar-color: hsl(var(--border)) transparent; }
-        .filter-scroll::-webkit-scrollbar { width: 4px; }
-        .filter-scroll::-webkit-scrollbar-track { background: transparent; border-radius: 999px; }
-        .filter-scroll::-webkit-scrollbar-thumb { background: hsl(var(--border)); border-radius: 999px; }
-        .filter-scroll::-webkit-scrollbar-thumb:hover { background: hsl(var(--primary) / 0.6); }
-
-        @keyframes like-pop {
-          0%   { transform: scale(1); }
-          40%  { transform: scale(1.45); }
-          70%  { transform: scale(0.9); }
-          100% { transform: scale(1); }
-        }
-        .like-pop { animation: like-pop 0.35s ease forwards; }
-
-        @keyframes desc-in {
-          from { opacity: 0; transform: translateY(-5px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-        .desc-in { animation: desc-in 0.25s ease forwards; }
-      `}</style>
-
       <div className="container mx-auto px-4 pt-24 pb-16">
         <div>
           <h1 className="mb-2 font-display text-3xl font-bold md:text-4xl">
@@ -421,7 +399,7 @@ export default function Explore() {
             </div>
 
             {/* ── Description banner — always visible, never conditional ─── */}
-            <div key={activeDescription.label} className="desc-in mb-6 rounded-xl border border-border bg-card px-5 py-4">
+            <div key={activeDescription.label} className="animate-desc-in mb-6 rounded-xl border border-border bg-card px-5 py-4">
               {/* Active filter chips — only when filters are on */}
               {hasActiveFilters && (
                 <div className="flex flex-wrap gap-1.5 mb-2.5">
@@ -467,13 +445,13 @@ export default function Explore() {
                       />
                       <div className="absolute inset-0 flex items-center justify-center bg-background/60 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
                         <Button asChild size="sm" className="btn-glow border-0 text-primary-foreground text-xs px-4">
-                          <Link href={`/design/${design.id}`}>Check Details</Link>
+                          <Link href={`/design/${design.id}`}>View Design</Link>
                         </Button>
                       </div>
                       <button onClick={(e) => toggleLike(e, design.id)}
                         aria-label={isLiked ? "Unlike" : "Like"} aria-pressed={isLiked}
                         className={`absolute top-2.5 right-2.5 rounded-full p-1.5 transition-all duration-200 ${isLiked ? "bg-pink-500/20 opacity-100" : "bg-background/60 opacity-0 group-hover:opacity-100 hover:bg-background/80"}`}>
-                        <Heart className={`h-3.5 w-3.5 transition-colors duration-200 ${isLiked ? "fill-pink-500 text-pink-500 like-pop" : "text-foreground"}`} />
+                        <Heart className={`h-3.5 w-3.5 transition-colors duration-200 ${isLiked ? "fill-pink-500 text-pink-500 animate-like-pop" : "text-foreground"}`} />
                       </button>
                     </div>
                     <div className="flex items-center justify-between px-3 py-2">

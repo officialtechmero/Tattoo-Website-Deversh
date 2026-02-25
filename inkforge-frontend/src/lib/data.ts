@@ -80,19 +80,22 @@ export const flashDesigns: TattooDesign[] = Array.from({ length: 24 }, (_, i) =>
 export const testimonials = [
   {
     name: "Derek J.",
-    avatar: "https://ui-avatars.com/api/?name=Derek+J&background=7C3AED&color=fff&size=80&format=png",
+    initials: "DJ",
+    avatarClass: "bg-[#3f6212] text-[#f7fee7]",
     rating: 5,
     quote: "One of the best art AIs I've ever used. My friend is literally getting a tattoo of an image it created.",
   },
   {
     name: "Filippa M.",
-    avatar: "https://ui-avatars.com/api/?name=Filippa+M&background=7C3AED&color=fff&size=80&format=png",
+    initials: "FM",
+    avatarClass: "bg-[#1f2937] text-[#f9fafb]",
     rating: 5,
     quote: "I've been searching for something like this to help me find a design that feels 100% right for me.",
   },
   {
     name: "Marina R.",
-    avatar: "https://ui-avatars.com/api/?name=Marina+R&background=7C3AED&color=fff&size=80&format=png",
+    initials: "MR",
+    avatarClass: "bg-[#365314] text-[#fefce8]",
     rating: 5,
     quote: "Thanks for this marvelous tool... AI-generated tattoos, copy-pasted to my body!",
   },

@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { Sparkles, Download, Share2, Heart, Loader2, RefreshCw } from "lucide-react";
 import { styles, placements, tattooSamples } from "@/lib/data";
-import { motion } from "framer-motion";
 
 export default function Generate() {
   const [prompt, setPrompt] = useState("");
@@ -36,21 +36,16 @@ export default function Generate() {
     <div className="min-h-screen bg-background">
       <Navbar />
       <div className="container mx-auto px-4 pt-24 pb-16">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+        <div>
           <h1 className="mb-2 font-display text-3xl font-bold md:text-4xl tracking-wider">
             AI Tattoo <span className="text-gradient">Generator</span>
           </h1>
           <p className="mb-8 text-muted-foreground">Describe your idea and let AI create your perfect design</p>
-        </motion.div>
+        </div>
 
         <div className="grid gap-8 lg:grid-cols-2">
           {/* Left: Controls */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.1 }}
-            className="space-y-6"
-          >
+          <div className="space-y-6">
             {/* Prompt */}
             <div>
               <label className="mb-2 block text-sm font-medium">Describe your tattoo idea</label>
@@ -171,14 +166,10 @@ export default function Generate() {
             <p className="text-center text-sm text-muted-foreground">
               You have <span className="font-semibold text-primary">{credits}</span> credits remaining
             </p>
-          </motion.div>
+          </div>
 
           {/* Right: Preview */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.2 }}
-          >
+          <div>
             <div className="rounded-2xl border border-border bg-card overflow-hidden">
               <div className="aspect-square flex items-center justify-center">
                 {generating ? (
@@ -187,9 +178,13 @@ export default function Generate() {
                     <p className="text-sm text-muted-foreground">Creating your design...</p>
                   </div>
                 ) : result ? (
-                  <img
+                  <Image
                     src={result}
                     alt="Generated tattoo"
+                    width={1200}
+                    height={1200}
+                    sizes="(max-width: 1024px) 100vw, 50vw"
+                    priority
                     className={`h-full w-full object-cover ${colorMode === "bw" ? "grayscale" : ""}`}
                   />
                 ) : (
@@ -202,31 +197,33 @@ export default function Generate() {
                 )}
               </div>
 
-              {result && (
-                <div className="border-t border-border p-4">
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    <span className="rounded-full bg-primary/10 px-3 py-1 text-xs text-primary">{selectedStyle}</span>
-                    <span className="rounded-full bg-card border border-border px-3 py-1 text-xs text-muted-foreground">{selectedPlacement}</span>
-                    <span className="rounded-full bg-card border border-border px-3 py-1 text-xs text-muted-foreground">
-                      {["Simple", "Light", "Medium", "Detailed", "Complex"][complexity - 1]}
-                    </span>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button size="sm" className="btn-glow flex-1 border-0 text-primary-foreground gap-1">
-                      <Download className="h-3.5 w-3.5" /> Download HD
-                    </Button>
-                    <Button size="sm" variant="outline" className="border-border gap-1">
-                      <Heart className="h-3.5 w-3.5" /> Save
-                    </Button>
-                    <Button size="sm" variant="outline" className="border-border gap-1">
-                      <Share2 className="h-3.5 w-3.5" /> Share
-                    </Button>
-                    <Button size="sm" variant="outline" className="border-border gap-1" onClick={handleGenerate}>
-                      <RefreshCw className="h-3.5 w-3.5" /> Variation
-                    </Button>
-                  </div>
-                </div>
-              )}
+              <div className={`border-t border-border p-4 ${result ? "" : "invisible min-h-[112px]"}`}>
+                {result ? (
+                  <>
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      <span className="rounded-full bg-primary/10 px-3 py-1 text-xs text-primary">{selectedStyle}</span>
+                      <span className="rounded-full bg-card border border-border px-3 py-1 text-xs text-muted-foreground">{selectedPlacement}</span>
+                      <span className="rounded-full bg-card border border-border px-3 py-1 text-xs text-muted-foreground">
+                        {["Simple", "Light", "Medium", "Detailed", "Complex"][complexity - 1]}
+                      </span>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button size="sm" className="btn-glow flex-1 border-0 text-primary-foreground gap-1">
+                        <Download className="h-3.5 w-3.5" /> Download HD
+                      </Button>
+                      <Button size="sm" variant="outline" className="border-border gap-1">
+                        <Heart className="h-3.5 w-3.5" /> Save
+                      </Button>
+                      <Button size="sm" variant="outline" className="border-border gap-1">
+                        <Share2 className="h-3.5 w-3.5" /> Share
+                      </Button>
+                      <Button size="sm" variant="outline" className="border-border gap-1" onClick={handleGenerate}>
+                        <RefreshCw className="h-3.5 w-3.5" /> Variation
+                      </Button>
+                    </div>
+                  </>
+                ) : null}
+              </div>
             </div>
 
             {/* Recent generations */}
@@ -235,12 +232,19 @@ export default function Generate() {
               <div className="grid grid-cols-4 gap-2">
                 {recentGenerations.map((img, i) => (
                   <div key={i} className="aspect-square overflow-hidden rounded-xl border border-border">
-                    <img src={img} alt="" className="h-full w-full object-cover grayscale hover:grayscale-0 transition-all" />
+                    <Image
+                      src={img}
+                      alt={`Recent tattoo generation ${i + 1}`}
+                      width={300}
+                      height={300}
+                      sizes="(max-width: 1024px) 25vw, 12vw"
+                      className="h-full w-full object-cover grayscale hover:grayscale-0 transition-all"
+                    />
                   </div>
                 ))}
               </div>
             </div>
-          </motion.div>
+          </div>
         </div>
       </div>
       <Footer />

@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { Star } from "lucide-react";
 import { testimonials } from "@/lib/data";
 
@@ -26,14 +25,12 @@ export function Testimonials() {
               </div>
               <p className="mb-6 text-sm text-muted-foreground italic">"{t.quote}"</p>
               <div className="flex items-center gap-3">
-                <Image
-                  src={t.avatar}
-                  alt={t.name}
-                  width={40}
-                  height={40}
-                  loading="lazy"
-                  className="h-10 w-10 rounded-full"
-                />
+                <div
+                  aria-hidden="true"
+                  className={`flex h-10 w-10 items-center justify-center rounded-full text-xs font-semibold ${t.avatarClass}`}
+                >
+                  {t.initials}
+                </div>
                 <span className="text-sm font-semibold">{t.name}</span>
               </div>
             </div>

@@ -4,18 +4,13 @@ import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
-import { motion } from "framer-motion";
 
 export default function Login() {
   const [showPw, setShowPw] = useState(false);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md"
-      >
+      <div className="w-full max-w-md">
         <div className="mb-8 text-center">
           <Link href="/" className="inline-flex items-center gap-2 mb-6">
             <span className="font-display text-2xl font-bold tracking-wider">InkForge AI</span>
@@ -72,7 +67,7 @@ export default function Login() {
           Don't have an account?{" "}
           <Link href="/signup" className="text-primary hover:underline font-medium">Sign up</Link>
         </p>
-      </motion.div>
+      </div>
     </div>
   );
 }

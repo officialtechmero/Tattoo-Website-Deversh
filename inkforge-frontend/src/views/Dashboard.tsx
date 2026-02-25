@@ -2,20 +2,20 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
-  Home, Sparkles, Compass, Image, Settings, Crown, Droplet,
+  Home, Sparkles, Compass, ImageIcon, Settings, Crown, Droplet,
   Download, Trash2, Plus, Menu, X,
 } from "lucide-react";
 import { flashDesigns } from "@/lib/data";
-import { motion } from "framer-motion";
 
 const sidebarLinks = [
   { icon: Home, label: "Home", to: "/" },
   { icon: Sparkles, label: "Generate", to: "/generate" },
   { icon: Compass, label: "Explore", to: "/explore" },
-  { icon: Image, label: "My Designs", to: "/dashboard" },
+  { icon: ImageIcon, label: "My Designs", to: "/dashboard" },
   { icon: Settings, label: "Settings", to: "/dashboard" },
 ];
 
@@ -97,7 +97,7 @@ export default function Dashboard() {
       {/* Main content */}
       <main className="flex-1 md:ml-64">
         <div className="container mx-auto px-4 py-8 md:py-12">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+          <div>
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8">
               <div>
                 <h1 className="font-display text-2xl font-bold md:text-3xl">My Designs</h1>
@@ -112,17 +112,17 @@ export default function Dashboard() {
 
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {myDesigns.map((design, i) => (
-                <motion.div
+                <div
                   key={design.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.05 }}
                   className="group card-hover overflow-hidden rounded-2xl border border-border bg-card"
                 >
                   <div className="aspect-square overflow-hidden">
-                    <img
+                    <Image
                       src={design.image}
                       alt={`${design.style} tattoo`}
+                      width={700}
+                      height={700}
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                       className="h-full w-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
                     />
                   </div>
@@ -142,10 +142,10 @@ export default function Dashboard() {
                       </button>
                     </div>
                   </div>
-                </motion.div>
+                </div>
               ))}
             </div>
-          </motion.div>
+          </div>
         </div>
       </main>
     </div>
