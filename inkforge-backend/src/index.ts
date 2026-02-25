@@ -9,7 +9,11 @@ const app = Fastify({ logger: true });
 const port = Number(process.env.PORT ?? 3000);
 const host = process.env.HOST ?? "0.0.0.0";
 
-app.get("/health", async () => ({ status: "ok" }));
+app.get("/", async () => ({
+  status: "Ok",
+  uptime: process.uptime(),
+  message: "InkForge Backend is running..." 
+}));
 
 app.get("/users", async () => {
   return db.select().from(users);
