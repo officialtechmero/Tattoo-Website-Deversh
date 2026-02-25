@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Droplet, Mail, Lock, Eye, EyeOff } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { motion } from "framer-motion";
 
-export default function Signup() {
+export default function Login() {
   const [showPw, setShowPw] = useState(false);
 
   return (
@@ -15,11 +15,11 @@ export default function Signup() {
         className="w-full max-w-md"
       >
         <div className="mb-8 text-center">
-          <Link to="/" className="inline-flex items-center gap-2 mb-6">
+          <Link href="/" className="inline-flex items-center gap-2 mb-6">
             <span className="font-display text-2xl font-bold tracking-wider">InkForge AI</span>
           </Link>
-          <h1 className="font-display text-2xl font-bold tracking-wide">Create your account</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Start designing amazing tattoos</p>
+          <h1 className="font-display text-2xl font-bold tracking-wide">Welcome back</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Log in to your account</p>
         </div>
 
         <div className="rounded-2xl border border-border bg-card p-6 space-y-4">
@@ -37,7 +37,11 @@ export default function Signup() {
             <label className="mb-1.5 block text-sm font-medium">Email</label>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <input type="email" placeholder="you@example.com" className="w-full rounded-xl border border-border bg-secondary py-2.5 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary" />
+              <input
+                type="email"
+                placeholder="you@example.com"
+                className="w-full rounded-xl border border-border bg-secondary py-2.5 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+              />
             </div>
           </div>
 
@@ -45,27 +49,26 @@ export default function Signup() {
             <label className="mb-1.5 block text-sm font-medium">Password</label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <input type={showPw ? "text" : "password"} placeholder="••••••••" className="w-full rounded-xl border border-border bg-secondary py-2.5 pl-10 pr-10 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary" />
+              <input
+                type={showPw ? "text" : "password"}
+                placeholder="••••••••"
+                className="w-full rounded-xl border border-border bg-secondary py-2.5 pl-10 pr-10 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+              />
               <button onClick={() => setShowPw(!showPw)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
                 {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
-          </div>
-
-          <div>
-            <label className="mb-1.5 block text-sm font-medium">Confirm Password</label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <input type={showPw ? "text" : "password"} placeholder="••••••••" className="w-full rounded-xl border border-border bg-secondary py-2.5 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary" />
+            <div className="mt-1 text-right">
+              <span className="text-xs text-primary cursor-pointer hover:underline">Forgot password?</span>
             </div>
           </div>
 
-          <Button className="btn-glow w-full border-0 text-primary-foreground h-11">Create Account</Button>
+          <Button className="btn-glow w-full border-0 text-primary-foreground h-11">Login</Button>
         </div>
 
         <p className="mt-4 text-center text-sm text-muted-foreground">
-          Already have an account?{" "}
-          <Link to="/login" className="text-primary hover:underline font-medium">Log in</Link>
+          Don't have an account?{" "}
+          <Link href="/signup" className="text-primary hover:underline font-medium">Sign up</Link>
         </p>
       </motion.div>
     </div>

@@ -56,7 +56,7 @@ export default function Stencil() {
                   <span className="text-sm font-medium">Original</span>
                 </div>
                 <div className="aspect-square">
-                  <img src={tattooSample6} alt="Original" className="h-full w-full object-cover" />
+                  <img src={tattooSample6.src} alt="Original" className="h-full w-full object-cover" />
                 </div>
               </div>
 
@@ -70,7 +70,7 @@ export default function Stencil() {
                 </div>
                 <div className="aspect-square">
                   <img
-                    src={tattooSample6}
+                    src={tattooSample6.src}
                     alt="Stencil"
                     className="h-full w-full object-cover"
                     style={{ filter: "grayscale(100%) contrast(200%) brightness(1.1)" }}

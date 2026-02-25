@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Home, Sparkles, Compass, Image, Settings, Crown, Droplet,
@@ -20,7 +21,7 @@ const myDesigns = flashDesigns.slice(0, 6);
 
 export default function Dashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const location = useLocation();
+  const pathname = usePathname();
   const creditsUsed = 3;
   const creditsTotal = 3;
 
@@ -48,10 +49,10 @@ export default function Dashboard() {
           {sidebarLinks.map((link) => (
             <Link
               key={link.label}
-              to={link.to}
+              href={link.to}
               onClick={() => setSidebarOpen(false)}
               className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
-                location.pathname === link.to
+                pathname === link.to
                   ? "bg-primary/10 text-primary"
                   : "text-muted-foreground hover:text-foreground hover:bg-surface-hover"
               }`}
@@ -78,7 +79,7 @@ export default function Dashboard() {
             <p className="mt-2 text-xs text-muted-foreground">{creditsTotal - creditsUsed} credits remaining</p>
           </div>
 
-          <Link to="/pricing">
+          <Link href="/pricing">
             <Button size="sm" className="btn-glow mt-3 w-full border-0 text-primary-foreground gap-1">
               <Crown className="h-3.5 w-3.5" /> Upgrade
             </Button>
@@ -100,7 +101,7 @@ export default function Dashboard() {
                 <h1 className="font-display text-2xl font-bold md:text-3xl">My Designs</h1>
                 <p className="text-sm text-muted-foreground mt-1">Your saved tattoo designs</p>
               </div>
-              <Link to="/generate">
+              <Link href="/generate">
                 <Button className="btn-glow border-0 text-primary-foreground gap-2">
                   <Plus className="h-4 w-4" /> Generate New Design
                 </Button>

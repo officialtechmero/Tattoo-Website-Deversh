@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useRouter } from "next/navigation";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
@@ -6,8 +6,9 @@ import { Heart, Download, ArrowLeft } from "lucide-react";
 import { flashDesigns } from "@/lib/data";
 
 export default function DesignDetails() {
-  const { id } = useParams();
-  const navigate = useNavigate();
+  const params = useParams<{ id: string }>();
+  const id = params?.id;
+  const router = useRouter();
 
   const design = flashDesigns.find(d => d.id === Number(id));
 
@@ -30,7 +31,7 @@ export default function DesignDetails() {
         {/* ✅ Back Button */}
         <Button
           className="bg-transparent hover:text-black mb-6 text-muted-foreground"
-          onClick={() => navigate(-1)}
+          onClick={() => router.back()}
         >
           <ArrowLeft /> Back
         </Button>

@@ -160,7 +160,7 @@
 // }
 
 import { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Search, Heart, SlidersHorizontal } from "lucide-react";
@@ -184,20 +184,25 @@ const filterCategories = {
   Unique: ["Aztec", "Egyptian", "Celtic", "Flash", "Henna", "Yakuza", "Sugar Skull"],
 };
 
+type FilterCategory = keyof typeof filterCategories;
+type ActiveFilters = Record<FilterCategory, string[]>;
+const createEmptyFilters = () =>
+  Object.fromEntries(
+    Object.keys(filterCategories).map((cat) => [cat, [] as string[]]),
+  ) as ActiveFilters;
+
 export default function Explore() {
   const [search, setSearch] = useState("");
   const [activeStyle, setActiveStyle] = useState("All");
   const [showFilters, setShowFilters] = useState(false);
   const [activeSort, setActiveSort] = useState("Popular");
 
-  const navigate = useNavigate();
+  const router = useRouter();
 
   // One state object to track selected values per category
-  const [activeFilters, setActiveFilters] = useState(
-    Object.fromEntries(Object.keys(filterCategories).map((cat) => [cat, []]))
-  );
+  const [activeFilters, setActiveFilters] = useState<ActiveFilters>(createEmptyFilters());
 
-  const toggleFilter = (category, value) => {
+  const toggleFilter = (category: FilterCategory, value: string) => {
     setActiveFilters((prev) => {
       const current = prev[category];
       const updated = current.includes(value)
@@ -208,9 +213,7 @@ export default function Explore() {
   };
 
   const clearAllFilters = () => {
-    setActiveFilters(
-      Object.fromEntries(Object.keys(filterCategories).map((cat) => [cat, []]))
-    );
+    setActiveFilters(createEmptyFilters());
     setActiveStyle("All");
     setActiveSort("Popular");
   };
@@ -351,7 +354,7 @@ export default function Explore() {
               </div>
 
               {/* Dynamic filter categories from image */}
-              {Object.entries(filterCategories).map(([category, options]) => (
+              {(Object.entries(filterCategories) as [FilterCategory, string[]][]).map(([category, options]) => (
                 <div key={category}>
                   <label className="mb-2 block text-xs font-medium text-muted-foreground">
                     {category}
@@ -409,7 +412,7 @@ export default function Explore() {
           {sorted.map((design, i) => (
             <motion.div
               key={design.id}
-              onClick={() => navigate(`/design/${design.id}`)}
+              onClick={() => router.push(`/design/${design.id}`)}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}

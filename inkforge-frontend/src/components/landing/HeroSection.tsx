@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import { Sparkles, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
@@ -54,13 +54,13 @@ export function HeroSection() {
           </p>
 
           <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-            <Link to="/signup">
+            <Link href="/signup">
               <Button size="lg" className="btn-glow border-0 px-8 text-primary-foreground gap-2">
                 <Sparkles className="h-4 w-4" />
                 Start Free - 3 Credits
               </Button>
             </Link>
-            <Link to="/explore">
+            <Link href="/explore">
               <Button size="lg" variant="outline" className="border-border text-foreground hover:bg-white gap-2">
                 See Examples
                 <ArrowRight className="h-4 w-4" />

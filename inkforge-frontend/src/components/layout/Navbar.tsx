@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Droplet } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -14,12 +15,12 @@ const navLinks = [
 
 export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const location = useLocation();
+  const pathname = usePathname();
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
-        <Link to="/" className="flex items-center gap-2">
+        <Link href="/" className="flex items-center gap-2">
           {/* <Droplet className="h-7 w-7 text-primary" /> */}
           <span className="font-display text-2xl font-bold text-foreground tracking-widest">
             InkForge <span className="text-primary">AI</span>
@@ -31,9 +32,9 @@ export function Navbar() {
           {navLinks.map((link) => (
             <Link
               key={link.to}
-              to={link.to}
+              href={link.to}
               className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                location.pathname === link.to
+                pathname === link.to
                   ? "text-primary"
                   : "text-muted-foreground hover:text-foreground"
               }`}
@@ -44,12 +45,12 @@ export function Navbar() {
         </div>
 
         <div className="hidden items-center gap-3 md:flex">
-          <Link to="/login">
+          <Link href="/login">
             <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-black">
               Login
             </Button>
           </Link>
-          <Link to="/signup">
+          <Link href="/signup">
             <Button size="sm" className="btn-glow border-0 text-primary-foreground">
               Start Free
             </Button>
@@ -78,10 +79,10 @@ export function Navbar() {
               {navLinks.map((link) => (
                 <Link
                   key={link.to}
-                  to={link.to}
+                  href={link.to}
                   onClick={() => setMobileOpen(false)}
                   className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                    location.pathname === link.to
+                    pathname === link.to
                       ? "text-primary bg-primary/10"
                       : "text-muted-foreground hover:text-foreground"
                   }`}
@@ -90,10 +91,10 @@ export function Navbar() {
                 </Link>
               ))}
               <div className="mt-3 flex gap-2">
-                <Link to="/login" className="flex-1" onClick={() => setMobileOpen(false)}>
+                <Link href="/login" className="flex-1" onClick={() => setMobileOpen(false)}>
                   <Button variant="outline" className="w-full border-border">Login</Button>
                 </Link>
-                <Link to="/signup" className="flex-1" onClick={() => setMobileOpen(false)}>
+                <Link href="/signup" className="flex-1" onClick={() => setMobileOpen(false)}>
                   <Button className="btn-glow w-full border-0 text-primary-foreground">Start Free</Button>
                 </Link>
               </div>

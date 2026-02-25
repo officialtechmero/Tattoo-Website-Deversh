@@ -1,5 +1,4 @@
-import { Link } from "react-router-dom";
-import { Droplet } from "lucide-react";
+import Link from "next/link";
 
 export function Footer() {
   return (
@@ -7,7 +6,7 @@ export function Footer() {
       <div className="container mx-auto px-4 py-12">
         <div className="grid gap-8 md:grid-cols-4">
           <div>
-            <Link to="/" className="flex items-center gap-2 mb-4">
+            <Link href="/" className="flex items-center gap-2 mb-4">
               <span className="font-display text-xl font-bold tracking-widest">InkForge AI</span>
             </Link>
             <p className="text-sm text-muted-foreground">
@@ -18,7 +17,7 @@ export function Footer() {
             <h4 className="mb-3 font-display text-sm font-semibold text-foreground tracking-widest">Product</h4>
             <div className="flex flex-col gap-2">
               {["Generate", "Explore", "Stencil", "Pricing"].map((item) => (
-                <Link key={item} to={`/${item.toLowerCase()}`} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <Link key={item} href={`/${item.toLowerCase()}`} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                   {item}
                 </Link>
               ))}

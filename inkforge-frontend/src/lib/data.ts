@@ -9,17 +9,17 @@ import tattooSample8 from "@/assets/tattoo-sample-8.jpg";
 import tattooHero from "@/assets/tattoo-hero.jpg";
 
 export const tattooSamples = [
-  tattooSample1,
-  tattooSample2,
-  tattooSample3,
-  tattooSample4,
-  tattooSample5,
-  tattooSample6,
-  tattooSample7,
-  tattooSample8,
+  tattooSample1.src,
+  tattooSample2.src,
+  tattooSample3.src,
+  tattooSample4.src,
+  tattooSample5.src,
+  tattooSample6.src,
+  tattooSample7.src,
+  tattooSample8.src,
 ];
 
-export const tattooHeroImage = tattooHero;
+export const tattooHeroImage = tattooHero.src;
 
 export const styles = [
   "Traditional",
@@ -44,22 +44,22 @@ export const placements = [
 ] as const;
 
 export interface TattooDesign {
-  sessionCost: number;
-  sessions: number;
-  tip: number;
-  name: string;
-  artist: string;
-  category: string;
-  type: string;
-  city: string;
-  gender: boolean;
-  bodyPart: boolean;
-  theme: boolean;
-  symbol: boolean;
-  floral: boolean;
-  animal: boolean;
-  celestial: boolean;
-  unique: boolean;
+  sessionCost?: number;
+  sessions?: number;
+  tip?: number;
+  name?: string;
+  artist?: string;
+  category?: string;
+  type?: string;
+  city?: string;
+  gender?: string;
+  bodyPart?: string;
+  theme?: string;
+  symbol?: string;
+  floral?: string;
+  animal?: string;
+  celestial?: string;
+  unique?: string;
   id: number;
   image: string;
   style: string;
