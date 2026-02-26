@@ -27,7 +27,6 @@ export const designCategories = pgTable("designCategories", {
 });
 
 // Relations
-
 export const designRelations = relations(designs, ({ one }) => ({
   user: one(users, {
     fields: [designs.createdBy],

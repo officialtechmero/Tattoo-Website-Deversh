@@ -11,8 +11,7 @@ const host = process.env.HOST ?? "0.0.0.0";
 
 app.get("/", async () => ({
   status: "Ok",
-  uptime: process.uptime(),
-  message: "InkForge Backend is running..." 
+  uptime: process.uptime() 
 }));
 
 app.get("/users", async () => {
@@ -21,6 +20,9 @@ app.get("/users", async () => {
 
 const start = async () => {
   try {
+    await pool.query("select 1");
+    app.log.info("Database connection check passed");
+
     await app.listen({ port, host });
     app.log.info(`Server running at http://${host}:${port}`);
   } catch (error) {
