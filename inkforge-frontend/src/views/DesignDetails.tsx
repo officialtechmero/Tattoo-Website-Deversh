@@ -1,5 +1,4 @@
 "use client";
-
 import { useCallback, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -10,14 +9,56 @@ import { Button } from "@/components/ui/button";
 import { Heart, Download, ArrowLeft } from "lucide-react";
 import { flashDesigns } from "@/lib/data";
 
+function getTattooDescription(style: string, category: string): string {
+  const s = (style || "").toLowerCase();
+  const c = (category || "").toLowerCase();
+
+  if (s.includes("traditional") || s.includes("old school")) {
+    return `This bold Traditional tattoo draws from the rich heritage of classic American tattooing — think thick outlines, a limited yet vivid color palette, and timeless motifs that have stood the test of time. Rooted in nautical and folkloric iconography, Traditional designs are built to age gracefully on the skin. Whether it's an anchor, eagle, or floral motif, this style carries a sense of permanence and pride, making it a favorite for collectors who value history and craftsmanship in every line.`;
+  }
+  if (s.includes("japanese") || s.includes("irezumi")) {
+    return `Steeped in centuries of Japanese artistic tradition, this Irezumi-inspired design blends flowing composition with rich symbolism. Japanese tattoos are known for their seamless integration with the body's natural contours, using bold outlines and vibrant shading to bring mythological creatures, botanicals, and spiritual motifs to life. Each element carries deeper meaning — courage, protection, or transformation — making this style as profound as it is visually striking. A true wearable work of art.`;
+  }
+  if (s.includes("blackwork") || s.includes("black work")) {
+    return `Stark, graphic, and undeniably striking — this Blackwork tattoo harnesses the raw power of solid black ink to create bold visual impact. Blackwork pulls from tribal, geometric, and illustrative traditions, using contrast and negative space as its primary tools. With no reliance on color, every line and shape must be intentional. The result is a design that feels simultaneously ancient and modern, commanding attention with its confident simplicity and architectural precision.`;
+  }
+  if (s.includes("fine line") || s.includes("fineline")) {
+    return `Delicate, precise, and effortlessly elegant — this Fine Line tattoo showcases the incredible control required to work at such a refined scale. Using ultra-thin needles and minimal shading, fine line work captures intricate detail that feels almost drawn in ink directly on skin. This style suits those who prefer understated beauty: subtle portraits, botanical sketches, or minimalist symbols rendered with surgical accuracy. A quiet statement that reveals more the closer you look.`;
+  }
+  if (s.includes("geometric")) {
+    return `Precise and hypnotic, this Geometric tattoo transforms mathematical structure into wearable art. Using clean lines, repeating patterns, and sacred geometry, these designs evoke a sense of order, balance, and cosmic harmony. Whether abstract or nature-inspired, geometric tattoos reward the eye with layers of symmetry and depth. Popularized by contemporary tattoo culture, this style appeals to those who find beauty in structure — where every angle is intentional and every shape carries visual weight.`;
+  }
+  if (s.includes("watercolor")) {
+    return `Fluid, expressive, and painterly — this Watercolor tattoo mimics the spontaneous beauty of pigment spreading across wet paper. With soft washes of color, intentional bleed effects, and minimal outlining, watercolor tattoos feel alive and organic on the skin. This style is ideal for those who want their ink to feel more like fine art than traditional tattooing. Vibrant hues blend and fade gracefully, creating a design that looks as though it was brushed on in a single inspired session.`;
+  }
+  if (s.includes("neo trad") || s.includes("neo-trad") || s.includes("neotraditional")) {
+    return `Neo Traditional tattooing takes the bold foundations of classic American style and elevates them with richer color palettes, intricate detail, and a more illustrative sensibility. Think lush shading, decorative linework, and a wider range of subject matter — from portraiture to botanical studies. This design bridges the gap between old-school permanence and contemporary artistic sophistication, offering a timeless aesthetic with a distinctly modern edge that wears beautifully over time.`;
+  }
+  if (s.includes("realism") || s.includes("realistic")) {
+    return `A tour de force of technical skill, this Realism tattoo captures its subject with photographic precision and dimensional depth. Using advanced shading techniques, careful tonal gradation, and meticulous attention to texture, realism tattoos blur the line between ink and imagery. Whether depicting a portrait, animal, or object, the goal is total visual authenticity — a piece that makes viewers do a double take. Ideal for those who want their tattoo to tell a story with uncompromising detail.`;
+  }
+  if (s.includes("minimalist") || s.includes("minimal")) {
+    return `Less is more with this Minimalist tattoo — a study in restraint and intentionality. Stripping away the unnecessary, minimalist designs communicate through clean lines, subtle forms, and generous negative space. These tattoos often carry deep personal meaning wrapped in disarmingly simple visuals: a single word, a small symbol, or a spare outline. Perfect for first-timers and seasoned collectors alike, minimalist ink fits anywhere on the body and ages with quiet grace.`;
+  }
+
+  // Category-based fallback
+  if (c.includes("floral") || c.includes("botanical")) {
+    return `This botanical-inspired tattoo celebrates the timeless beauty of nature's most elegant forms. Floral tattoos have been a staple of the art form across cultures and centuries — symbolizing growth, femininity, resilience, and renewal. Whether rendered in stark black or lush color, each petal and leaf is placed with intention. This design captures the organic delicacy of its subject while giving it permanence on skin, creating a piece that feels simultaneously natural and artfully composed.`;
+  }
+  if (c.includes("animal") || c.includes("wildlife")) {
+    return `Animals have been central to tattoo art since its earliest origins, serving as totems, protectors, and symbols of personal identity. This animal-themed design channels the spirit and symbolism of its subject — strength, freedom, loyalty, or transformation — into a striking wearable image. Whether fierce or graceful, the creature depicted here is rendered with careful attention to character and energy, creating a tattoo that resonates on both an aesthetic and deeply personal level.`;
+  }
+
+  // Generic fallback
+  return `This ${style || "custom"} tattoo is a compelling example of the craft at its best — where artistic vision meets technical execution. Designed to complement the body's natural form, it balances visual impact with wearability. Whether you're drawn to its aesthetic beauty, symbolic meaning, or sheer artistry, this piece represents a commitment to self-expression that lasts a lifetime. Every detail has been considered, from line weight to composition, ensuring a design that looks as intentional years from now as it does today.`;
+}
+
 export default function DesignDetails() {
   const params = useParams<{ id: string }>();
   const id = params?.id;
   const router = useRouter();
-
   const [likedIds, setLikedIds] = useState<Record<number, boolean>>({});
   const [extraLikes, setExtraLikes] = useState<Record<number, number>>({});
-
   const toggleLike = useCallback((e: React.MouseEvent, designId: number) => {
     e.preventDefault();
     e.stopPropagation();
@@ -30,14 +71,11 @@ export default function DesignDetails() {
       return { ...prev, [designId]: !wasLiked };
     });
   }, []);
-
   const design = flashDesigns.find((d) => d.id === Number(id));
-
   const similarDesigns = useMemo(() => {
     if (!design) return [];
     return flashDesigns.filter((d) => d.id !== design.id && d.style === design.style).slice(0, 6);
   }, [design]);
-
   const youMayAlsoLike = useMemo(() => {
     if (!design) return [];
     return flashDesigns
@@ -53,20 +91,18 @@ export default function DesignDetails() {
       )
       .slice(0, 6);
   }, [design]);
-
   if (!design) {
     return <div className="p-10">Design not found</div>;
   }
-
   const sessionCost = design.sessionCost || 120;
   const sessions = design.sessions || 3;
   const tip = design.tip || 40;
   const total = sessionCost * sessions + tip;
+  const tattooDescription = getTattooDescription(design.style || "", design.category || "");
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-
       <div className="container mx-auto px-4 pt-24 pb-16">
         <Button
           className="bg-transparent hover:text-black mb-6 text-muted-foreground"
@@ -74,7 +110,6 @@ export default function DesignDetails() {
         >
           <ArrowLeft /> Back
         </Button>
-
         <div className="grid gap-10 md:grid-cols-2">
           <div className="rounded-2xl border border-border bg-card p-3">
             <Image
@@ -87,7 +122,6 @@ export default function DesignDetails() {
               className="w-full rounded-xl object-cover"
             />
           </div>
-
           <div>
             <h1 className="font-display text-3xl font-bold mb-2 tracking-wider">
               {design.name || "Untitled Tattoo"}
@@ -110,9 +144,11 @@ export default function DesignDetails() {
                 <Download className="h-4 w-4" /> Download
               </Button>
             </div>
+            <p className="mt-6 text-sm text-muted-foreground leading-relaxed">
+              {tattooDescription}
+            </p>
           </div>
         </div>
-
         {similarDesigns.length > 0 && (
           <section className="mt-20">
             <div className="mb-6 flex items-end justify-between">
@@ -130,7 +166,6 @@ export default function DesignDetails() {
                 View all
               </Link>
             </div>
-
             <div className="columns-2 gap-3 sm:columns-3 lg:columns-4 xl:columns-6 [column-fill:_balance]">
               {similarDesigns.map((d, i) => (
                 <DesignCard
@@ -145,7 +180,6 @@ export default function DesignDetails() {
             </div>
           </section>
         )}
-
         {youMayAlsoLike.length > 0 && (
           <section className="mt-20">
             <div className="mb-6 flex items-end justify-between">
@@ -165,7 +199,6 @@ export default function DesignDetails() {
                 Explore more
               </Link>
             </div>
-
             <div className="columns-2 gap-3 sm:columns-3 lg:columns-4 xl:columns-6 [column-fill:_balance]">
               {youMayAlsoLike.map((d, i) => (
                 <DesignCard
@@ -181,7 +214,6 @@ export default function DesignDetails() {
           </section>
         )}
       </div>
-
       <Footer />
     </div>
   );
@@ -214,13 +246,11 @@ function DesignCard({
             loading={index < 4 ? undefined : "lazy"}
             className="w-full h-auto object-cover grayscale transition-all duration-500 group-hover:grayscale-0 group-hover:scale-105"
           />
-
           <div className="absolute inset-0 flex items-center justify-center bg-background/60 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
             <span className="rounded-full bg-primary px-3 py-1.5 text-[11px] font-semibold text-primary-foreground">
               View Design
             </span>
           </div>
-
           <button
             onClick={(e) => onLike(e, design.id)}
             aria-label={isLiked ? "Unlike" : "Like"}
@@ -238,7 +268,6 @@ function DesignCard({
             />
           </button>
         </div>
-
         <div className="flex items-center justify-between px-3 py-2">
           <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-[11px] font-medium text-primary truncate max-w-[70%]">
             {design.style}

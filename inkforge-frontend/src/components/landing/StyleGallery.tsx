@@ -18,7 +18,7 @@ export function StyleGallery() {
               key={style}
               className="group flex-shrink-0 w-44 cursor-pointer"
             >
-              <div className="relative overflow-hidden rounded-2xl border border-border bg-card">
+              <div className="relative overflow-hidden rounded-lg border-border bg-card">
                 <div className="aspect-square overflow-hidden">
                   <Image
                     src={tattooSamples[i]}

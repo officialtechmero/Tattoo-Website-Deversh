@@ -115,84 +115,60 @@ function buildDescription(
   activeFilters: ActiveFilters,
 ): { label: string; description: string } {
   const activeValues = (Object.values(activeFilters) as string[][]).flat();
-
-  // ── No filters at all → full "All" overview ────────────────────────────
   if (activeValues.length === 0 && activeStyle === "All") {
-    return {
-      label: "All Designs",
-      description: styleDescriptions.All,
-    };
+    return { label: "All Designs", description: styleDescriptions.All };
   }
-
-  // ── Only style tab, no chips ───────────────────────────────────────────
   if (activeValues.length === 0) {
     return {
       label: activeStyle,
       description:
         styleDescriptions[activeStyle] ??
-        `Explore our curated collection of ${activeStyle} tattoo designs — each one crafted with intention, artistry, and a deep respect for the tradition it draws from. Whether you are a first-timer or a seasoned collector, these pieces are designed to resonate.`,
+        `Explore our curated collection of ${activeStyle} tattoo designs — each one crafted with intention, artistry, and a deep respect for the tradition it draws from.`,
     };
   }
-
-  // ── One or more filter chips active → build combined sentence ─────────
   const genders = activeValues.filter((v) => filterCategories.Gender.includes(v));
   const bodyParts = activeValues.filter((v) => filterCategories["Body Part"].includes(v));
   const themes = activeValues.filter((v) =>
     [
-      ...filterCategories.Themes,
-      ...filterCategories.Symbol,
-      ...filterCategories.Floral,
-      ...filterCategories.Animals,
-      ...filterCategories.Celestial,
-      ...filterCategories.Unique,
+      ...filterCategories.Themes, ...filterCategories.Symbol,
+      ...filterCategories.Floral, ...filterCategories.Animals,
+      ...filterCategories.Celestial, ...filterCategories.Unique,
     ].includes(v),
   );
-
   const stylePrefix = activeStyle !== "All" ? `${activeStyle} ` : "";
   const themeEssences = themes.map((v) => valueSnippets[v]?.essence).filter(Boolean) as string[];
   const genderEssences = genders.map((v) => valueSnippets[v]?.essence).filter(Boolean) as string[];
   const bodyEssences = bodyParts.map((v) => valueSnippets[v]?.essence).filter(Boolean) as string[];
-
-  // Build sentence fragments
   const parts: string[] = [];
   if (genderEssences.length) parts.push(`forged with ${join(genderEssences)}`);
   if (themeEssences.length)
-    parts.push(
-      themeEssences.length === 1
-        ? `centred around ${themeEssences[0]}`
-        : `weaving together ${join(themeEssences)}`,
-    );
+    parts.push(themeEssences.length === 1 ? `centred around ${themeEssences[0]}` : `weaving together ${join(themeEssences)}`);
   if (bodyEssences.length)
-    parts.push(
-      bodyEssences.length === 1
-        ? `perfectly suited to ${bodyEssences[0]}`
-        : `thoughtfully composed for ${join(bodyEssences)}`,
-    );
-
-  // Closing sentence varies by how many filters are active
+    parts.push(bodyEssences.length === 1 ? `perfectly suited to ${bodyEssences[0]}` : `thoughtfully composed for ${join(bodyEssences)}`);
   const closing =
     activeValues.length === 1
       ? `Every piece in this selection has been chosen because it captures that feeling perfectly — browse slowly, something here was made for you.`
       : activeValues.length <= 3
         ? `Each design in this edit has been chosen for how powerfully it brings those elements together — a small but potent collection worth exploring in full.`
         : `With this many layers of intent stacked together, every result you see here is genuinely rare — a design that checks every one of your boxes at once.`;
-
   const coreDesc =
     parts.length > 0
       ? `${stylePrefix}tattoo${activeValues.length > 1 ? "s" : ""} ${parts.join(", ")} — a curated edit that speaks directly to a very specific kind of collector. ${closing}`
-      : `A focused collection of ${stylePrefix}designs featuring ${join(
-        activeValues.map((v) => valueSnippets[v]?.essence ?? v),
-      )}. ${closing}`;
-
-  // Label
+      : `A focused collection of ${stylePrefix}designs featuring ${join(activeValues.map((v) => valueSnippets[v]?.essence ?? v))}. ${closing}`;
   const label =
     activeValues.length === 1
       ? `${stylePrefix}${activeValues[0]}`
       : activeValues.length <= 3
         ? activeValues.join(" · ")
         : `${activeValues.length} Filters Active`;
-
   return { label, description: coreDesc };
+}
+
+// Distribute items into N columns Pinterest-style (by index, not height)
+function distributeIntoColumns<T>(items: T[], numCols: number): T[][] {
+  const columns: T[][] = Array.from({ length: numCols }, () => []);
+  items.forEach((item, i) => columns[i % numCols].push(item));
+  return columns;
 }
 
 export default function Explore() {
@@ -219,9 +195,7 @@ export default function Explore() {
   const toggleFilter = useCallback((category: FilterCategory, value: string) => {
     setActiveFilters((prev) => {
       const current = prev[category];
-      const updated = current.includes(value)
-        ? current.filter((v) => v !== value)
-        : [...current, value];
+      const updated = current.includes(value) ? current.filter((v) => v !== value) : [...current, value];
       return { ...prev, [category]: updated };
     });
   }, []);
@@ -238,13 +212,10 @@ export default function Explore() {
   );
 
   const activeFilterCount = useMemo(
-    () =>
-      Object.values(activeFilters).reduce((c, v) => c + v.length, 0) +
-      (activeStyle === "All" ? 0 : 1),
+    () => Object.values(activeFilters).reduce((c, v) => c + v.length, 0) + (activeStyle === "All" ? 0 : 1),
     [activeFilters, activeStyle],
   );
 
-  // Always returns something — never null
   const activeDescription = useMemo(
     () => buildDescription(activeStyle, activeFilters),
     [activeStyle, activeFilters],
@@ -271,6 +242,11 @@ export default function Explore() {
       return 0;
     });
   }, [activeFilters, activeSort, activeStyle, search]);
+
+  // Pinterest columns: 2 on mobile, 3 on md, 4 on xl
+  const cols2 = useMemo(() => distributeIntoColumns(sorted, 2), [sorted]);
+  const cols3 = useMemo(() => distributeIntoColumns(sorted, 3), [sorted]);
+  const cols4 = useMemo(() => distributeIntoColumns(sorted, 4), [sorted]);
 
   const FilterPanel = () => (
     <div className="flex flex-col gap-5">
@@ -318,10 +294,67 @@ export default function Explore() {
     </div>
   );
 
+  // Reusable card renderer
+  const renderCard = (design: (typeof flashDesigns)[number], i: number) => {
+    const isLiked = !!likedIds[design.id];
+    const displayLikes = (design.likes || 0) + (extraLikes[design.id] || 0);
+    return (
+      <article
+        key={design.id}
+        className="group mb-3 overflow-hidden rounded-2xl border border-border bg-card cursor-pointer"
+      >
+        <Link href={`/design/${design.id}`} className="block">
+          <div className="relative overflow-hidden">
+            <Image
+              src={design.image}
+              alt={`${design.style} tattoo`}
+              width={600}
+              height={900}
+              sizes="(max-width: 640px) 50vw, (max-width: 1280px) 33vw, 25vw"
+              priority={i < 6}
+              loading={i < 6 ? undefined : "lazy"}
+              className="w-full h-auto object-cover grayscale transition-all duration-500 group-hover:grayscale-0 group-hover:scale-105"
+            />
+            {/* Hover overlay */}
+            <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100 p-3">
+              <span className="inline-flex self-start rounded-full bg-primary px-3 py-1 text-[11px] font-semibold text-primary-foreground">
+                View Design
+              </span>
+            </div>
+            {/* Like button */}
+            <button
+              onClick={(e) => { e.preventDefault(); toggleLike(e, design.id); }}
+              aria-label={isLiked ? "Unlike" : "Like"}
+              aria-pressed={isLiked}
+              className={`absolute top-2.5 right-2.5 rounded-full p-1.5 transition-all duration-200 ${isLiked
+                  ? "bg-pink-500/20 opacity-100"
+                  : "bg-black/40 opacity-0 group-hover:opacity-100 hover:bg-black/60"
+                }`}
+            >
+              <Heart
+                className={`h-3.5 w-3.5 transition-colors duration-200 ${isLiked ? "fill-pink-500 text-pink-500" : "text-white"
+                  }`}
+              />
+            </button>
+          </div>
+          {/* Footer */}
+          <div className="flex items-center justify-between px-3 py-2.5">
+            <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-[11px] font-medium text-primary truncate max-w-[70%]">
+              {design.style}
+            </span>
+            <span className={`flex items-center gap-1 text-[11px] transition-colors duration-200 ${isLiked ? "text-pink-500" : "text-muted-foreground"}`}>
+              <Heart className={`h-3 w-3 ${isLiked ? "fill-pink-500 text-pink-500" : ""}`} />
+              {displayLikes}
+            </span>
+          </div>
+        </Link>
+      </article>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-
       <div className="container mx-auto px-4 pt-24 pb-16">
         <div>
           <h1 className="mb-2 font-display text-3xl font-bold md:text-4xl">
@@ -398,9 +431,8 @@ export default function Explore() {
               ))}
             </div>
 
-            {/* ── Description banner — always visible, never conditional ─── */}
+            {/* Description banner */}
             <div key={activeDescription.label} className="animate-desc-in mb-6 rounded-xl border border-border bg-card px-5 py-4">
-              {/* Active filter chips — only when filters are on */}
               {hasActiveFilters && (
                 <div className="flex flex-wrap gap-1.5 mb-2.5">
                   {activeStyle !== "All" && (
@@ -415,60 +447,43 @@ export default function Explore() {
                   ))}
                 </div>
               )}
-
-              {/* Label */}
               <p className="text-[11px] font-semibold uppercase tracking-widest text-primary mb-1">
                 {activeDescription.label}
               </p>
-
-              {/* Description — always present */}
               <p className="text-sm text-muted-foreground leading-relaxed">
                 {activeDescription.description}
               </p>
             </div>
 
-            {/* Grid */}
-            <div className="columns-2 gap-3 sm:columns-2 xl:columns-3 [column-fill:_balance]">
-              {sorted.map((design, i) => {
-                const isLiked = !!likedIds[design.id];
-                const displayLikes = (design.likes || 0) + (extraLikes[design.id] || 0);
-                return (
-                  <article key={design.id}
-                    className="group mb-3 break-inside-avoid overflow-hidden rounded-2xl border border-border bg-card cursor-pointer">
-                    <div className="relative overflow-hidden">
-                      <Image
-                        src={design.image} alt={`${design.style} tattoo`}
-                        width={900} height={1200}
-                        sizes="(max-width: 640px) 50vw, (max-width: 1280px) 33vw, 25vw"
-                        priority={i < 4} loading={i < 4 ? undefined : "lazy"}
-                        className="w-full h-auto object-cover grayscale transition-all duration-500 group-hover:grayscale-0 group-hover:scale-105"
-                      />
-                      <div className="absolute inset-0 flex items-center justify-center bg-background/60 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-                        <Button asChild size="sm" className="btn-glow border-0 text-primary-foreground text-xs px-4">
-                          <Link href={`/design/${design.id}`}>View Design</Link>
-                        </Button>
-                      </div>
-                      <button onClick={(e) => toggleLike(e, design.id)}
-                        aria-label={isLiked ? "Unlike" : "Like"} aria-pressed={isLiked}
-                        className={`absolute top-2.5 right-2.5 rounded-full p-1.5 transition-all duration-200 ${isLiked ? "bg-pink-500/20 opacity-100" : "bg-background/60 opacity-0 group-hover:opacity-100 hover:bg-background/80"}`}>
-                        <Heart className={`h-3.5 w-3.5 transition-colors duration-200 ${isLiked ? "fill-pink-500 text-pink-500 animate-like-pop" : "text-foreground"}`} />
-                      </button>
+            {/* ── Pinterest Masonry Grid ── */}
+            {sorted.length > 0 ? (
+              <>
+                {/* 2 cols: mobile only */}
+                <div className="grid grid-cols-2 gap-3 md:hidden">
+                  {cols2.map((col, ci) => (
+                    <div key={ci} className="flex flex-col gap-3">
+                      {col.map((design, i) => renderCard(design, ci * cols2[0].length + i))}
                     </div>
-                    <div className="flex items-center justify-between px-3 py-2">
-                      <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-[11px] font-medium text-primary truncate max-w-[70%]">
-                        {design.style}
-                      </span>
-                      <span className={`flex items-center gap-1 text-[11px] transition-colors duration-200 ${isLiked ? "text-pink-500" : "text-muted-foreground"}`}>
-                        <Heart className={`h-3 w-3 transition-all duration-200 ${isLiked ? "fill-pink-500 text-pink-500" : ""}`} />
-                        {displayLikes}
-                      </span>
+                  ))}
+                </div>
+                {/* 3 cols: md–xl */}
+                <div className="hidden md:grid xl:hidden grid-cols-3 gap-3">
+                  {cols3.map((col, ci) => (
+                    <div key={ci} className="flex flex-col gap-3">
+                      {col.map((design, i) => renderCard(design, ci * cols3[0].length + i))}
                     </div>
-                  </article>
-                );
-              })}
-            </div>
-
-            {sorted.length === 0 && (
+                  ))}
+                </div>
+                {/* 4 cols: xl+ */}
+                <div className="hidden xl:grid grid-cols-4 gap-3">
+                  {cols4.map((col, ci) => (
+                    <div key={ci} className="flex flex-col gap-3">
+                      {col.map((design, i) => renderCard(design, ci * cols4[0].length + i))}
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : (
               <div className="flex flex-col items-center justify-center py-24 text-center">
                 <p className="text-muted-foreground text-sm">No designs match your filters.</p>
                 <button onClick={clearAllFilters}
