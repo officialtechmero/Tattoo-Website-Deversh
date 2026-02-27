@@ -4,9 +4,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
-import { Search, Heart, SlidersHorizontal, X } from "lucide-react";
+import { Search, Heart, SlidersHorizontal, X, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { flashDesigns, styles } from "@/lib/data";
+
+const ITEMS_PER_PAGE = 3;
 
 const sortOptions = ["Popular", "Newest", "Most Liked"];
 const filterCategories = {
@@ -22,7 +24,6 @@ const filterCategories = {
   Celestial: ["Sun And Moon", "Star", "Sunset", "Sun", "Moon", "Sunrise"],
   Unique: ["Aztec", "Egyptian", "Celtic", "Flash", "Henna", "Yakuza", "Sugar Skull"],
 };
-
 const valueSnippets: Record<string, { essence: string }> = {
   Men: { essence: "bold masculine energy" },
   Women: { essence: "elegant feminine expression" },
@@ -79,7 +80,6 @@ const valueSnippets: Record<string, { essence: string }> = {
   Yakuza: { essence: "Yakuza irezumi tradition and full-body storytelling" },
   "Sugar Skull": { essence: "sugar skull Day of the Dead color and joy" },
 };
-
 const styleDescriptions: Record<string, string> = {
   All: "Every tattoo tells a story only its wearer truly knows. Browse our entire collection — from razor-sharp geometric precision and delicate watercolor washes to ancient tribal heritage and dreamlike surrealism. Whatever draws you in, your perfect design is waiting somewhere in this gallery.",
   Blackwork: "Blackwork is the art of commitment — bold, uncompromising lines and deep solid ink that ages with extraordinary grace. These designs command attention through contrast alone, turning the skin into a striking monochrome canvas. If you believe that the strongest statements need no colour, blackwork speaks your language.",
@@ -94,22 +94,18 @@ const styleDescriptions: Record<string, string> = {
   Sketch: "Sketch-style tattoos look like a master artist's pencil drawing brought permanently to life on skin. Loose, energetic lines, visible hatching, and that wonderful sense of an artwork caught mid-creation give these designs a raw, intellectual energy that finished illustrations simply cannot replicate.",
   Surrealism: "Surrealist tattoos drag the subconscious mind into the visible world. Melting clocks, impossible anatomies, dreamscapes where gravity and logic no longer apply — these designs are deeply personal, endlessly conversation-starting, and utterly unlike anything else. Wear your inner dream life on the outside.",
 };
-
 type FilterCategory = keyof typeof filterCategories;
 type ActiveFilters = Record<FilterCategory, string[]>;
-
 const createEmptyFilters = () =>
   Object.fromEntries(
     Object.keys(filterCategories).map((cat) => [cat, [] as string[]]),
   ) as ActiveFilters;
-
 const join = (arr: string[]) => {
   if (arr.length === 0) return "";
   if (arr.length === 1) return arr[0];
   if (arr.length === 2) return `${arr[0]} and ${arr[1]}`;
   return `${arr.slice(0, -1).join(", ")}, and ${arr[arr.length - 1]}`;
 };
-
 function buildDescription(
   activeStyle: string,
   activeFilters: ActiveFilters,
@@ -171,6 +167,122 @@ function distributeIntoColumns<T>(items: T[], numCols: number): T[][] {
   return columns;
 }
 
+// ── Pagination (extracted outside Explore to avoid re-mount on every render) ──
+function PaginationBar({
+  currentPage,
+  totalPages,
+  totalCount,
+  onGoToPage,
+}: {
+  currentPage: number;
+  totalPages: number;
+  totalCount: number;
+  onGoToPage: (page: number) => void;
+}) {
+  if (totalPages <= 1) return null;
+
+  const getPageNumbers = (): (number | "...")[] => {
+    if (totalPages <= 7) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+    const pages: (number | "...")[] = [1];
+    if (currentPage > 3) pages.push("...");
+    const start = Math.max(2, currentPage - 1);
+    const end = Math.min(totalPages - 1, currentPage + 1);
+    for (let i = start; i <= end; i++) pages.push(i);
+    if (currentPage < totalPages - 2) pages.push("...");
+    pages.push(totalPages);
+    return pages;
+  };
+
+  const pageNumbers = getPageNumbers();
+
+  const iconBtn =
+    "inline-flex items-center justify-center h-8 w-8 rounded-lg border border-border bg-card text-sm font-medium transition-all duration-150 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-primary";
+  const pageBtn =
+    "inline-flex items-center justify-center h-8 min-w-[2rem] px-2.5 rounded-lg border border-border bg-card text-sm font-medium transition-all duration-150 hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-primary";
+
+  return (
+    <div className="mt-10 flex flex-col items-center gap-3">
+      <p className="text-xs text-muted-foreground">
+        Page <span className="font-semibold text-foreground">{currentPage}</span> of{" "}
+        <span className="font-semibold text-foreground">{totalPages}</span>
+        <span className="ml-1">({totalCount.toLocaleString()} designs)</span>
+      </p>
+      <div className="flex items-center gap-1">
+        {/* ⟪ First */}
+        <button
+          className={iconBtn}
+          onClick={() => onGoToPage(1)}
+          disabled={currentPage === 1}
+          aria-label="First page"
+          title="First page"
+        >
+          <ChevronsLeft className="h-4 w-4" />
+        </button>
+
+        {/* ‹ Prev */}
+        <button
+          className={iconBtn}
+          onClick={() => onGoToPage(currentPage - 1)}
+          disabled={currentPage === 1}
+          aria-label="Previous page"
+          title="Previous page"
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </button>
+
+        {/* Page numbers */}
+        <div className="flex items-center gap-1 mx-1">
+          {pageNumbers.map((p, idx) =>
+            p === "..." ? (
+              <span key={`ellipsis-${idx}`} className="px-1 text-muted-foreground text-sm select-none">
+                …
+              </span>
+            ) : (
+              <button
+                key={p}
+                className={`${pageBtn} ${
+                  currentPage === p
+                    ? "bg-primary text-primary-foreground border-primary hover:bg-primary"
+                    : ""
+                }`}
+                onClick={() => onGoToPage(p as number)}
+                aria-label={`Page ${p}`}
+                aria-current={currentPage === p ? "page" : undefined}
+              >
+                {p}
+              </button>
+            )
+          )}
+        </div>
+
+        {/* › Next */}
+        <button
+          className={iconBtn}
+          onClick={() => onGoToPage(currentPage + 1)}
+          disabled={currentPage === totalPages}
+          aria-label="Next page"
+          title="Next page"
+        >
+          <ChevronRight className="h-4 w-4" />
+        </button>
+
+        {/* ⟫ Last */}
+        <button
+          className={iconBtn}
+          onClick={() => onGoToPage(totalPages)}
+          disabled={currentPage === totalPages}
+          aria-label="Last page"
+          title="Last page"
+        >
+          <ChevronsRight className="h-4 w-4" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function Explore() {
   const [search, setSearch] = useState("");
   const [activeStyle, setActiveStyle] = useState("All");
@@ -179,6 +291,7 @@ export default function Explore() {
   const [activeFilters, setActiveFilters] = useState<ActiveFilters>(createEmptyFilters());
   const [likedIds, setLikedIds] = useState<Record<number, boolean>>({});
   const [extraLikes, setExtraLikes] = useState<Record<number, number>>({});
+  const [currentPage, setCurrentPage] = useState(1);
 
   const toggleLike = useCallback((e: React.MouseEvent, id: number) => {
     e.stopPropagation();
@@ -198,24 +311,24 @@ export default function Explore() {
       const updated = current.includes(value) ? current.filter((v) => v !== value) : [...current, value];
       return { ...prev, [category]: updated };
     });
+    setCurrentPage(1);
   }, []);
 
   const clearAllFilters = useCallback(() => {
     setActiveFilters(createEmptyFilters());
     setActiveStyle("All");
     setActiveSort("Popular");
+    setCurrentPage(1);
   }, []);
 
   const hasActiveFilters = useMemo(
     () => activeStyle !== "All" || Object.values(activeFilters).some((arr) => arr.length > 0),
     [activeStyle, activeFilters],
   );
-
   const activeFilterCount = useMemo(
     () => Object.values(activeFilters).reduce((c, v) => c + v.length, 0) + (activeStyle === "All" ? 0 : 1),
     [activeFilters, activeStyle],
   );
-
   const activeDescription = useMemo(
     () => buildDescription(activeStyle, activeFilters),
     [activeStyle, activeFilters],
@@ -243,10 +356,22 @@ export default function Explore() {
     });
   }, [activeFilters, activeSort, activeStyle, search]);
 
+  const totalPages = useMemo(() => Math.max(1, Math.ceil(sorted.length / ITEMS_PER_PAGE)), [sorted]);
+
+  const paginated = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return sorted.slice(start, start + ITEMS_PER_PAGE);
+  }, [sorted, currentPage]);
+
+  const goToPage = useCallback((page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
+
   // Pinterest columns: 2 on mobile, 3 on md, 4 on xl
-  const cols2 = useMemo(() => distributeIntoColumns(sorted, 2), [sorted]);
-  const cols3 = useMemo(() => distributeIntoColumns(sorted, 3), [sorted]);
-  const cols4 = useMemo(() => distributeIntoColumns(sorted, 4), [sorted]);
+  const cols2 = useMemo(() => distributeIntoColumns(paginated, 2), [paginated]);
+  const cols3 = useMemo(() => distributeIntoColumns(paginated, 3), [paginated]);
+  const cols4 = useMemo(() => distributeIntoColumns(paginated, 4), [paginated]);
 
   const FilterPanel = () => (
     <div className="flex flex-col gap-5">
@@ -254,7 +379,7 @@ export default function Explore() {
         <label className="mb-2 block text-xs font-medium text-muted-foreground uppercase tracking-wider">Sort by</label>
         <div className="flex flex-wrap gap-1">
           {sortOptions.map((o) => (
-            <button key={o} onClick={() => setActiveSort(o)}
+            <button key={o} onClick={() => { setActiveSort(o); setCurrentPage(1); }}
               className={`rounded-full px-3 py-1 text-xs font-medium transition-all ${activeSort === o ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground hover:text-foreground"}`}>
               {o}
             </button>
@@ -265,7 +390,7 @@ export default function Explore() {
         <label className="mb-2 block text-xs font-medium text-muted-foreground uppercase tracking-wider">Style</label>
         <div className="flex flex-wrap gap-1">
           {["All", ...styles].map((s) => (
-            <button key={s} onClick={() => setActiveStyle(s)}
+            <button key={s} onClick={() => { setActiveStyle(s); setCurrentPage(1); }}
               className={`rounded-full px-3 py-1 text-xs font-medium transition-all ${activeStyle === s ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground hover:text-foreground"}`}>
               {s}
             </button>
@@ -362,14 +487,13 @@ export default function Explore() {
           </h1>
           <p className="mb-8 text-muted-foreground">Browse our collection of AI-generated tattoo designs</p>
         </div>
-
         {/* Search */}
         <div className="mb-6 flex flex-col gap-4 sm:flex-row">
           <div className="relative flex-1">
             <label htmlFor="search-designs" className="sr-only">Search tattoo ideas</label>
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <input
-              id="search-designs" value={search} onChange={(e) => setSearch(e.target.value)}
+              id="search-designs" value={search} onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
               placeholder="Search tattoo ideas..."
               className="w-full rounded-xl border border-border bg-card py-2.5 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
             />
@@ -384,7 +508,6 @@ export default function Explore() {
             )}
           </Button>
         </div>
-
         {/* Mobile drawer */}
         {showFilters && (
           <div className="fixed inset-0 z-50 lg:hidden">
@@ -401,7 +524,6 @@ export default function Explore() {
             </div>
           </div>
         )}
-
         <div className="flex gap-6 items-start">
           {/* Desktop sidebar */}
           <aside className="hidden lg:block w-56 shrink-0">
@@ -419,18 +541,16 @@ export default function Explore() {
               <FilterPanel />
             </div>
           </aside>
-
           <div className="flex-1 min-w-0">
             {/* Style tabs */}
             <div className="mb-4 flex flex-wrap gap-2">
               {["All", ...styles].map((s) => (
-                <button key={s} onClick={() => setActiveStyle(s)}
+                <button key={s} onClick={() => { setActiveStyle(s); setCurrentPage(1); }}
                   className={`rounded-full px-4 py-1.5 text-sm font-medium transition-all ${activeStyle === s ? "bg-primary text-primary-foreground" : "bg-card border border-border text-muted-foreground hover:text-foreground"}`}>
                   {s}
                 </button>
               ))}
             </div>
-
             {/* Description banner */}
             <div key={activeDescription.label} className="animate-desc-in mb-6 rounded-xl border border-border bg-card px-5 py-4">
               {hasActiveFilters && (
@@ -454,9 +574,8 @@ export default function Explore() {
                 {activeDescription.description}
               </p>
             </div>
-
             {/* ── Pinterest Masonry Grid ── */}
-            {sorted.length > 0 ? (
+            {paginated.length > 0 ? (
               <>
                 {/* 2 cols: mobile only */}
                 <div className="grid grid-cols-2 gap-3 md:hidden">
@@ -493,9 +612,13 @@ export default function Explore() {
               </div>
             )}
 
-            <div className="mt-10 text-center">
-              <Button variant="outline" className="border-border">Load More</Button>
-            </div>
+            {/* ── Pagination ── */}
+            <PaginationBar
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalCount={sorted.length}
+              onGoToPage={goToPage}
+            />
           </div>
         </div>
       </div>
