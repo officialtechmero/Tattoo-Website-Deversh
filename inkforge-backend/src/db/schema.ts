@@ -246,3 +246,26 @@ export const paymentOrders = pgTable("payment_orders", {
     )
   })
 );
+
+export const qualityEnumDesignDownloads = pgEnum("quality", 
+  ["standard", "hd", "stencil"]
+);
+
+export const designDownloads = pgTable("design_downloads", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  user_id: uuid("user_id").references(() => users.id).notNull(),
+  design_id: uuid("design_id").references(() => designs.id).notNull(),
+  quality: qualityEnumDesignDownloads().notNull(),
+  created_at: timestamps.updated_at
+});
+
+export const stencilJobs = pgTable("stencil_jobs", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  user_id: uuid("user_id").references(() => users.id),
+  source_image_url: text("source_image_url").notNull(),
+  result_image_url: text("result_image_url"),
+  status: statusGenerationJobs().notNull(),
+  error_message: text("error_message"),
+  created_at: timestamps.created_at,
+  completed_at: timestamp("completed_at").defaultNow()
+});
