@@ -1,10 +1,8 @@
-import { config } from "dotenv";
+import 'dotenv/config';
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 
-config();
-
-const databaseUrl = process.env.DATABASE_URL;
+const databaseUrl = process.env.DATABASE_URL!;
 
 if (!databaseUrl) {
   throw new Error("DATABASE_URL is required in environment");

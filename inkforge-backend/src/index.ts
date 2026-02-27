@@ -1,7 +1,6 @@
 ﻿import 'dotenv/config';
 import Fastify from "fastify";
-import { db, pool } from "./db/client";
-import { users } from "./db/schema";
+import { pool } from "./db/client";
 import userRouter from './routes/user.route';
 
 const app = Fastify({ logger: true });
