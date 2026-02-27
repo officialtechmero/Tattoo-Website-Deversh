@@ -6,7 +6,7 @@ const timestamps = {
   updated_at: timestamp("updated_at", { withTimezone: true }).$onUpdate(() => new Date()).defaultNow().notNull()
 }
 
-const statusEnumUsers = pgEnum("user_status", ["active", "suspended", "deleted"]);
+export const statusEnumUsers = pgEnum("user_status", ["active", "suspended", "deleted"]);
 
 export const users = pgTable("users", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -21,10 +21,10 @@ export const users = pgTable("users", {
   })
 );
 
-const personaEnumUserProfiles = pgEnum(
+export const personaEnumUserProfiles = pgEnum(
   "persona", ["tattoo_enthusiast", "tattoo_artist", "collector", "exploring"]
 );
-const experienceLevelUserProfiles = pgEnum(
+export const experienceLevelUserProfiles = pgEnum(
   "experience_level", ["beginner", "intermediate", "experienced", "pro artist"]
 );
 
@@ -39,7 +39,7 @@ export const userProfiles = pgTable("user_profiles", {
   ...timestamps
 });
 
-const codeEnumPlans = pgEnum("code", ["free", "pro", "artist"]);
+export const codeEnumPlans = pgEnum("code", ["free", "pro", "artist"]);
 
 export const plans = pgTable("plans", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -55,11 +55,11 @@ export const plans = pgTable("plans", {
   ...timestamps
 });
 
-const statusEnumSubscriptions = pgEnum("subscription_status",
+export const statusEnumSubscriptions = pgEnum("subscription_status",
   ["trialing", "active", "past_due", "cancelled", "expired"]
 );
-const billingIntervalEnumSubscriptions = pgEnum("billing_interval", ["monthly", "yearly"]);
-const providerEnumSubscriptions = pgEnum("provider",
+export const billingIntervalEnumSubscriptions = pgEnum("billing_interval", ["monthly", "yearly"]);
+export const providerEnumSubscriptions = pgEnum("provider",
   ["stripe", "razorpay", "manual"]
 );
 
@@ -95,7 +95,7 @@ export const creditWallets = pgTable("credit_wallets", {
   updated_at: timestamps.updated_at
 });
 
-const sourceEnumCreditLedger = pgEnum("source",
+export const sourceEnumCreditLedger = pgEnum("source",
   ["generation", "subscription_reset", "purchase", "refund", "admin_adjustment", "variation"]
 );
 
@@ -117,7 +117,7 @@ export const creditLedger = pgTable("credit_ledger", {
   })
 );
 
-const visibilityEnumDesigns = pgEnum("visibility",
+export const visibilityEnumDesigns = pgEnum("visibility",
   ["public", "private", "unlisted"]
 );
 
@@ -182,11 +182,11 @@ export const designFavorites = pgTable("design_favorites", {
   })
 );
 
-const colorModeEnumGenerationJobs = pgEnum("color_mode", ["bw", "color"]);
-const lineWeightGenerationJobs = pgEnum("line_weight",
+export const colorModeEnumGenerationJobs = pgEnum("color_mode", ["bw", "color"]);
+export const lineWeightGenerationJobs = pgEnum("line_weight",
   ["fine", "medium", "bold"]
 )
-const statusGenerationJobs = pgEnum("generation_job_status",
+export const statusGenerationJobs = pgEnum("generation_job_status",
   ["queued", "running", "success", "failed"]
 )
 
@@ -221,7 +221,7 @@ export const generationJobs = pgTable("generation_jobs", {
   })
 );
 
-const statusEnumPaymentOrders = pgEnum("status_payment_order",
+export const statusEnumPaymentOrders = pgEnum("status_payment_order",
   ["pending", "paid", "failed", "refunded"]
 );
 
