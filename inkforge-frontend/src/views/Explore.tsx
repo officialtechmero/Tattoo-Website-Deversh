@@ -8,7 +8,7 @@ import { Search, Heart, SlidersHorizontal, X, ChevronLeft, ChevronRight, Chevron
 import { Button } from "@/components/ui/button";
 import { flashDesigns, styles } from "@/lib/data";
 
-const ITEMS_PER_PAGE = 3;
+const ITEMS_PER_PAGE = 10;
 
 const sortOptions = ["Popular", "Newest", "Most Liked"];
 const filterCategories = {

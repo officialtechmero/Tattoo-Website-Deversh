@@ -1,4 +1,11 @@
 import tattooSample1 from "@/assets/tattoo-sample-1.jpg";
+import tattooSample10 from "@/assets/tattoo-sample-10.jpg";
+import tattooSample11 from "@/assets/tattoo-sample-11.jpg";
+import tattooSample12 from "@/assets/tattoo-sample-12.jpg";
+import tattooSample13 from "@/assets/tattoo-sample-13.jpg";
+import tattooSample14 from "@/assets/tattoo-sample-14.jpg";
+import tattooSample15 from "@/assets/tattoo-sample-15.jpg";
+import tattooSample16 from "@/assets/tattoo-sample-16.jpg";
 import tattooSample2 from "@/assets/tattoo-sample-2.jpg";
 import tattooSample3 from "@/assets/tattoo-sample-3.jpg";
 import tattooSample4 from "@/assets/tattoo-sample-4.jpg";
@@ -6,6 +13,7 @@ import tattooSample5 from "@/assets/tattoo-sample-5.jpg";
 import tattooSample6 from "@/assets/tattoo-sample-6.jpg";
 import tattooSample7 from "@/assets/tattoo-sample-7.jpg";
 import tattooSample8 from "@/assets/tattoo-sample-8.jpg";
+import tattooSample9 from "@/assets/tattoo-sample-9.jpg";
 import tattooHero from "@/assets/tattoo-hero.jpg";
 
 export const tattooSamples = [
@@ -17,6 +25,14 @@ export const tattooSamples = [
   tattooSample6.src,
   tattooSample7.src,
   tattooSample8.src,
+  tattooSample9.src,
+  tattooSample10.src,
+  tattooSample11.src,
+  tattooSample12.src,
+  tattooSample13.src,
+  tattooSample14.src,
+  tattooSample15.src,
+  tattooSample16.src,
 ];
 
 export const tattooHeroImage = tattooHero.src;
@@ -68,9 +84,9 @@ export interface TattooDesign {
   date?: string;
 }
 
-export const flashDesigns: TattooDesign[] = Array.from({ length: 24 }, (_, i) => ({
+export const flashDesigns: TattooDesign[] = Array.from({ length: 48 }, (_, i) => ({
   id: i + 1,
-  image: tattooSamples[i % 8],
+  image: tattooSamples[i % tattooSamples.length],
   style: styles[i % 8],
   likes: 50 + ((i * 73 + 191) % 500),
   placement: ["Forearm", "Upper Arm", "Chest", "Back", "Ankle", "Wrist"][i % 6],
