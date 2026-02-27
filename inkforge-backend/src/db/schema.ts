@@ -6,9 +6,9 @@ const timestamps = {
   updated_at: timestamp("updated_at", { withTimezone: true }).$onUpdate(() => new Date()).defaultNow().notNull()
 }
 
-const statusEnumUsers = pgEnum("status", ["active", "suspended", "deleted"]);
+const statusEnumUsers = pgEnum("user_status", ["active", "suspended", "deleted"]);
 
-const users = pgTable("users", {
+export const users = pgTable("users", {
   id: uuid("id").defaultRandom().primaryKey(),
   email: varchar("email", { length: 320 }).unique().notNull(),
   password: text("password").notNull(),
@@ -28,7 +28,7 @@ const experienceLevelUserProfiles = pgEnum(
   "experience_level", ["beginner", "intermediate", "experienced", "pro artist"]
 );
 
-const userProfiles = pgTable("user_profiles", {
+export const userProfiles = pgTable("user_profiles", {
   user_id: uuid("user_id").references(() => users.id).notNull(),
   full_name: varchar("full_name", { length: 120 }).default("Guest"),
   country: varchar("country", { length: 100 }),
@@ -41,7 +41,7 @@ const userProfiles = pgTable("user_profiles", {
 
 const codeEnumPlans = pgEnum("code", ["free", "pro", "artist"]);
 
-const plans = pgTable("plans", {
+export const plans = pgTable("plans", {
   id: uuid("id").defaultRandom().primaryKey(),
   code: codeEnumPlans().default("free"),
   name: varchar("name", { length: 60 }).notNull(),
@@ -55,7 +55,7 @@ const plans = pgTable("plans", {
   ...timestamps
 });
 
-const statusEnumSubscriptions = pgEnum("status",
+const statusEnumSubscriptions = pgEnum("subscription_status",
   ["trialing", "active", "past_due", "cancelled", "expired"]
 );
 const billingIntervalEnumSubscriptions = pgEnum("billing_interval", ["monthly", "yearly"]);
@@ -63,7 +63,7 @@ const providerEnumSubscriptions = pgEnum("provider",
   ["stripe", "razorpay", "manual"]
 );
 
-const subscriptions = pgTable("subscriptions", {
+export const subscriptions = pgTable("subscriptions", {
   id: uuid("id").defaultRandom().primaryKey(),
   user_id: uuid("user_id").references(() => users.id).notNull(),
   plan_id: uuid("plan_id").references(() => plans.id).notNull(),
@@ -85,7 +85,7 @@ const subscriptions = pgTable("subscriptions", {
   })
 );
 
-const creditWallets = pgTable("credit_wallets", {
+export const creditWallets = pgTable("credit_wallets", {
   id: uuid("id").defaultRandom().primaryKey(),
   user_id: uuid("user_id").references(() => users.id).notNull(),
   balance: integer().notNull().default(0),
@@ -99,7 +99,7 @@ const sourceEnumCreditLedger = pgEnum("source",
   ["generation", "subscription_reset", "purchase", "refund", "admin_adjustment", "variation"]
 );
 
-const creditLedger = pgTable("credit_ledger", {
+export const creditLedger = pgTable("credit_ledger", {
   id: uuid("id").defaultRandom().primaryKey(),
   user_id: uuid("user_id").references(() => users.id).notNull(),
   source: sourceEnumCreditLedger().notNull(),
@@ -121,7 +121,7 @@ const visibilityEnumDesigns = pgEnum("visibility",
   ["public", "private", "unlisted"]
 );
 
-const designs = pgTable("designs", {
+export const designs = pgTable("designs", {
   id: uuid("id").defaultRandom().primaryKey(),
   owner_id: uuid("owner_id").references(() => users.id),
   image_url: text("image_url").notNull(),
@@ -172,7 +172,7 @@ const designs = pgTable("designs", {
   })
 );
 
-const designFavorites = pgTable("design_favorites", {
+export const designFavorites = pgTable("design_favorites", {
   user_id: uuid("user_id").references(() => users.id).notNull(),
   design_id: uuid("design_id").references(() => designs.id).notNull(),
   created_at: timestamps.created_at,
@@ -186,11 +186,11 @@ const colorModeEnumGenerationJobs = pgEnum("color_mode", ["bw", "color"]);
 const lineWeightGenerationJobs = pgEnum("line_weight",
   ["fine", "medium", "bold"]
 )
-const statusGenerationJobs = pgEnum("status",
+const statusGenerationJobs = pgEnum("generation_job_status",
   ["queued", "running", "success", "failed"]
 )
 
-const generationJobs = pgTable("generation_jobs", {
+export const generationJobs = pgTable("generation_jobs", {
   id: uuid("id").defaultRandom().primaryKey(),
   user_id: uuid("user_id").references(() => users.id).notNull(),
   prompt: text("prompt").notNull(),
@@ -225,7 +225,7 @@ const statusEnumPaymentOrders = pgEnum("status_payment_order",
   ["pending", "paid", "failed", "refunded"]
 );
 
-const paymentOrders = pgTable("payment_orders", {
+export const paymentOrders = pgTable("payment_orders", {
   id: uuid("id").defaultRandom().primaryKey(),
   user_id: uuid("user_id").references(() => users.id),
   subscription_id: uuid("subscription_id").references(() => subscriptions.id),
@@ -240,7 +240,7 @@ const paymentOrders = pgTable("payment_orders", {
   created_at: timestamps.created_at.notNull()
 },
   (table) => ({
-    uniqueUserIdCreatedAtIndex: index("unique_user_id_created_at_index").on(
+    uniqueUserIdCreatedAtIndex: index("unique_user_id_created_at_payment_index").on(
       table.user_id,
       table.created_at.desc()
     )
