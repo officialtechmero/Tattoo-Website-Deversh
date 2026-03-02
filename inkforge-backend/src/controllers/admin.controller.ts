@@ -8,6 +8,7 @@ export const getAdmin = async (req: FastifyRequest, res: FastifyReply) => {
     const images = await db.select().from(scrapeImages);
     return res.send({
       status: "Okay",
+      total: images.length,
       message: '/ route for admin',
       data: images
     });
@@ -24,6 +25,12 @@ export const scraperInit = async (req: FastifyRequest, res: FastifyReply) => {
     { query: string, limit: number, scrolls: number };
 
     const results = await scrapePinterest(query, limit);
+    if (!results || results.length === 0) {
+      return res.send({
+        message: "Query already scraped or no images found",
+        images: []
+      });
+    }
 
     const rows = results.map(img => ({
       query: query,
