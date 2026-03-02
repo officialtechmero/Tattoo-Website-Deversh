@@ -6,6 +6,15 @@ const timestamps = {
   updated_at: timestamp("updated_at", { withTimezone: true }).$onUpdate(() => new Date()).defaultNow().notNull()
 }
 
+export const scrapeImages = pgTable("scrap_images", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  query: text("query").notNull(),
+  imageLink: text().unique().notNull(),
+  imageAlt: text().notNull(),
+  ...timestamps
+});
+
+
 export const statusEnumUsers = pgEnum("user_status", ["active", "suspended", "deleted"]);
 
 export const users = pgTable("users", {

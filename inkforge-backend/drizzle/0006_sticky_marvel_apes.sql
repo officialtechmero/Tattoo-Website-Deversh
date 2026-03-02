@@ -1,0 +1,1 @@
+ALTER TABLE "scrap_images" ADD COLUMN "query" text NOT NULL;

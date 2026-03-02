@@ -36,6 +36,20 @@
       "when": 1772194359630,
       "tag": "0004_fat_golden_guardian",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1772430470193,
+      "tag": "0005_bent_zarda",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1772431073623,
+      "tag": "0006_sticky_marvel_apes",
+      "breakpoints": true
     }
   ]
 }
