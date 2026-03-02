@@ -1,7 +1,7 @@
 ﻿import 'dotenv/config';
 import Fastify from "fastify";
 import { pool } from "./db/client";
-import userRouter from './routes/user.route';
+import adminRoutes from './routes/admin.route';
 
 const app = Fastify({ logger: true });
 const port = Number(process.env.PORT ?? 3000);
@@ -12,7 +12,7 @@ app.get("/", async () => ({
   uptime: process.uptime() 
 }));
 
-app.register(userRouter, { prefix: '/api/users' });
+app.register(adminRoutes, { prefix: '/api/admin' });
 
 const start = async () => {
   try {
