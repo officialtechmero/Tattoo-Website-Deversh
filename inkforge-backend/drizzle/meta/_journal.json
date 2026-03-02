@@ -50,6 +50,13 @@
       "when": 1772431073623,
       "tag": "0006_sticky_marvel_apes",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1772444002869,
+      "tag": "0007_narrow_pyro",
+      "breakpoints": true
     }
   ]
 }

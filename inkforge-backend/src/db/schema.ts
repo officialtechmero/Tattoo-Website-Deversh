@@ -9,8 +9,8 @@ const timestamps = {
 export const scrapeImages = pgTable("scrap_images", {
   id: uuid("id").defaultRandom().primaryKey(),
   query: text("query").notNull(),
-  imageLink: text().unique().notNull(),
-  imageAlt: text().notNull(),
+  imageLink: text("image_link").unique().notNull(),
+  imageAlt: text("image_alt").notNull().default(""),
   ...timestamps
 });
 
