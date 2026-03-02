@@ -31,7 +31,7 @@ export const scraperInit = async (req: FastifyRequest, res: FastifyReply) => {
       imageAlt: img.alt
     }));
 
-    await db.insert(scrapeImages).values(rows);
+    await db.insert(scrapeImages).values(rows).onConflictDoNothing();
 
     return res.send({
       inserted: rows.length,

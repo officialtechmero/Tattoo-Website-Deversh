@@ -1,103 +1,3 @@
-// // import {chromium} from 'playwright';
-
-// // const scrapePinterest = async (query: string, maxScrolls = 10) => {
-// //   const browser = await chromium.launch({headless: true});
-// //   const page = await browser.newPage();
-
-// //   const searchUrl = `https://www.pinterest.com/search/pins/?q=${encodeURIComponent(query)}`;
-
-// //   await page.goto(searchUrl, {waitUntil: "networkidle"});
-// //   const images = new Set<string>();
-  
-// //   for(let i = 0; i < maxScrolls; i++) {
-// //     const res = await page.$$eval("img", imgs =>
-// //       imgs.map(img => ({
-// //         src: img.src,
-// //         alt: img.alt
-// //       }))
-// //     );
-
-// //     res.forEach(img => {
-// //       if(img.src && img.src.includes("pinimg")) {
-// //         images.add(JSON.stringify(img));
-// //       }
-// //     });
-
-// //     await page.evaluate(() => {
-// //       window.scrollBy(0, window.innerHeight);
-// //     });
-
-// //     await page.waitForTimeout(3000);
-// //   }
-
-// //   await browser.close();
-
-// //   return [...images].map(i => JSON.parse(i));
-// // }
-
-// // // (async () => {
-// // //   const results = await scrapePinterest("modern tattoo designs", 200);
-// // //   console.log(results);
-// // // });
-
-// // export default scrapePinterest;
-
-// import { chromium } from "playwright";
-
-// const scrapePinterest = async (
-//   query: string,
-//   limit = 20,
-//   maxScrolls = 50
-// ) => {
-//   const browser = await chromium.launch({ headless: true });
-//   const page = await browser.newPage();
-
-//   const searchUrl = `https://www.pinterest.com/search/pins/?q=${encodeURIComponent(query)}`;
-
-//   await page.goto(searchUrl, { waitUntil: "networkidle" });
-
-//   const images = new Map<string, { src: string; alt: string }>();
-
-//   for (let i = 0; i < maxScrolls; i++) {
-
-//     const res = await page.$$eval("img", imgs =>
-//       imgs.map(img => ({
-//         src: img.src,
-//         alt: img.alt
-//       }))
-//     );
-
-//     for (const img of res) {
-//       if (img.src && img.src.includes("pinimg")) {
-
-//         if (!images.has(img.src)) {
-//           images.set(img.src, img);
-//         }
-
-//         // stop when limit reached
-//         if (images.size >= limit) {
-//           await browser.close();
-//           return Array.from(images.values());
-//         }
-//       }
-//     }
-
-//     await page.evaluate(() => {
-//       window.scrollBy(0, window.innerHeight);
-//     });
-
-//     await page.waitForTimeout(2000);
-//   }
-
-//   await browser.close();
-
-//   return Array.from(images.values()).slice(0, limit);
-// };
-
-// export default scrapePinterest;
-
-
-
 import { chromium } from "playwright";
 
 type ImageResult = {
@@ -131,7 +31,7 @@ const scrapePinterest = async (
     storageState: "pinterest-session.json"
   });
 
-  const page = await browser.newPage();
+  const page = await context.newPage();
 
   const searchUrl = `https://www.pinterest.com/search/pins/?q=${encodeURIComponent(query)}`;
 
