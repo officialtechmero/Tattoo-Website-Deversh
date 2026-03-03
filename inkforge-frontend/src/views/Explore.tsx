@@ -187,23 +187,21 @@ export default function Explore() {
           <p className="text-sm text-muted-foreground">No images found.</p>
         ) : (
           <>
-            <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+            <div className="columns-2 gap-4 md:columns-3 lg:columns-4 xl:columns-5">
               {images.map((item) => (
-                <article key={item.id} className="overflow-hidden rounded-2xl border border-border bg-card">
+                <article
+                  key={item.id}
+                  className="mb-4 break-inside-avoid overflow-hidden rounded-2xl border border-border bg-card"
+                >
                   <a href={item.imageLink} target="_blank" rel="noreferrer" className="block">
                     <img
                       src={item.imageLink}
                       alt={item.imageAlt || item.query || "Scraped tattoo image"}
                       loading="lazy"
-                      className="h-56 w-full object-cover"
+                      decoding="async"
+                      className="h-auto w-full object-contain"
                     />
                   </a>
-                  <div className="p-2.5">
-                    <p className="line-clamp-1 text-xs font-medium text-primary">{item.query}</p>
-                    <p className="line-clamp-1 text-[11px] text-muted-foreground">
-                      {item.imageAlt || "No alt text"}
-                    </p>
-                  </div>
                 </article>
               ))}
             </div>
