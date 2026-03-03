@@ -8,10 +8,7 @@ import { Button } from "@/components/ui/button";
 
 const navLinks = [
   { label: "Home", to: "/" },
-  { label: "Generate", to: "/generate" },
   { label: "Explore", to: "/explore" },
-  { label: "Stencil", to: "/stencil" },
-  { label: "Pricing", to: "/pricing" },
 ];
 
 export function Navbar() {
@@ -46,14 +43,9 @@ export function Navbar() {
         </div>
 
         <div className="hidden items-center gap-3 md:flex">
-          <Link href="/login">
-            <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-black">
-              Login
-            </Button>
-          </Link>
-          <Link href="/signup">
+          <Link href="/explore">
             <Button size="sm" className="btn-glow border-0 text-primary-foreground">
-              Start Free
+              Browse Designs
             </Button>
           </Link>
         </div>
@@ -87,11 +79,8 @@ export function Navbar() {
               </Link>
             ))}
             <div className="mt-3 flex gap-2">
-              <Link href="/login" className="flex-1" onClick={() => setMobileOpen(false)}>
-                <Button variant="outline" className="w-full border-border">Login</Button>
-              </Link>
-              <Link href="/signup" className="flex-1" onClick={() => setMobileOpen(false)}>
-                <Button className="btn-glow w-full border-0 text-primary-foreground">Start Free</Button>
+              <Link href="/explore" className="flex-1" onClick={() => setMobileOpen(false)}>
+                <Button className="btn-glow w-full border-0 text-primary-foreground">Browse Designs</Button>
               </Link>
             </div>
           </div>

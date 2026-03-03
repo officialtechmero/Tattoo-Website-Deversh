@@ -1,7 +1,8 @@
-﻿import 'dotenv/config';
+import 'dotenv/config';
 import Fastify from "fastify";
 import { pool } from "./db/client";
 import adminRoutes from './routes/admin.route';
+import exploreRoutes from './routes/explore.route';
 import './workers/scrapingImages.worker';
 
 const app = Fastify({ logger: true });
@@ -10,10 +11,11 @@ const host = process.env.HOST ?? "0.0.0.0";
 
 app.get("/", async () => ({
   status: "Ok",
-  uptime: process.uptime() 
+  uptime: process.uptime()
 }));
 
 app.register(adminRoutes, { prefix: '/api/admin' });
+app.register(exploreRoutes, { prefix: '/api/explore' });
 
 const start = async () => {
   try {

@@ -6,8 +6,8 @@ import { Footer } from "@/components/layout/Footer";
 
 const quickLinks = [
   { label: "Explore Designs", href: "/explore" },
-  { label: "Generate Tattoo", href: "/generate" },
-  { label: "Pricing", href: "/pricing" },
+  { label: "Home", href: "/" },
+  { label: "Dashboard", href: "/dashboard" },
 ];
 
 const NotFound = () => {

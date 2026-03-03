@@ -62,10 +62,10 @@ export function HeroSection() {
           </p>
 
           <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-            <Link href="/signup">
+            <Link href="/explore">
               <Button size="lg" className="btn-glow border-0 px-8 text-primary-foreground gap-2">
                 <Sparkles className="h-4 w-4" />
-                Start Free - 3 Credits
+                Explore Designs
               </Button>
             </Link>
             <Link href="/explore">

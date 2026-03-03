@@ -8,7 +8,6 @@ import { HowItWorks } from "@/components/landing/HowItWorks";
 import { StyleGallery } from "@/components/landing/StyleGallery";
 import { FlashLibrary } from "@/components/landing/FlashLibrary";
 import { Testimonials } from "@/components/landing/Testimonials";
-import { PricingSection } from "@/components/landing/PricingSection";
 
 const Index = () => {
   return (
@@ -20,11 +19,9 @@ const Index = () => {
       <StyleGallery />
       <FlashLibrary />
       <Testimonials />
-      <PricingSection />
       <Footer />
     </div>
   );
 };
 
 export default Index;
-

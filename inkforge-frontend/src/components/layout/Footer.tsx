@@ -16,7 +16,7 @@ export function Footer() {
           <div>
             <h4 className="mb-3 font-display text-sm font-semibold text-foreground tracking-widest">Product</h4>
             <div className="flex flex-col gap-2">
-              {["Generate", "Explore", "Stencil", "Pricing"].map((item) => (
+              {["Explore"].map((item) => (
                 <Link key={item} href={`/${item.toLowerCase()}`} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                   {item}
                 </Link>
