@@ -155,6 +155,13 @@ export default function Explore() {
   }, [page, debouncedSearch, fetchPage, prefetchPage]);
 
   const pageLabel = useMemo(() => `Page ${page} of ${totalPages}`, [page, totalPages]);
+  const goToPage = useCallback(
+    (nextPage: number) => {
+      setPage(nextPage);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    },
+    []
+  );
 
   return (
     <div className="min-h-screen bg-background">
@@ -213,7 +220,7 @@ export default function Explore() {
               <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  onClick={() => goToPage(Math.max(1, page - 1))}
                   disabled={page <= 1}
                   className="rounded-lg border border-border px-3 py-1.5 text-sm disabled:opacity-40"
                 >
@@ -221,7 +228,7 @@ export default function Explore() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  onClick={() => goToPage(Math.min(totalPages, page + 1))}
                   disabled={page >= totalPages}
                   className="rounded-lg border border-border px-3 py-1.5 text-sm disabled:opacity-40"
                 >
