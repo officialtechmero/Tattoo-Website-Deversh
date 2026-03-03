@@ -64,6 +64,13 @@
       "when": 1772512561721,
       "tag": "0008_stale_nova",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1772519550745,
+      "tag": "0009_petite_shaman",
+      "breakpoints": true
     }
   ]
 }

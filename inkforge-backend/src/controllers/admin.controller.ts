@@ -5,12 +5,19 @@ import scrapingImagesQueue from "../queues/scrapingImages.queue";
 
 export const getAdmin = async (req: FastifyRequest, res: FastifyReply) => {
   try{
-    const images = await db.select().from(scrapeImages);
+    const { page = '1' } = req.query as { page?: string, limit?: string };
+
+    const pageNumber = Math.max(1, Number(page));
+    const limitNumber = Math.max(20);
+    const offset = (pageNumber - 1) * limitNumber;
+
+    const images = await db.select().from(scrapeImages).limit(limitNumber).offset(offset)
     return res.send({
       status: "Okay",
       total: images.length,
       message: '/ route for admin',
-      data: images
+      data: images,
+      page: pageNumber  
     });
   }
   catch(e) {
