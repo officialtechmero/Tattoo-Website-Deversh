@@ -29,11 +29,10 @@ export function FlashLibrary() {
             <button
               key={tab}
               onClick={() => setActiveFilter(tab)}
-              className={`rounded-full px-4 py-1.5 text-sm font-medium transition-all ${
-                activeFilter === tab
+              className={`rounded-full px-4 py-1.5 text-sm font-medium transition-all ${activeFilter === tab
                   ? "bg-primary text-primary-foreground"
                   : "bg-card border border-border text-muted-foreground hover:text-foreground"
-              }`}
+                }`}
             >
               {tab}
             </button>
@@ -50,7 +49,7 @@ export function FlashLibrary() {
               <div className="relative aspect-square overflow-hidden">
                 <Image
                   src={design.image}
-                  alt={`${design.style} tattoo`}
+                  alt={`${design.style} tattoo design`}
                   fill
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                   loading="lazy"

@@ -27,9 +27,9 @@ export function Footer() {
             <h4 className="mb-3 font-display text-sm font-semibold text-foreground tracking-widest">Company</h4>
             <div className="flex flex-col gap-2">
               {["Blog", "Privacy", "Terms"].map((item) => (
-                <span key={item} className="text-sm text-muted-foreground cursor-pointer hover:text-foreground transition-colors">
+                <Link key={item} href={`/${item.toLowerCase()}`} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                   {item}
-                </span>
+                </Link>
               ))}
             </div>
           </div>
@@ -37,9 +37,9 @@ export function Footer() {
             <h4 className="mb-3 font-display text-sm font-semibold text-foreground tracking-widest">Social</h4>
             <div className="flex flex-col gap-2">
               {["Twitter / X", "Instagram", "TikTok"].map((item) => (
-                <span key={item} className="text-sm text-muted-foreground cursor-pointer hover:text-foreground transition-colors">
+                <Link key={item} href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                   {item}
-                </span>
+                </Link>
               ))}
             </div>
           </div>

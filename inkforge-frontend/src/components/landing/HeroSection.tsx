@@ -52,10 +52,10 @@ export function HeroSection() {
             AI-Powered Tattoo Design
           </div>
 
-          <div className="font-display text-5xl font-extrabold leading-tight tracking-wide md:text-7xl">
-            <div className="text-9xl">Design Your{" "}</div>
-            <div className="text-gradient text-8xl">Dream Ink</div>
-          </div>
+          <h1 className="font-display text-5xl font-extrabold leading-tight tracking-wide md:text-7xl">
+            <span className="block text-9xl">Design Your </span>
+            <span className="text-gradient text-8xl">Dream Ink</span>
+          </h1>
 
           <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground md:text-xl">
             AI-powered tattoo generator. Describe your idea, choose your style, get stunning results instantly.
@@ -90,11 +90,12 @@ export function HeroSection() {
             >
               <Image
                 src={img}
-                alt={`Tattoo sample ${i + 1}`}
+                alt={`Tattoo design sample ${i + 1}`}
                 width={224}
                 height={224}
                 sizes="224px"
-                loading="lazy"
+                priority={i === 0}
+                loading={i === 0 ? undefined : "lazy"}
                 className="h-full w-full object-cover grayscale hover:grayscale-0 transition-all duration-500"
               />
             </div>

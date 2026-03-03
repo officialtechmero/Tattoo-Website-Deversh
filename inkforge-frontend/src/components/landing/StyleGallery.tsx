@@ -22,7 +22,7 @@ export function StyleGallery() {
                 <div className="aspect-square overflow-hidden">
                   <Image
                     src={tattooSamples[i]}
-                    alt={style}
+                    alt={`${style} tattoo style example`}
                     width={176}
                     height={176}
                     sizes="176px"
@@ -32,7 +32,7 @@ export function StyleGallery() {
                 </div>
                 <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-transparent" />
                 <div className="absolute bottom-0 w-full p-3 text-center">
-                  <span className="font-display text-sm font-semibold tracking-widest">{style}</span>
+                  <h3 className="font-display text-sm font-semibold tracking-widest">{style}</h3>
                 </div>
               </div>
             </div>
