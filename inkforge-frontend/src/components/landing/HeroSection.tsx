@@ -68,12 +68,12 @@ export function HeroSection() {
                 Explore Designs
               </Button>
             </Link>
-            <Link href="/explore">
+            {/* <Link href="/explore">
               <Button size="lg" variant="outline" className="border-border text-foreground hover:bg-white gap-2">
                 See Examples
                 <ArrowRight className="h-4 w-4" />
               </Button>
-            </Link>
+            </Link> */}
           </div>
         </div>
       </div>

@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { Bebas_Neue, DM_Sans, DM_Serif_Display } from "next/font/google";
 import "../index.css";
 import { Providers } from "@/components/providers";
+import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
 import { siteUrl } from "@/lib/site";
 
 const bebasNeue = Bebas_Neue({
@@ -91,6 +92,7 @@ export default function RootLayout({
       className={`${bebasNeue.variable} ${dmSans.variable} ${dmSerifDisplay.variable}`}
     >
       <body>
+        <ServiceWorkerRegister />
         <Providers>{children}</Providers>
       </body>
     </html>

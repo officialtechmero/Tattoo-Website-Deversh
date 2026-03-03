@@ -6,10 +6,10 @@ import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-const navLinks = [
-  { label: "Home", to: "/" },
-  { label: "Explore", to: "/explore" },
-];
+// const navLinks = [
+//   { label: "Home", to: "/" },
+//   { label: "Explore", to: "/explore" },
+// ];
 
 export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -25,7 +25,7 @@ export function Navbar() {
           </span>
         </Link>
 
-        {/* Desktop nav */}
+        {/* Desktop nav
         <div className="hidden items-center gap-1 md:flex">
           {navLinks.map((link) => (
             <Link
@@ -40,30 +40,30 @@ export function Navbar() {
               {link.label}
             </Link>
           ))}
-        </div>
+        </div> */}
 
-        <div className="hidden items-center gap-3 md:flex">
+        {/* <div className="hidden items-center gap-3 md:flex">
           <Link href="/explore">
             <Button size="sm" className="btn-glow border-0 text-primary-foreground">
               Browse Designs
             </Button>
           </Link>
-        </div>
+        </div> */}
 
         {/* Mobile hamburger */}
-        <button
+        {/* <button
           onClick={() => setMobileOpen(!mobileOpen)}
           className="text-foreground md:hidden"
           aria-label={mobileOpen ? "Close navigation menu" : "Open navigation menu"}
         >
           {mobileOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-        </button>
+        </button> */}
       </div>
 
       {/* Mobile menu */}
       {mobileOpen && (
         <div className="border-b border-border bg-background md:hidden">
-          <div className="flex flex-col gap-1 p-4">
+          {/* <div className="flex flex-col gap-1 p-4">
             {navLinks.map((link) => (
               <Link
                 key={link.to}
@@ -83,7 +83,7 @@ export function Navbar() {
                 <Button className="btn-glow w-full border-0 text-primary-foreground">Browse Designs</Button>
               </Link>
             </div>
-          </div>
+          </div> */}
         </div>
       )}
     </nav>
