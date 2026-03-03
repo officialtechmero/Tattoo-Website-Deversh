@@ -2,6 +2,7 @@
 import Fastify from "fastify";
 import { pool } from "./db/client";
 import adminRoutes from './routes/admin.route';
+import './workers/scrapingImages.worker';
 
 const app = Fastify({ logger: true });
 const port = Number(process.env.PORT ?? 3000);

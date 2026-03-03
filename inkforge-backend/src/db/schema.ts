@@ -14,6 +14,17 @@ export const scrapeImages = pgTable("scrap_images", {
   ...timestamps
 });
 
+export const imageScraperJobsEnum = pgEnum(
+  "image_scraper_jobs_status",
+  ["completed", "processing", "failed", "cancelled"]
+);
+
+export const imageScraperJobs = pgTable("image_scraper_jobs", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  JobId: integer().notNull().unique(),
+  status: imageScraperJobsEnum().default("processing").notNull(),
+  ...timestamps
+});
 
 export const statusEnumUsers = pgEnum("user_status", ["active", "suspended", "deleted"]);
 

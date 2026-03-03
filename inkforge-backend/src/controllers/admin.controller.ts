@@ -1,7 +1,7 @@
 import { FastifyReply, FastifyRequest } from "fastify";
-import scrapePinterest from "../services/scraper.service";
 import { db } from "../db/client";
-import { scrapeImages } from "../db/schema";
+import { imageScraperJobs, scrapeImages } from "../db/schema";
+import scrapingImagesQueue from "../queues/scrapingImages.queue";
 
 export const getAdmin = async (req: FastifyRequest, res: FastifyReply) => {
   try{
@@ -21,32 +21,36 @@ export const getAdmin = async (req: FastifyRequest, res: FastifyReply) => {
 
 export const scraperInit = async (req: FastifyRequest, res: FastifyReply) => {
   try{
-    const {query, limit} = req.body as 
+    const {query, limit, scrolls} = req.body as
     { query: string, limit: number, scrolls: number };
 
-    const results = await scrapePinterest(query, limit);
-    if (!results || results.length === 0) {
-      return res.send({
-        message: "Query already scraped or no images found",
-        images: []
-      });
+    // add process to queue
+    const job = await scrapingImagesQueue.add('scrapingImages', { query, limit, scrolls });
+    const jobId = Number(job.id);
+    if (!Number.isFinite(jobId)) {
+      throw new Error(`Invalid BullMQ job id: ${String(job.id)}`);
     }
 
-    const rows = results.map(img => ({
-      query: query,
-      imageLink: img.src,
-      imageAlt: img.alt
-    }));
-
-    await db.insert(scrapeImages).values(rows).onConflictDoNothing();
+    // add images scraping job to db
+    await db.insert(imageScraperJobs).values({
+      JobId: jobId,
+      status: 'processing'
+    });
 
     return res.send({
-      inserted: rows.length,
-      data: rows
+      status: "Okay",
+      message: "Scraping job queued",
+      data: {
+        JobId: jobId,
+        status: 'processing'
+      }
     });
   }
   catch(e) {
     console.error("Error in scraper init route", e);
-    return null;
+    return res.status(500).send({
+      status: "Error",
+      message: "Failed to queue scraping job"
+    });
   }
 }

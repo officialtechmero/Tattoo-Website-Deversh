@@ -1,7 +1,4 @@
 import { chromium } from "playwright";
-import { db } from "../db/client";
-import { scrapeImages } from "../db/schema";
-import { eq } from "drizzle-orm";
 
 type ImageResult = {
   src: string;
@@ -31,29 +28,11 @@ const getHighQualityImage = (url: string): string => {
   return url.replace(/\/\d+x\//, "/736x/");
 };
 
-// const checkQueryExists = async (query: string) => {
-//   const existing = await db
-//     .select()
-//     .from(scrapeImages)
-//     .where(eq(scrapeImages.query, query))
-//     .limit(1);
-
-//   return existing.length > 0;
-// };
-
 const scrapePinterest = async (
   query: string,
   limit: number = 20,
   maxScrolls: number = 80
 ): Promise<ImageResult[]> => {
-
-  // check DB first
-  // const exists = await checkQueryExists(query);
-
-  // if (exists) {
-  //   console.log("Query already scraped:", query);
-  //   return [];
-  // }
 
   const browser = await chromium.launch({
     headless: true,
@@ -131,20 +110,6 @@ const scrapePinterest = async (
   }
 
   const imagesArray = Array.from(imagesMap.values()).slice(0, limit);
-
-  if (imagesArray.length > 0) {
-
-    await db
-      .insert(scrapeImages)
-      .values(
-        imagesArray.map(img => ({
-          query,
-          imageLink: img.src,
-          imageAlt: img.alt || ""
-        }))
-      )
-      .onConflictDoNothing();
-  }
 
   await browser.close();
 
