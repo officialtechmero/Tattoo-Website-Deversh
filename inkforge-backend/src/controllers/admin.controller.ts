@@ -2,7 +2,7 @@ import { FastifyReply, FastifyRequest } from "fastify";
 import { db } from "../db/client";
 import { imageScraperJobs, scrapeImages } from "../db/schema";
 import scrapingImagesQueue from "../queues/scrapingImages.queue";
-import { and, desc, ilike, sql } from "drizzle-orm";
+import { and, desc, ilike, or, sql } from "drizzle-orm";
 
 export const getAdmin = async (req: FastifyRequest, res: FastifyReply) => {
   try{
@@ -40,9 +40,23 @@ export const getExplore = async (req: FastifyRequest, res: FastifyReply) => {
     const limitNumber = Math.min(100, Math.max(1, Number(limit) || 30));
     const offset = (pageNumber - 1) * limitNumber;
     const searchValue = search.trim();
+    const searchWords = searchValue
+      .toLowerCase()
+      .split(/\s+/)
+      .map((word) => word.trim())
+      .filter(Boolean);
     const shouldCount = withTotal !== "0";
 
-    const whereClause = and(searchValue ? ilike(scrapeImages.query, `%${searchValue}%`) : undefined);
+    const whereClause = searchWords.length
+      ? and(
+          ...searchWords.map((word) =>
+            or(
+              ilike(scrapeImages.imageAlt, `%${word}%`),
+              ilike(scrapeImages.query, `%${word}%`)
+            )
+          )
+        )
+      : undefined;
 
     const imagesQuery = db
       .select({
