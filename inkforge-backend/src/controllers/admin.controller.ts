@@ -29,7 +29,7 @@ export const getAdmin = async (req: FastifyRequest, res: FastifyReply) => {
 
 export const getExplore = async (req: FastifyRequest, res: FastifyReply) => {
   try {
-    const { page = "1", limit = "20", search = "", withTotal = "1" } = req.query as {
+    const { page = "1", limit = "30", search = "", withTotal = "1" } = req.query as {
       page?: string;
       limit?: string;
       search?: string;
@@ -37,34 +37,45 @@ export const getExplore = async (req: FastifyRequest, res: FastifyReply) => {
     };
 
     const pageNumber = Math.max(1, Number(page) || 1);
-    const limitNumber = Math.min(100, Math.max(1, Number(limit) || 20));
+    const limitNumber = Math.min(100, Math.max(1, Number(limit) || 30));
     const offset = (pageNumber - 1) * limitNumber;
     const searchValue = search.trim();
     const shouldCount = withTotal !== "0";
 
-    const whereClause = and(
-      searchValue ? ilike(scrapeImages.query, `%${searchValue}%`) : undefined
-    );
+    const whereClause = and(searchValue ? ilike(scrapeImages.query, `%${searchValue}%`) : undefined);
 
-    const images = await db
-      .select()
+    const imagesQuery = db
+      .select({
+        id: scrapeImages.id,
+        query: scrapeImages.query,
+        imageLink: scrapeImages.imageLink,
+        imageAlt: scrapeImages.imageAlt,
+        created_at: scrapeImages.created_at,
+      })
       .from(scrapeImages)
       .where(whereClause)
       .orderBy(desc(scrapeImages.created_at))
       .limit(limitNumber)
       .offset(offset);
 
-    let total = 0;
-    let totalPages = 1;
+    let images: Awaited<typeof imagesQuery> = [];
+    let total: number | null = null;
+    let totalPages: number | null = null;
 
     if (shouldCount) {
-      const [totalRow] = await db
-        .select({ count: sql<number>`count(*)` })
-        .from(scrapeImages)
-        .where(whereClause);
+      const [imagesResult, totalResult] = await Promise.all([
+        imagesQuery,
+        db
+          .select({ count: sql<number>`count(*)` })
+          .from(scrapeImages)
+          .where(whereClause),
+      ]);
 
-      total = Number(totalRow?.count ?? 0);
+      images = imagesResult;
+      total = Number(totalResult?.[0]?.count ?? 0);
       totalPages = Math.max(1, Math.ceil(total / limitNumber));
+    } else {
+      images = await imagesQuery;
     }
 
     return res.send({
@@ -73,8 +84,8 @@ export const getExplore = async (req: FastifyRequest, res: FastifyReply) => {
       pagination: {
         page: pageNumber,
         limit: limitNumber,
-        total: shouldCount ? total : null,
-        totalPages: shouldCount ? totalPages : null,
+        total,
+        totalPages,
       },
     });
   } catch (e) {

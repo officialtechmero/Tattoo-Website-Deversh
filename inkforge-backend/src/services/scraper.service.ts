@@ -5,6 +5,8 @@ type ImageResult = {
   alt: string;
 };
 
+const REQUIRED_PINIMG_PREFIX = "https://i.pinimg.com/736x/";
+
 const applyStealth = async (page: any) => {
   await page.addInitScript(() => {
     Object.defineProperty(navigator, "webdriver", {
@@ -26,6 +28,10 @@ const applyStealth = async (page: any) => {
 
 const getHighQualityImage = (url: string): string => {
   return url.replace(/\/\d+x\//, "/736x/");
+};
+
+const isAllowedPinterestImageUrl = (url: string): boolean => {
+  return url.startsWith(REQUIRED_PINIMG_PREFIX);
 };
 
 /**
@@ -126,6 +132,7 @@ const scrapePinterest = async (
       if (!altMatchesQuery(img.alt, keywords)) continue;
 
       const highRes = getHighQualityImage(img.src);
+      if (!isAllowedPinterestImageUrl(highRes)) continue;
 
       if (!imagesMap.has(highRes)) {
         imagesMap.set(highRes, { src: highRes, alt: img.alt });
@@ -154,7 +161,9 @@ const scrapePinterest = async (
 
   await browser.close();
 
-  return Array.from(imagesMap.values()).slice(0, limit);
+  return Array.from(imagesMap.values())
+    .filter((item) => isAllowedPinterestImageUrl(item.src))
+    .slice(0, limit);
 };
 
 export default scrapePinterest;

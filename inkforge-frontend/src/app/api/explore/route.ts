@@ -15,10 +15,16 @@ export async function GET(req: NextRequest) {
       method: "GET",
       headers: { accept: "application/json" },
       cache: "no-store",
+      signal: AbortSignal.timeout(12000),
     });
 
-    const json = await response.json();
-    return NextResponse.json(json, { status: response.status });
+    return new NextResponse(response.body, {
+      status: response.status,
+      headers: {
+        "content-type": response.headers.get("content-type") ?? "application/json",
+        "cache-control": "no-store",
+      },
+    });
   } catch (error) {
     console.error("Explore proxy failed", error);
     return NextResponse.json(
