@@ -1,0 +1,1 @@
+ALTER TYPE "public"."image_scraper_jobs_status" ADD VALUE 'ready to upload' BEFORE 'failed';

@@ -4,6 +4,7 @@ import { pool } from "./db/client";
 import adminRoutes from './routes/admin.route';
 import exploreRoutes from './routes/explore.route';
 import './workers/scrapingImages.worker';
+import { startBunnyUploadService } from './services/bunnyUpload.service';
 
 const app = Fastify({ logger: true });
 const port = Number(process.env.PORT ?? 3000);
@@ -40,3 +41,4 @@ process.on("SIGINT", shutdown);
 process.on("SIGTERM", shutdown);
 
 start();
+startBunnyUploadService();

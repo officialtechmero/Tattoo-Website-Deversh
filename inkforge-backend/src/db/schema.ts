@@ -16,7 +16,7 @@ export const scrapeImages = pgTable("scrap_images", {
 
 export const imageScraperJobsEnum = pgEnum(
   "image_scraper_jobs_status",
-  ["completed", "processing", "failed", "cancelled"]
+  ["completed", "processing", "ready to upload", "failed", "cancelled"]
 );
 
 export const imageScraperJobs = pgTable("image_scraper_jobs", {
