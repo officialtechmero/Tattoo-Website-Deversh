@@ -1,17 +1,30 @@
+"use client";
+
 import { useState } from "react";
 import Image from "next/image";
 import { Heart } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { flashDesigns, styles } from "@/lib/data";
+import { landingStyles, type LandingDesign } from "@/lib/landing";
 
-const filterTabs = ["All", ...styles] as const;
+const filterTabs = ["All", ...landingStyles] as const;
 
-export function FlashLibrary() {
+export function FlashLibrary({ designs }: { designs: LandingDesign[] }) {
   const [activeFilter, setActiveFilter] = useState("All");
 
+  const sourceDesigns = designs.length > 0
+    ? designs
+    : [
+      {
+        id: "placeholder",
+        image: "/placeholder.svg",
+        style: "Traditional",
+        likes: 0,
+        alt: "Tattoo placeholder",
+      },
+    ];
+
   const filtered = activeFilter === "All"
-    ? flashDesigns.slice(0, 12)
-    : flashDesigns.filter((d) => d.style === activeFilter).slice(0, 12);
+    ? sourceDesigns.slice(0, 12)
+    : sourceDesigns.filter((d) => d.style === activeFilter).slice(0, 12);
 
   return (
     <section className="py-24">
@@ -41,7 +54,7 @@ export function FlashLibrary() {
 
         {/* Grid */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((design, i) => (
+          {filtered.map((design) => (
             <div
               key={design.id}
               className="group card-hover overflow-hidden rounded-xl border border-border bg-card"
@@ -49,7 +62,7 @@ export function FlashLibrary() {
               <div className="relative aspect-square overflow-hidden">
                 <Image
                   src={design.image}
-                  alt={`${design.style} tattoo design`}
+                  alt={design.alt || `${design.style} tattoo design`}
                   fill
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                   loading="lazy"

@@ -1,5 +1,5 @@
 import { Star } from "lucide-react";
-import { testimonials } from "@/lib/data";
+import { testimonials } from "@/lib/landing";
 
 export function Testimonials() {
   return (

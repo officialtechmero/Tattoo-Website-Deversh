@@ -1,7 +1,9 @@
 import Image from "next/image";
-import { tattooSamples, styles } from "@/lib/data";
+import { landingStyles } from "@/lib/landing";
 
-export function StyleGallery() {
+export function StyleGallery({ images }: { images: string[] }) {
+  const sourceImages = images.length > 0 ? images : ["/placeholder.svg"];
+
   return (
     <section className="py-24 bg-secondary/30">
       <div className="container mx-auto px-4">
@@ -13,7 +15,7 @@ export function StyleGallery() {
         </div>
 
         <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
-          {styles.map((style, i) => (
+          {landingStyles.map((style, i) => (
             <div
               key={style}
               className="group flex-shrink-0 w-44 cursor-pointer"
@@ -21,7 +23,7 @@ export function StyleGallery() {
               <div className="relative overflow-hidden rounded-lg border-border bg-card">
                 <div className="aspect-square overflow-hidden">
                   <Image
-                    src={tattooSamples[i]}
+                    src={sourceImages[i % sourceImages.length]}
                     alt={`${style} tattoo style example`}
                     width={176}
                     height={176}

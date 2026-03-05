@@ -1,8 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Sparkles, ArrowRight } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { tattooSamples } from "@/lib/data";
 
 const INK_PARTICLE_COUNT = 20;
 
@@ -38,8 +37,9 @@ function InkParticles() {
   );
 }
 
-export function HeroSection() {
-  const doubled = [...tattooSamples, ...tattooSamples];
+export function HeroSection({ images }: { images: string[] }) {
+  const sourceImages = images.length > 0 ? images : ["/placeholder.svg"];
+  const doubled = [...sourceImages, ...sourceImages];
 
   return (
     <section className="relative min-h-screen flex flex-col items-center justify-center pt-20 overflow-hidden">

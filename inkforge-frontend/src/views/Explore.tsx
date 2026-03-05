@@ -28,10 +28,13 @@ type CachedPage = {
   data: ExploreImage[];
   total: number | null;
   totalPages: number | null;
+  expiresAt: number;
 };
 
 const ITEMS_PER_PAGE = 30;
 const SKELETON_ITEMS = 12;
+const CACHE_TTL_MS = 5 * 60 * 1000;
+const CACHE_CLEANUP_MS = 60 * 1000;
 
 export default function Explore() {
   const [search, setSearch] = useState("");
@@ -45,6 +48,32 @@ export default function Explore() {
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const cacheRef = useRef<Map<string, CachedPage>>(new Map());
 
+  const getCachedPage = useCallback((cacheKey: string): CachedPage | null => {
+    const cached = cacheRef.current.get(cacheKey);
+    if (!cached) return null;
+
+    if (Date.now() > cached.expiresAt) {
+      cacheRef.current.delete(cacheKey);
+      return null;
+    }
+
+    return cached;
+  }, []);
+
+  const pruneExpiredCache = useCallback(() => {
+    const now = Date.now();
+    for (const [key, value] of cacheRef.current.entries()) {
+      if (now > value.expiresAt) {
+        cacheRef.current.delete(key);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    const timer = setInterval(pruneExpiredCache, CACHE_CLEANUP_MS);
+    return () => clearInterval(timer);
+  }, [pruneExpiredCache]);
+
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(search.trim()), 300);
     return () => clearTimeout(timer);
@@ -57,7 +86,7 @@ export default function Explore() {
   const fetchPage = useCallback(
     async (targetPage: number, includeTotal: boolean, signal?: AbortSignal): Promise<CachedPage> => {
       const cacheKey = `${debouncedSearch}::${targetPage}`;
-      const cached = cacheRef.current.get(cacheKey);
+      const cached = getCachedPage(cacheKey);
       if (cached) return cached;
 
       const params = new URLSearchParams({
@@ -85,18 +114,19 @@ export default function Explore() {
         data: json.data ?? [],
         total: json.pagination?.total ?? null,
         totalPages: json.pagination?.totalPages ?? null,
+        expiresAt: Date.now() + CACHE_TTL_MS,
       };
       cacheRef.current.set(cacheKey, payload);
       return payload;
     },
-    [debouncedSearch]
+    [debouncedSearch, getCachedPage]
   );
 
   const prefetchPage = useCallback(
     async (targetPage: number) => {
       if (targetPage < 1) return;
       const cacheKey = `${debouncedSearch}::${targetPage}`;
-      if (cacheRef.current.has(cacheKey)) return;
+      if (getCachedPage(cacheKey)) return;
 
       try {
         await fetchPage(targetPage, false);
@@ -104,7 +134,7 @@ export default function Explore() {
         // Best effort prefetch; ignore failures here.
       }
     },
-    [debouncedSearch, fetchPage]
+    [debouncedSearch, fetchPage, getCachedPage]
   );
 
   const getDownloadUrl = useCallback((item: ExploreImage) => {
@@ -152,7 +182,7 @@ export default function Explore() {
 
     const run = async () => {
       const cacheKey = `${debouncedSearch}::${page}`;
-      const cached = cacheRef.current.get(cacheKey);
+      const cached = getCachedPage(cacheKey);
       setLoading(!cached);
       setError(null);
 
@@ -188,7 +218,7 @@ export default function Explore() {
     return () => {
       controller.abort();
     };
-  }, [page, debouncedSearch, fetchPage, prefetchPage, totalPages]);
+  }, [page, debouncedSearch, fetchPage, prefetchPage, totalPages, getCachedPage]);
 
   const pageLabel = useMemo(() => {
     const maxPages = Math.max(1, totalPages ?? 1);

@@ -1,5 +1,3 @@
-"use client";
-
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { HeroSection } from "@/components/landing/HeroSection";
@@ -8,16 +6,24 @@ import { HowItWorks } from "@/components/landing/HowItWorks";
 import { StyleGallery } from "@/components/landing/StyleGallery";
 import { FlashLibrary } from "@/components/landing/FlashLibrary";
 import { Testimonials } from "@/components/landing/Testimonials";
+import type { LandingDesign } from "@/lib/landing";
 
-const Index = () => {
+type IndexProps = {
+  designs: LandingDesign[];
+};
+
+const Index = ({ designs }: IndexProps) => {
+  const heroImages = designs.slice(0, 16).map((item) => item.image);
+  const styleImages = designs.slice(0, 8).map((item) => item.image);
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <HeroSection />
+      <HeroSection images={heroImages} />
       <SocialProofBar />
       <HowItWorks />
-      <StyleGallery />
-      <FlashLibrary />
+      <StyleGallery images={styleImages} />
+      <FlashLibrary designs={designs} />
       <Testimonials />
       <Footer />
     </div>
