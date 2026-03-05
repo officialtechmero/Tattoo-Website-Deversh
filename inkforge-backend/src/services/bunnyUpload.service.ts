@@ -25,7 +25,6 @@ const BUNNY_STORAGE_ZONE = process.env.BUNNY_STORAGE_ZONE ?? "";
 const BUNNY_STORAGE_PASSWORD = process.env.BUNNY_STORAGE_PASSWORD ?? "";
 const BUNNY_STORAGE_REGION = process.env.BUNNY_STORAGE_REGION ?? "";
 const BUNNY_PUBLIC_BASE_URL = process.env.BUNNY_PUBLIC_BASE_URL ?? "";
-const BUNNY_UPLOAD_PREFIX = process.env.BUNNY_UPLOAD_PREFIX ?? "scraped";
 
 const getStorageHost = () => {
   const region = BUNNY_STORAGE_REGION.trim().toLowerCase();
@@ -57,13 +56,13 @@ const stripPinterestNoise = (value: string): string => {
     .trim();
 };
 
-const buildSafeRemotePath = (jobId: number, localPath: string, alt: string): string => {
+const buildSafeRemotePath = (localPath: string, alt: string): string => {
   const parsed = path.parse(localPath);
   const cleanedAlt = stripPinterestNoise(alt);
   const altSlug = sanitizeBunnySegment(cleanedAlt);
   const uuid = randomUUID();
   const ext = sanitizeBunnySegment(parsed.ext.replace(".", "")) || "jpg";
-  return `${BUNNY_UPLOAD_PREFIX}/job-${jobId}/${altSlug}-${uuid}.${ext}`;
+  return `${altSlug}-${uuid}.${ext}`;
 };
 
 const encodeObjectPath = (objectPath: string): string => {
@@ -124,7 +123,7 @@ const processReadyJob = async (jobId: number) => {
 
     for (let i = 0; i < manifest.files.length; i++) {
       const file = manifest.files[i];
-      const remotePath = buildSafeRemotePath(jobId, file.localPath, file.alt);
+      const remotePath = buildSafeRemotePath(file.localPath, file.alt);
       const publicUrl = await uploadToBunny(file.localPath, remotePath);
 
       await db
