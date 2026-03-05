@@ -1,6 +1,6 @@
 import { db } from "../db/client";
 import { imageScraperJobs, scrapeImages } from "../db/schema";
-import { and, asc, eq } from "drizzle-orm";
+import { and, asc, eq, like, ne } from "drizzle-orm";
 import { readFile, unlink } from "node:fs/promises";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
@@ -129,7 +129,13 @@ const processReadyJob = async (jobId: number) => {
       await db
         .update(scrapeImages)
         .set({ imageLink: publicUrl })
-        .where(eq(scrapeImages.imageLink, file.sourceUrl));
+        .where(
+          and(
+            eq(scrapeImages.imageLink, file.sourceUrl),
+            like(scrapeImages.imageLink, "https://i.pinimg.com/%"),
+            ne(scrapeImages.imageLink, publicUrl)
+          )
+        );
 
       // Remove local file after successful upload + backlink update.
       await unlink(file.localPath).catch(() => undefined);
