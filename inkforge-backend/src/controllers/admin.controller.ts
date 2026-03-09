@@ -137,6 +137,13 @@ export const getExplore = async (req: FastifyRequest, res: FastifyReply) => {
       .filter(Boolean);
     const shouldCount = withTotal !== "0";
     const randomOrder = random === "1";
+    const searchConditions = searchWords.map((word) => {
+      const pattern = `%${word}%`;
+      return sql`(${scrapeImages.imageAlt} ILIKE ${pattern} OR ${scrapeImages.query} ILIKE ${pattern})`;
+    });
+    const rawWhereClause = searchConditions.length
+      ? sql`WHERE ${sql.join(searchConditions, sql` AND `)}`
+      : sql``;
 
     const whereClause = searchWords.length
       ? and(
@@ -146,42 +153,96 @@ export const getExplore = async (req: FastifyRequest, res: FastifyReply) => {
               ilike(scrapeImages.query, `%${word}%`)
             )
           )
-        )
+      )
       : undefined;
 
-    const baseQuery = db
-      .select({
-        id: scrapeImages.id,
-        query: scrapeImages.query,
-        imageLink: scrapeImages.imageLink,
-        imageAlt: scrapeImages.imageAlt,
-        created_at: scrapeImages.created_at,
-      })
-      .from(scrapeImages)
-      .where(whereClause);
-
-    const imagesQuery = randomOrder
-      ? baseQuery.orderBy(sql`random()`).limit(limitNumber)
-      : baseQuery.orderBy(desc(scrapeImages.created_at)).limit(limitNumber).offset(offset);
-
-    let images: Awaited<typeof imagesQuery> = [];
+    let images: Array<{
+      id: string;
+      query: string;
+      imageLink: string;
+      imageAlt: string;
+      created_at: Date;
+    }> = [];
+    const mapRandomRows = (rows: Record<string, unknown>[]) =>
+      rows.map((row) => ({
+        id: String(row.id ?? ""),
+        query: String(row.query ?? ""),
+        imageLink: String(row.imageLink ?? ""),
+        imageAlt: String(row.imageAlt ?? ""),
+        created_at: row.created_at instanceof Date
+          ? row.created_at
+          : new Date(String(row.created_at ?? "")),
+      }));
     let total: number | null = null;
     let totalPages: number | null = null;
 
-    if (shouldCount) {
-      const [imagesResult, totalResult] = await Promise.all([
-        imagesQuery,
-        db
-          .select({ count: sql<number>`count(*)` })
-          .from(scrapeImages)
-          .where(whereClause),
-      ]);
+    if (randomOrder) {
+      const randomRowsPromise = db.execute(sql`
+        SELECT id, query, image_link AS "imageLink", image_alt AS "imageAlt", created_at
+        FROM (
+          SELECT DISTINCT ON (lower(${scrapeImages.query}))
+            ${scrapeImages.id} AS id,
+            ${scrapeImages.query} AS query,
+            ${scrapeImages.imageLink} AS image_link,
+            ${scrapeImages.imageAlt} AS image_alt,
+            ${scrapeImages.created_at} AS created_at
+          FROM ${scrapeImages}
+          ${rawWhereClause}
+          ORDER BY lower(${scrapeImages.query}), random()
+        ) AS unique_by_query
+        ORDER BY random()
+        LIMIT ${limitNumber}
+      `);
 
-      images = imagesResult;
-      total = Number(totalResult?.[0]?.count ?? 0);
-      totalPages = Math.max(1, Math.ceil(total / limitNumber));
+      if (shouldCount) {
+        const [imagesResult, totalResult] = await Promise.all([
+          randomRowsPromise,
+          db.execute<{ count: number }>(sql`
+            SELECT count(DISTINCT lower(${scrapeImages.query}))::int AS count
+            FROM ${scrapeImages}
+            ${rawWhereClause}
+          `),
+        ]);
+
+        images = mapRandomRows(imagesResult.rows);
+        total = Number((totalResult.rows?.[0] as { count?: number } | undefined)?.count ?? 0);
+        totalPages = Math.max(1, Math.ceil(total / limitNumber));
+      } else {
+        const imagesResult = await randomRowsPromise;
+        images = mapRandomRows(imagesResult.rows);
+      }
     } else {
-      images = await imagesQuery;
+      const baseQuery = db
+        .select({
+          id: scrapeImages.id,
+          query: scrapeImages.query,
+          imageLink: scrapeImages.imageLink,
+          imageAlt: scrapeImages.imageAlt,
+          created_at: scrapeImages.created_at,
+        })
+        .from(scrapeImages)
+        .where(whereClause);
+
+      const imagesQuery = baseQuery
+        .orderBy(desc(scrapeImages.created_at))
+        .limit(limitNumber)
+        .offset(offset);
+
+      if (shouldCount) {
+        const [imagesResult, totalResult] = await Promise.all([
+          imagesQuery,
+          db
+            .select({ count: sql<number>`count(*)` })
+            .from(scrapeImages)
+            .where(whereClause),
+        ]);
+
+        images = imagesResult;
+        total = Number(totalResult?.[0]?.count ?? 0);
+        totalPages = Math.max(1, Math.ceil(total / limitNumber));
+      } else {
+        images = await imagesQuery;
+      }
     }
 
     return res.send({

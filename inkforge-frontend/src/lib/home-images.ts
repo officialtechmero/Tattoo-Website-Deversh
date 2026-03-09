@@ -38,8 +38,16 @@ export async function getHomeDesigns(): Promise<LandingDesign[]> {
 
     const json = (await response.json()) as ExploreResponse;
     const items = json.data ?? [];
+    const seenQueries = new Set<string>();
+    const uniqueItems = items.filter((item) => {
+      const queryKey = item.query.trim().toLowerCase();
+      if (!queryKey) return true;
+      if (seenQueries.has(queryKey)) return false;
+      seenQueries.add(queryKey);
+      return true;
+    });
 
-    return items.map((item, index) => ({
+    return uniqueItems.map((item, index) => ({
       id: item.id,
       image: sanitizeImageUrl(item.imageLink),
       style: landingStyles[index % landingStyles.length],
