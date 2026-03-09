@@ -1,79 +1,53 @@
-# InkForge Frontend
+﻿# InkForge Frontend
 
-Frontend web app for InkForge AI, built with Next.js (App Router), TypeScript, Tailwind CSS, and Radix/shadcn-style UI components.
+Next.js (App Router) frontend for browsing tattoo references scraped by the backend.
 
-## Current Progress
+## What is implemented
 
-The frontend is in a strong UI/UX prototype stage with multiple production-like pages and interactions.
+- Landing page (`/`) with hero, style filters, and trending design cards.
+- Explore gallery (`/explore`) with search, pagination, modal preview, and downloads.
+- Design details page (`/design/[id]`).
+- SEO files: `robots.ts`, `sitemap.ts`, route-level metadata.
+- Backend proxy API routes:
+  - `GET /api/explore` (forwards to backend)
+  - `GET /api/download-image` (downloads image by URL)
 
-- Marketing landing page with modular sections (hero, social proof, workflow, gallery, testimonials, pricing).
-- Dedicated pages for:
-  - `/generate`
-  - `/explore`
-  - `/stencil`
-  - `/design/[id]`
-  - `/dashboard`
-  - `/pricing`
-  - `/login`
-  - `/signup`
-- SEO metadata configured per route.
-- `robots.ts` and `sitemap.ts` included.
-- Rich reusable component library under `src/components/ui`.
-- Local mock data model powering explore/design/dashboard experiences.
-- Basic tests configured with Vitest + Testing Library.
+## Current routes
 
-### Feature Status (Current)
+- `/`
+- `/explore`
+- `/design/[id]`
+- `/_not-found`
+- `/api/explore`
+- `/api/download-image`
+- `/robots.txt`
+- `/sitemap.xml`
 
-- Most page-level functionality is UI-driven and mock-data based.
-- Generation and stencil flows simulate behavior locally (no backend/API integration yet).
-- Auth screens are present as UI and are not yet connected to backend auth endpoints.
+## Tech stack
 
-## Tech Stack
-
-- Next.js 15 (App Router)
+- Next.js 15
 - React 18 + TypeScript
 - Tailwind CSS
 - Radix UI primitives + shadcn-style components
-- Framer Motion
 - Vitest + Testing Library
 
-## Project Structure
+## Environment variables
 
-```txt
-src/
-  app/
-  views/
-  components/
-    layout/
-    landing/
-    ui/
-  lib/
-  hooks/
-  assets/
-  test/
-```
-
-## Environment Variables
-
-Optional (`.env.local`):
+Create `.env.local` in `inkforge-frontend/`:
 
 ```env
+NEXT_PUBLIC_BACKEND_URL=http://localhost:5000
 NEXT_PUBLIC_SITE_URL=http://localhost:4000
 ```
 
-If omitted, the app defaults to `http://localhost:3000` for `siteUrl` metadata.
+Notes:
+- `NEXT_PUBLIC_BACKEND_URL` is used by server/data helpers and API proxy routes.
+- `NEXT_PUBLIC_SITE_URL` is used for canonical/sitemap metadata.
 
-## Getting Started
-
-1. Install dependencies
+## Run locally
 
 ```bash
 npm install
-```
-
-2. Run development server
-
-```bash
 npm run dev
 ```
 
@@ -81,26 +55,15 @@ Default dev URL: `http://localhost:4000`
 
 ## Scripts
 
-- `npm run dev` - Start Next.js dev server (Turbopack, port 4000)
+- `npm run dev` - Start dev server (Turbopack) on port 4000
 - `npm run build` - Build production app
 - `npm run start` - Start production server
 - `npm run lint` - Run ESLint
 - `npm run test` - Run tests once
 - `npm run test:watch` - Run tests in watch mode
 
-## Routing Snapshot
+## Data flow
 
-- `/` - Landing page
-- `/generate` - AI generation UI
-- `/explore` - Gallery with filters/sorting/search
-- `/stencil` - Image-to-stencil UI
-- `/design/[id]` - Design detail page
-- `/dashboard` - User design dashboard
-- `/pricing` - Pricing + FAQs
-- `/login` - Login UI
-- `/signup` - Signup UI
-
-## Notes
-
-- The frontend is ready for API integration phase (auth, generation, gallery persistence).
-- Current architecture already separates views, reusable UI, and data utilities for smoother backend wiring.
+- Home page loads designs from backend explore endpoint.
+- Home fetch currently uses random ordering (`random=1`) to avoid same-category recent clustering.
+- Explore page fetches via frontend proxy (`/api/explore`) and supports backend search/pagination.

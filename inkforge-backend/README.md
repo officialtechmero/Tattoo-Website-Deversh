@@ -1,65 +1,101 @@
-# InkForge Backend
+﻿# InkForge Backend
 
-Backend API service for InkForge AI, built with Fastify, TypeScript, PostgreSQL, and Drizzle ORM.
+Fastify + TypeScript backend for scraping tattoo references from Pinterest, storing them in PostgreSQL, and serving explore/admin APIs.
 
-## Current Progress
+## What is implemented
 
-The backend is in an early foundation stage with server, database, and project structure in place.
+- Fastify server with health/readiness endpoints.
+- PostgreSQL access via `pg` + Drizzle ORM.
+- Scraper queue with BullMQ + Redis.
+- Playwright Pinterest scraper worker.
+- Image persistence flow:
+  - scrape Pinterest image URLs
+  - dedupe against existing rows
+  - save local manifest + files
+  - optional BunnyCDN upload service
+- Explore API with search, pagination, and random ordering.
+- Admin scraper init endpoint supporting single query, comma-separated query, and array input.
 
-- Fastify server bootstrapped with logging, startup checks, and graceful shutdown.
-- PostgreSQL connection configured through `pg` pool + Drizzle ORM.
-- Drizzle schema defined for core domain models:
-  - `users`
-  - `plans`
-  - `subscriptions`
-  - `designs`
-  - `favorites`
-  - `downloads`
-  - `categories`
-  - `designCategories`
-- User routes scaffolded under `/api/users`.
-- Docker + Compose setup available for DB-only and app+DB runs.
+## API routes
 
-### API Status (Current)
+Base server:
+- `GET /` - basic status + uptime
+- `GET /health` - liveness
+- `GET /ready` - DB readiness check
 
-- `GET /` -> implemented (service status + uptime)
-- `GET /api/users/` -> implemented (fetches users)
-- `POST /api/users/signup` -> scaffolded, logic pending
-- `POST /api/users/signin` -> scaffolded, logic pending
-- `PUT /api/users/verify-account` -> scaffolded, logic pending
-- `DELETE /api/users/delete-account` -> scaffolded, logic pending
+Explore:
+- `GET /api/explore`
+  - Query params:
+    - `page` (default `1`)
+    - `limit` (default `30`, max `100`)
+    - `search` (space-separated terms)
+    - `withTotal` (`1` or `0`)
+    - `random` (`1` for random order)
 
-## Tech Stack
+Admin:
+- `GET /api/admin` - paginated admin image list
+- `POST /api/admin/scrap` - enqueue scraping job(s)
+  - Body:
+    - `query`: string, comma-separated string, JSON array string, or string[]
+    - `limit`: number (optional)
+    - `scrolls`: number (optional)
+
+## Tech stack
 
 - Node.js + TypeScript
 - Fastify
 - PostgreSQL (`pg`)
 - Drizzle ORM + Drizzle Kit
-- Docker / Docker Compose
+- BullMQ + Redis
+- Playwright
 
-## Project Structure
+## Project structure
 
 ```txt
 src/
+  config/
   controllers/
   db/
-    client.ts
-    schema.ts
+  queues/
   routes/
+  services/
+  session/
+  workers/
   index.ts
 ```
 
-## Environment Variables
+## Environment variables
 
 Create `.env` in `inkforge-backend/`:
 
 ```env
-DATABASE_URL=postgresql://postgres:postgres@localhost:5432/inkforge
-PORT=3000
+# Core
+PORT=5000
 HOST=0.0.0.0
+FRONTEND_URL=http://localhost:4000
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/inkforge
+DB_SSL=false
+
+# Redis (BullMQ)
+REDIS_HOST=127.0.0.1
+REDIS_PORT=6379
+
+# Pinterest session helper (optional)
+PINTEREST_EMAIL=
+PINTEREST_PASSWORD=
+
+# Bunny upload service (optional)
+BUNNY_STORAGE_ZONE=
+BUNNY_STORAGE_PASSWORD=
+BUNNY_STORAGE_REGION=
+BUNNY_PUBLIC_BASE_URL=
 ```
 
-## Getting Started (Local)
+Notes:
+- `DATABASE_URL` is required.
+- Bunny upload loop only runs when Bunny env vars are provided.
+
+## Run locally
 
 1. Install dependencies
 
@@ -67,49 +103,45 @@ HOST=0.0.0.0
 npm install
 ```
 
-2. Start PostgreSQL
+2. Start PostgreSQL and Redis (your preferred method).
 
-```bash
-docker compose -f docker-compose.db.yml up -d
-```
-
-3. Apply schema (recommended)
+3. Push schema
 
 ```bash
 npm run db:push
 ```
 
-4. Run backend in development mode
+4. (Optional) create Pinterest session file
+
+```bash
+npm run session:login
+```
+
+5. Start backend
 
 ```bash
 npm run dev
 ```
 
-Server runs on `http://localhost:3000` by default.
+Server default: `http://localhost:5000`
 
 ## Scripts
 
-- `npm run dev` - Run backend with watch mode
+- `npm run dev` - Start API server in watch mode
 - `npm run build` - Compile TypeScript
 - `npm run start` - Run compiled server
-- `npm run typecheck` - Type-check without emit
-- `npm run db:generate` - Generate drizzle SQL files
-- `npm run db:push` - Push schema to database
+- `npm run typecheck` - Type-check only
+- `npm run session:login` - Save Pinterest login session (`pinterest-session.json`)
+- `npm run scrap` - Watch queue file (legacy helper script)
+- `npm run start:all` - Run `dev` and `scrap` together
+- `npm run db:generate` - Generate Drizzle SQL
+- `npm run db:push` - Push schema
 - `npm run db:migrate` - Run migrations
 - `npm run db:studio` - Open Drizzle Studio
 
-## Docker
+## Scraping pipeline summary
 
-Run full backend stack (app + database):
-
-```bash
-docker compose up --build
-```
-
-- App: `http://localhost:3001`
-- Postgres: `localhost:5432`
-
-## Notes
-
-- `docker/postgres/init.sql` currently seeds a basic `users` table for initial testing.
-- Core auth/business logic is intentionally scaffolded and pending implementation.
+1. `POST /api/admin/scrap` enqueues one or more jobs.
+2. Worker scrapes Pinterest, filters/normalizes image URLs, dedupes, and stores DB rows.
+3. Worker writes local files + manifest in `downloads/`.
+4. Bunny upload service polls `ready to upload` jobs and replaces `imageLink` with Bunny public URLs.
