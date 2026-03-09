@@ -4,7 +4,7 @@ import type { ConnectionOptions } from 'bullmq';
 import scrapePinterest from '../services/scraper.service';
 import { db } from '../db/client';
 import { imageScraperJobs, scrapeImages } from '../db/schema';
-import { eq } from 'drizzle-orm';
+import { eq, inArray } from 'drizzle-orm';
 import { mkdir, writeFile, access } from 'node:fs/promises';
 import path from 'node:path';
 
@@ -110,10 +110,23 @@ const scrapingImagesWorker = new Worker(
         return;
       }
 
+      const candidateLinks = filteredResults.map((img) => img.src);
+      const existingRows = await db
+        .select({ imageLink: scrapeImages.imageLink })
+        .from(scrapeImages)
+        .where(inArray(scrapeImages.imageLink, candidateLinks));
+      const existingLinks = new Set(existingRows.map((row) => row.imageLink));
+      const uniqueResults = filteredResults.filter((img) => !existingLinks.has(img.src));
+
+      if (!uniqueResults.length) {
+        await db.update(imageScraperJobs).set({ status: 'completed' }).where(eq(imageScraperJobs.JobId, jobId));
+        return;
+      }
+
       await mkdir(DOWNLOAD_DIR, { recursive: true });
       const manifest: Array<{ sourceUrl: string; localPath: string; alt: string; query: string }> = [];
-      for (let i = 0; i < filteredResults.length; i++) {
-        const image = filteredResults[i];
+      for (let i = 0; i < uniqueResults.length; i++) {
+        const image = uniqueResults[i];
         try {
           const localPath = await downloadImageToDisk(image.src, image.alt, i);
           manifest.push({
