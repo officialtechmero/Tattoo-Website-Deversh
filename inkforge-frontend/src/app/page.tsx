@@ -8,9 +8,9 @@ export async function generateMetadata(): Promise<Metadata> {
   const firstImage = designs[0]?.image;
 
   return {
-    title: "AI Tattoo Generator",
+    title: "Tattoo Reference Library",
     description:
-      "Generate unique tattoo ideas, browse trending styles, and turn concepts into ready-to-share designs.",
+      "Discover curated tattoo references, browse styles, and shortlist ideas for your next tattoo session.",
     alternates: {
       canonical: "/",
     },
@@ -34,11 +34,11 @@ export default async function Page() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
-    name: "InkForge AI",
+    name: "InkForge",
     applicationCategory: "DesignApplication",
     operatingSystem: "Web",
     description:
-      "Generate unique tattoo ideas, browse trending styles, and turn concepts into ready-to-share designs.",
+      "Discover curated tattoo references, browse styles, and shortlist ideas for your next tattoo session.",
     url: siteUrl,
     offers: {
       "@type": "Offer",

@@ -23,7 +23,7 @@ export const testimonials = [
     initials: "DJ",
     avatarClass: "bg-[#3f6212] text-[#f7fee7]",
     rating: 5,
-    quote: "One of the best art AIs I've ever used. My friend is literally getting a tattoo of an image it created.",
+    quote: "The library helped me quickly collect solid references before my studio consultation.",
   },
   {
     name: "Filippa M.",
@@ -37,7 +37,6 @@ export const testimonials = [
     initials: "MR",
     avatarClass: "bg-[#365314] text-[#fefce8]",
     rating: 5,
-    quote: "Thanks for this marvelous tool... AI-generated tattoos, copy-pasted to my body!",
+    quote: "Easy to search, easy to download, and much better for planning real tattoo sessions.",
   },
 ];
-

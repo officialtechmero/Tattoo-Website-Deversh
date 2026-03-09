@@ -18,7 +18,7 @@ export async function generateMetadata({
   return {
     title,
     description:
-      "View tattoo design details, estimated sessions, and style information in InkForge AI.",
+      "View tattoo design details, estimated sessions, and style information in InkForge.",
     alternates: {
       canonical: `/design/${id}`,
     },

@@ -66,11 +66,12 @@ export const getAdmin = async (req: FastifyRequest, res: FastifyReply) => {
 
 export const getExplore = async (req: FastifyRequest, res: FastifyReply) => {
   try {
-    const { page = "1", limit = "30", search = "", withTotal = "1" } = req.query as {
+    const { page = "1", limit = "30", search = "", withTotal = "1", random = "0" } = req.query as {
       page?: string;
       limit?: string;
       search?: string;
       withTotal?: string;
+      random?: string;
     };
 
     const pageNumber = Math.max(1, Number(page) || 1);
@@ -83,6 +84,7 @@ export const getExplore = async (req: FastifyRequest, res: FastifyReply) => {
       .map((word) => word.trim())
       .filter(Boolean);
     const shouldCount = withTotal !== "0";
+    const randomOrder = random === "1";
 
     const whereClause = searchWords.length
       ? and(
@@ -95,7 +97,7 @@ export const getExplore = async (req: FastifyRequest, res: FastifyReply) => {
         )
       : undefined;
 
-    const imagesQuery = db
+    const baseQuery = db
       .select({
         id: scrapeImages.id,
         query: scrapeImages.query,
@@ -104,10 +106,11 @@ export const getExplore = async (req: FastifyRequest, res: FastifyReply) => {
         created_at: scrapeImages.created_at,
       })
       .from(scrapeImages)
-      .where(whereClause)
-      .orderBy(desc(scrapeImages.created_at))
-      .limit(limitNumber)
-      .offset(offset);
+      .where(whereClause);
+
+    const imagesQuery = randomOrder
+      ? baseQuery.orderBy(sql`random()`).limit(limitNumber)
+      : baseQuery.orderBy(desc(scrapeImages.created_at)).limit(limitNumber).offset(offset);
 
     let images: Awaited<typeof imagesQuery> = [];
     let total: number | null = null;
@@ -133,7 +136,7 @@ export const getExplore = async (req: FastifyRequest, res: FastifyReply) => {
       status: "Okay",
       data: images,
       pagination: {
-        page: pageNumber,
+        page: randomOrder ? 1 : pageNumber,
         limit: limitNumber,
         total,
         totalPages,

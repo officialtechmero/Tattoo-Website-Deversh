@@ -49,7 +49,7 @@ export function HeroSection({ images }: { images: string[] }) {
         <div>
           <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-2.5 text-sm text-primary">
             <Sparkles className="h-4 w-4" />
-            AI-Powered Tattoo Design
+            Curated Tattoo References
           </div>
 
           <h1 className="font-display text-5xl font-extrabold leading-tight tracking-wide md:text-7xl">
@@ -58,7 +58,7 @@ export function HeroSection({ images }: { images: string[] }) {
           </h1>
 
           <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground md:text-xl">
-            AI-powered tattoo generator. Describe your idea, choose your style, get stunning results instantly.
+            Browse a growing tattoo library collected from targeted search queries and discover styles that match your next session.
           </p>
 
           <div className="mt-10 flex flex-wrap items-center justify-center gap-4">

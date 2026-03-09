@@ -4,20 +4,20 @@ const steps = [
   {
     icon: PenLine,
     step: "01",
-    title: "Describe Your Idea",
-    description: "Type a text prompt describing your dream tattoo design.",
+    title: "Search The Library",
+    description: "Start with keywords to find tattoo references that match your style.",
   },
   {
     icon: Palette,
     step: "02",
-    title: "Choose Style & Placement",
-    description: "Pick from 8 unique styles and body placement options.",
+    title: "Filter And Compare",
+    description: "Review results by theme, body placement, and visual direction.",
   },
   {
     icon: Download,
     step: "03",
-    title: "Download & Share",
-    description: "Export your design in HD and share with your tattoo artist.",
+    title: "Download And Save",
+    description: "Download references and shortlist the designs you want to discuss.",
   },
 ];
 
@@ -29,7 +29,7 @@ export function HowItWorks() {
           <h2 className="font-display text-3xl font-bold md:text-4xl tracking-wider">
             How It <span className="text-gradient">Works</span>
           </h2>
-          <p className="mt-4 text-muted-foreground">Three simple steps to your perfect tattoo design</p>
+          <p className="mt-4 text-muted-foreground">Three simple steps to find your next tattoo reference</p>
         </div>
 
         <div className="grid gap-8 md:grid-cols-3">

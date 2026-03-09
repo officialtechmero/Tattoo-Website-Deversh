@@ -24,7 +24,7 @@ const sanitizeImageUrl = (url: string) => {
 
 export async function getHomeDesigns(): Promise<LandingDesign[]> {
   try {
-    const url = `${backendBaseUrl}/api/explore?page=1&limit=${HOME_LIMIT}&withTotal=0`;
+    const url = `${backendBaseUrl}/api/explore?limit=${HOME_LIMIT}&withTotal=0&random=1`;
     const response = await fetch(url, {
       method: "GET",
       headers: { accept: "application/json" },

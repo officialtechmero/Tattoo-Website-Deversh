@@ -30,15 +30,15 @@ const dmSerifDisplay = DM_Serif_Display({
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "InkForge AI | AI Tattoo Generator and Design Studio",
-    template: "%s | InkForge AI",
+    default: "InkForge | Tattoo Reference Library",
+    template: "%s | InkForge",
   },
   description:
-    "Create custom tattoo concepts with AI, explore styles, and preview ideas before your next session.",
-  applicationName: "InkForge AI",
+    "Explore a searchable tattoo reference library and collect ideas for your next tattoo session.",
+  applicationName: "InkForge",
   keywords: [
-    "AI tattoo generator",
-    "tattoo design app",
+    "tattoo reference library",
+    "tattoo design discovery",
     "tattoo ideas",
     "tattoo styles",
     "flash tattoo designs",
@@ -46,17 +46,17 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    siteName: "InkForge AI",
-    title: "InkForge AI | AI Tattoo Generator and Design Studio",
+    siteName: "InkForge",
+    title: "InkForge | Tattoo Reference Library",
     description:
-      "Create custom tattoo concepts with AI, explore styles, and preview ideas before your next session.",
+      "Explore a searchable tattoo reference library and collect ideas for your next tattoo session.",
     url: siteUrl,
   },
   twitter: {
     card: "summary_large_image",
-    title: "InkForge AI | AI Tattoo Generator and Design Studio",
+    title: "InkForge | Tattoo Reference Library",
     description:
-      "Create custom tattoo concepts with AI, explore styles, and preview ideas before your next session.",
+      "Explore a searchable tattoo reference library and collect ideas for your next tattoo session.",
   },
   alternates: {
     canonical: "/",

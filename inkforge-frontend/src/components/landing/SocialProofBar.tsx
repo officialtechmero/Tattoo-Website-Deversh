@@ -1,9 +1,9 @@
 import { Users, Image, Award } from "lucide-react";
 
 const stats = [
-  { icon: Users, label: "1.5M+ users", value: "Trusted worldwide" },
-  { icon: Image, label: "50M+ designs", value: "Generated to date" },
-  { icon: Award, label: "Featured in", value: "Inked Magazine, Huffington Post, Yahoo News" },
+  { icon: Users, label: "Growing community", value: "Tattoo lovers and artists" },
+  { icon: Image, label: "Fresh designs", value: "Continuously added to the library" },
+  { icon: Award, label: "Search-first workflow", value: "Built for fast design discovery" },
 ];
 
 export function SocialProofBar() {

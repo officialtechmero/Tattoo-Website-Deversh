@@ -7,7 +7,7 @@ import { Footer } from "@/components/layout/Footer";
 const quickLinks = [
   { label: "Explore Designs", href: "/explore" },
   { label: "Home", href: "/" },
-  { label: "Dashboard", href: "/dashboard" },
+  { label: "Latest Uploads", href: "/explore" },
 ];
 
 const NotFound = () => {

@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 
 export function Footer() {
   return (
@@ -7,10 +7,10 @@ export function Footer() {
         <div className="grid gap-8 md:grid-cols-4">
           <div>
             <Link href="/" className="flex items-center gap-2 mb-4">
-              <span className="font-display text-xl font-bold tracking-widest">InkForge AI</span>
+              <span className="font-display text-xl font-bold tracking-widest">InkForge</span>
             </Link>
             <p className="text-sm text-muted-foreground">
-              AI-powered tattoo design generator. Create stunning, unique tattoo designs in seconds.
+              Curated tattoo reference library with searchable designs for your next ink idea.
             </p>
           </div>
           <div>
@@ -45,9 +45,10 @@ export function Footer() {
           </div>
         </div>
         <div className="mt-10 border-t border-border pt-6 text-center text-sm text-muted-foreground">
-          © 2026 InkForge AI. All rights reserved.
+          © 2026 InkForge. All rights reserved.
         </div>
       </div>
     </footer>
   );
 }
+

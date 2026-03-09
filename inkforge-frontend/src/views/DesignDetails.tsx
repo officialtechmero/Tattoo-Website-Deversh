@@ -126,7 +126,7 @@ export default function DesignDetails() {
             <h1 className="font-display text-3xl font-bold mb-2 tracking-wider">
               {design.name || "Untitled Tattoo"}
             </h1>
-            <p className="text-muted-foreground mb-6">Created by {design.artist || "AI Generator"}</p>
+            <p className="text-muted-foreground mb-6">Created by {design.artist || "Unknown Artist"}</p>
             <div className="space-y-3 text-sm">
               <Detail label="Category" value={design.category || design.style} />
               <Detail label="Type" value={design.type || "Blackwork"} />
