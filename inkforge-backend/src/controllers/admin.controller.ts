@@ -4,6 +4,43 @@ import { imageScraperJobs, scrapeImages } from "../db/schema";
 import scrapingImagesQueue from "../queues/scrapingImages.queue";
 import { and, desc, ilike, or, sql } from "drizzle-orm";
 
+const normalizeQueryToken = (value: string): string => {
+  return value
+    .trim()
+    .replace(/^[\[\s"'`]+/, "")
+    .replace(/[\]\s"'`]+$/, "")
+    .trim();
+};
+
+const parseQueriesInput = (input: unknown): string[] => {
+  if (Array.isArray(input)) {
+    return input
+      .map((item) => normalizeQueryToken(String(item)))
+      .filter(Boolean);
+  }
+
+  if (typeof input !== "string") return [];
+
+  const raw = input.trim();
+  if (!raw) return [];
+
+  if (raw.startsWith("[") && raw.endsWith("]")) {
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        return parsed
+          .map((item) => normalizeQueryToken(String(item)))
+          .filter(Boolean);
+      }
+    } catch {
+      // fallback to comma-based parsing below
+    }
+  }
+
+  const terms = raw.includes(",") ? raw.split(",") : [raw];
+  return terms.map(normalizeQueryToken).filter(Boolean);
+};
+
 export const getAdmin = async (req: FastifyRequest, res: FastifyReply) => {
   try{
     const { page = '1' } = req.query as { page?: string, limit?: string };
@@ -113,29 +150,49 @@ export const getExplore = async (req: FastifyRequest, res: FastifyReply) => {
 
 export const scraperInit = async (req: FastifyRequest, res: FastifyReply) => {
   try{
-    const {query, limit, scrolls} = req.body as
-    { query: string, limit: number, scrolls: number };
-
-    // add process to queue
-    const job = await scrapingImagesQueue.add('scrapingImages', { query, limit, scrolls });
-    const jobId = Number(job.id);
-    if (!Number.isFinite(jobId)) {
-      throw new Error(`Invalid BullMQ job id: ${String(job.id)}`);
+    const { query, limit, scrolls } = req.body as
+      { query: string | string[], limit?: number | string, scrolls?: number | string };
+    const queries = parseQueriesInput(query);
+    if (!queries.length) {
+      return res.status(400).send({
+        status: "Error",
+        message: "Query is required. Send a string, comma-separated string, or array of strings."
+      });
     }
 
-    // add images scraping job to db
-    await db.insert(imageScraperJobs).values({
-      JobId: jobId,
-      status: 'processing'
-    });
+    const limitNumber = Math.max(1, Math.floor(Number(limit) || 50));
+    const scrollsNumber = Math.max(1, Math.floor(Number(scrolls) || 8));
+    const queuedJobs: Array<{ JobId: number; query: string; status: "processing" }> = [];
+
+    for (const singleQuery of queries) {
+      const job = await scrapingImagesQueue.add('scrapingImages', {
+        query: singleQuery,
+        limit: limitNumber,
+        scrolls: scrollsNumber
+      });
+      const jobId = Number(job.id);
+      if (!Number.isFinite(jobId)) {
+        throw new Error(`Invalid BullMQ job id: ${String(job.id)}`);
+      }
+
+      await db.insert(imageScraperJobs).values({
+        JobId: jobId,
+        status: 'processing'
+      });
+
+      queuedJobs.push({
+        JobId: jobId,
+        query: singleQuery,
+        status: 'processing'
+      });
+    }
 
     return res.send({
       status: "Okay",
-      message: "Scraping job queued",
-      data: {
-        JobId: jobId,
-        status: 'processing'
-      }
+      message: queuedJobs.length === 1 ? "Scraping job queued" : "Scraping jobs queued",
+      totalJobs: queuedJobs.length,
+      jobs: queuedJobs,
+      data: queuedJobs.length === 1 ? queuedJobs[0] : queuedJobs
     });
   }
   catch(e) {
