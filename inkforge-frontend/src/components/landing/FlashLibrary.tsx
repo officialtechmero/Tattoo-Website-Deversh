@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { Heart } from "lucide-react";
 import { landingStyles, type LandingDesign } from "@/lib/landing";
 
 const filterTabs = ["All", ...landingStyles] as const;
@@ -53,30 +52,21 @@ export function FlashLibrary({ designs }: { designs: LandingDesign[] }) {
         </div>
 
         {/* Grid */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {filtered.map((design) => (
             <div
               key={design.id}
-              className="group card-hover overflow-hidden rounded-xl border border-border bg-card"
+              className="group card-hover overflow-hidden rounded-lg border border-border bg-card"
             >
-              <div className="relative aspect-square overflow-hidden">
+              <div className="relative aspect-[4/5] overflow-hidden">
                 <Image
                   src={design.image}
                   alt={design.alt || `${design.style} tattoo design`}
                   fill
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                   loading="lazy"
                   className="h-full w-full object-cover grayscale transition-all duration-500 group-hover:grayscale-0 group-hover:scale-105"
                 />
-              </div>
-              <div className="flex items-center justify-between p-3">
-                <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
-                  {design.style}
-                </span>
-                <div className="flex items-center gap-1 text-muted-foreground">
-                  <Heart className="h-3.5 w-3.5" />
-                  <span className="text-xs">{design.likes}</span>
-                </div>
               </div>
             </div>
           ))}
