@@ -6,6 +6,8 @@ import exploreRoutes from './routes/explore.route';
 import './workers/scrapingImages.worker';
 import { startBunnyUploadService } from './services/bunnyUpload.service';
 
+import cors from '@fastify/cors';
+
 const app = Fastify({
   logger: process.env.NODE_ENV === "production"
     ? { level: process.env.LOG_LEVEL ?? "info" }
@@ -13,6 +15,10 @@ const app = Fastify({
 });
 const port = Number(process.env.PORT ?? 3000);
 const host = process.env.HOST ?? "0.0.0.0";
+
+app.register(cors, {
+  origin: process.env.FRONTEND_URL,
+});
 
 app.get("/", async () => ({
   status: "Ok",
