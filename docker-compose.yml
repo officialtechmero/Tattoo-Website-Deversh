@@ -1,0 +1,55 @@
+services:
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: inkforge
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+
+  backend:
+    build:
+      context: ./inkforge-backend
+    restart: unless-stopped
+    shm_size: "1gb"
+    env_file:
+      - ./inkforge-backend/.env
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: 3000
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/inkforge
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    depends_on:
+      - postgres
+      - redis
+    ports:
+      - "3000:3000"
+
+  frontend:
+    build:
+      context: ./inkforge-frontend
+    restart: unless-stopped
+    env_file:
+      - ./inkforge-frontend/.env
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+    depends_on:
+      - backend
+    ports:
+      - "4000:4000"
+
+volumes:
+  postgres_data:

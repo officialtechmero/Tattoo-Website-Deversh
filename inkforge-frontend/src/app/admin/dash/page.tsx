@@ -184,7 +184,7 @@ export default function AdminDashboardPage() {
           <button
             type="button"
             onClick={onLogout}
-            className="rounded-lg border border-border px-4 py-2 text-sm hover:bg-secondary"
+            className="rounded-lg bg-red-600 border border-border px-4 py-2 text-sm"
           >
             Logout
           </button>
