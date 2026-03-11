@@ -19,7 +19,7 @@ const requireAdminAuth = async (
   const cookieToken = cookieHeader
     .split(";")
     .map((part) => part.trim())
-    .find((part) => part.startsWith("inkforge_admin_token="))
+    .find((part) => part.startsWith("tatoo_inkify_admin="))
     ?.split("=")[1];
 
   const token = bearerToken || (cookieToken ? decodeURIComponent(cookieToken) : null);

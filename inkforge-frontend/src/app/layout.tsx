@@ -30,12 +30,12 @@ const dmSerifDisplay = DM_Serif_Display({
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "InkForge | Tattoo Reference Library",
-    template: "%s | InkForge",
+    default: "TatooInkify | Tattoo Reference Library",
+    template: "%s | TatooInkify",
   },
   description:
     "Explore a searchable tattoo reference library and collect ideas for your next tattoo session.",
-  applicationName: "InkForge",
+  applicationName: "TatooInkify",
   keywords: [
     "tattoo reference library",
     "tattoo design discovery",
@@ -46,15 +46,15 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    siteName: "InkForge",
-    title: "InkForge | Tattoo Reference Library",
+    siteName: "TatooInkify",
+    title: "TatooInkify | Tattoo Reference Library",
     description:
       "Explore a searchable tattoo reference library and collect ideas for your next tattoo session.",
     url: siteUrl,
   },
   twitter: {
     card: "summary_large_image",
-    title: "InkForge | Tattoo Reference Library",
+    title: "TatooInkify | Tattoo Reference Library",
     description:
       "Explore a searchable tattoo reference library and collect ideas for your next tattoo session.",
   },

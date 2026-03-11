@@ -105,7 +105,7 @@ export const adminLogin = async (req: FastifyRequest, res: FastifyReply) => {
     const maxAgeSeconds = 60 * 60 * 12;
     const isProd = process.env.NODE_ENV === "production";
     const cookie = [
-      `inkforge_admin_token=${token}`,
+      `tatoo_inkify_admin=${token}`,
       "Path=/",
       "SameSite=Lax",
       `Max-Age=${maxAgeSeconds}`,
@@ -133,7 +133,7 @@ export const adminLogin = async (req: FastifyRequest, res: FastifyReply) => {
 export const adminLogout = async (_req: FastifyRequest, res: FastifyReply) => {
   const isProd = process.env.NODE_ENV === "production";
   const cookie = [
-    "inkforge_admin_token=",
+    "tatoo_inkify_admin=",
     "Path=/",
     "SameSite=Lax",
     "Max-Age=0",

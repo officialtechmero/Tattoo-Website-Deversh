@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-const ADMIN_COOKIE = "inkforge_admin_token";
+const ADMIN_COOKIE = "tatoo_inkify_admin";
 
 export async function POST() {
   const response = NextResponse.json({ status: "Okay", message: "Logged out" });

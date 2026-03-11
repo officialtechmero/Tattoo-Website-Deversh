@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const ADMIN_COOKIE = "inkforge_admin_token";
+const ADMIN_COOKIE = "tatoo_inkify_admin";
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;

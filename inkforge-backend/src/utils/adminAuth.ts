@@ -24,7 +24,7 @@ const fromBase64Url = (value: string): string => {
 const sign = (content: string): string => {
   const secret =
     process.env.ADMIN_TOKEN_SECRET ??
-    `${process.env.ADMIN_PASSWORD ?? ""}:inkforge-admin-token`;
+    `${process.env.ADMIN_PASSWORD ?? ""}:tatoo_inkify_admin`;
 
   return crypto
     .createHmac("sha256", secret)

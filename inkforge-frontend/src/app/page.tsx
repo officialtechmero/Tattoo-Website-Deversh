@@ -16,7 +16,7 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     openGraph: firstImage
       ? {
-        images: [{ url: firstImage, width: 1200, height: 630, alt: "InkForge tattoo designs" }],
+        images: [{ url: firstImage, width: 1200, height: 630, alt: "TatooInkify tattoo designs" }],
       }
       : undefined,
     twitter: firstImage
@@ -34,7 +34,7 @@ export default async function Page() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
-    name: "InkForge",
+    name: "TatooInkify",
     applicationCategory: "DesignApplication",
     operatingSystem: "Web",
     description:

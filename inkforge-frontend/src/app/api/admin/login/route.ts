@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const ADMIN_COOKIE = "inkforge_admin_token";
+const ADMIN_COOKIE = "tatoo_inkify_admin";
 const TOKEN_MAX_AGE_SECONDS = 60 * 60 * 12;
 const backendBaseUrl = (process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:5000").replace(/\/+$/, "");
 

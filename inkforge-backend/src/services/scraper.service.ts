@@ -1,4 +1,5 @@
 import { chromium } from "playwright";
+import fs from "node:fs";
 
 type ImageResult = {
   src: string;
@@ -97,8 +98,9 @@ const scrapePinterest = async (
     args: ["--disable-blink-features=AutomationControlled", "--no-sandbox"],
   });
 
+  const storageStatePath = "pinterest-session.json";
   const context = await browser.newContext({
-    storageState: "pinterest-session.json",
+    ...(fs.existsSync(storageStatePath) ? { storageState: storageStatePath } : {}),
     viewport: { width: 1280, height: 900 },
   });
 
@@ -114,6 +116,7 @@ const scrapePinterest = async (
   await page.goto(searchUrl, { waitUntil: "domcontentloaded" });
 
   const imagesMap = new Map<string, ImageResult>();
+  const fallbackMap = new Map<string, ImageResult>();
 
   let previousHeight = 0;
 
@@ -128,14 +131,17 @@ const scrapePinterest = async (
     for (const img of results) {
       if (!img.src) continue;
 
-      // Skip images whose alt text doesn't relate to the query
-      if (!altMatchesQuery(img.alt, keywords)) continue;
-
       const highRes = getHighQualityImage(img.src);
       if (!isAllowedPinterestImageUrl(highRes)) continue;
 
-      if (!imagesMap.has(highRes)) {
-        imagesMap.set(highRes, { src: highRes, alt: img.alt });
+      if (altMatchesQuery(img.alt, keywords)) {
+        if (!imagesMap.has(highRes)) {
+          imagesMap.set(highRes, { src: highRes, alt: img.alt });
+        }
+      }
+
+      if (!fallbackMap.has(highRes)) {
+        fallbackMap.set(highRes, { src: highRes, alt: img.alt });
       }
 
       if (imagesMap.size >= limit) break;
@@ -161,7 +167,15 @@ const scrapePinterest = async (
 
   await browser.close();
 
-  return Array.from(imagesMap.values())
+  const primary = Array.from(imagesMap.values())
+    .filter((item) => isAllowedPinterestImageUrl(item.src))
+    .slice(0, limit);
+
+  if (primary.length) {
+    return primary;
+  }
+
+  return Array.from(fallbackMap.values())
     .filter((item) => isAllowedPinterestImageUrl(item.src))
     .slice(0, limit);
 };
