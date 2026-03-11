@@ -102,6 +102,20 @@ export const adminLogin = async (req: FastifyRequest, res: FastifyReply) => {
     }
 
     const token = generateAdminToken();
+    const maxAgeSeconds = 60 * 60 * 12;
+    const isProd = process.env.NODE_ENV === "production";
+    const cookie = [
+      `inkforge_admin_token=${token}`,
+      "Path=/",
+      "SameSite=Lax",
+      `Max-Age=${maxAgeSeconds}`,
+      isProd ? "Secure" : "",
+      "HttpOnly",
+    ]
+      .filter(Boolean)
+      .join("; ");
+
+    res.header("Set-Cookie", cookie);
     return res.send({
       status: "Okay",
       token,
@@ -114,6 +128,23 @@ export const adminLogin = async (req: FastifyRequest, res: FastifyReply) => {
       message: "Failed to login admin",
     });
   }
+};
+
+export const adminLogout = async (_req: FastifyRequest, res: FastifyReply) => {
+  const isProd = process.env.NODE_ENV === "production";
+  const cookie = [
+    "inkforge_admin_token=",
+    "Path=/",
+    "SameSite=Lax",
+    "Max-Age=0",
+    isProd ? "Secure" : "",
+    "HttpOnly",
+  ]
+    .filter(Boolean)
+    .join("; ");
+
+  res.header("Set-Cookie", cookie);
+  return res.send({ status: "Okay", message: "Logged out" });
 };
 
 export const getExplore = async (req: FastifyRequest, res: FastifyReply) => {

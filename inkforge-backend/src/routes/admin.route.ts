@@ -1,6 +1,7 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import {
   adminLogin,
+  adminLogout,
   deleteScrapedImage,
   getAdmin,
   getScraperJobs,
@@ -14,7 +15,16 @@ const requireAdminAuth = async (
   reply: FastifyReply
 ) => {
   const bearerToken = getBearerToken(request.headers.authorization);
-  if (!bearerToken || !verifyAdminToken(bearerToken)) {
+  const cookieHeader = request.headers.cookie ?? "";
+  const cookieToken = cookieHeader
+    .split(";")
+    .map((part) => part.trim())
+    .find((part) => part.startsWith("inkforge_admin_token="))
+    ?.split("=")[1];
+
+  const token = bearerToken || (cookieToken ? decodeURIComponent(cookieToken) : null);
+
+  if (!token || !verifyAdminToken(token)) {
     return reply.status(401).send({
       status: "Error",
       message: "Unauthorized",
@@ -24,6 +34,9 @@ const requireAdminAuth = async (
 
 const adminRoutes = async (fastify: FastifyInstance) => {
   fastify.post("/auth/login", adminLogin);
+  // Backward-compat alias
+  fastify.post("/login", adminLogin);
+  fastify.post("/logout", adminLogout);
 
   fastify.get("/", { preHandler: requireAdminAuth }, getAdmin);
   fastify.get("/images", { preHandler: requireAdminAuth }, getAdmin);

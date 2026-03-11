@@ -2,7 +2,6 @@
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
-  output: "standalone",
   compress: true,
   experimental: {
     optimizePackageImports: ["lucide-react"],
@@ -20,9 +19,6 @@ const nextConfig = {
         hostname: "i.pinimg.com",
       },
     ],
-  },
-  eslint: {
-    ignoreDuringBuilds: true,
   },
 };
 
