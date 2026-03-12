@@ -42,8 +42,6 @@ app.get("/api/status", async () => ({
   uptime: process.uptime()
 }));
 
-app.get("/health", async () => ({ status: "Ok" }));
-
 app.get("/ready", async (_, reply) => {
   try {
     await pool.query("select 1");
