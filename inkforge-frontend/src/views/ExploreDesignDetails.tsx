@@ -8,6 +8,7 @@ import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { makeSlugId, slugify, splitSlugId } from "@/lib/slug";
+import place_holder from '../../public/placeholder.svg';
 
 type ShowcaseDesign = {
   id: string;
@@ -215,7 +216,7 @@ export default function ExploreDesignDetails() {
   const description = useMemo(() => buildDescription(seed, 300), [seed]);
   const [topPicks, setTopPicks] = useState<ShowcaseDesign[]>([]);
   const [similar, setSimilar] = useState<ShowcaseDesign[]>([]);
-  const heroImage = currentDesign?.imageLink || `https://picsum.photos/seed/inkforge-${slugId}/1200/1500`;
+  const heroImage = currentDesign?.imageLink || place_holder;
   const heroAlt = cleanedTitle || `${title} tattoo design`;
 
   useEffect(() => {
