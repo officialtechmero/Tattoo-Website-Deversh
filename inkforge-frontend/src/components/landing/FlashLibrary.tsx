@@ -29,7 +29,7 @@ export function FlashLibrary({ designs }: { designs: LandingDesign[] }) {
     <section className="py-24">
       <div className="container mx-auto px-4">
         <div className="mb-12 text-center">
-          <h2 className="font-display text-3xl font-bold md:text-4xl tracking-wider">
+          <h2 className="font-display text-3xl font-bold md:text-4xl tracking-normal">
             Trending <span className="text-gradient">Designs</span>
           </h2>
           <p className="mt-4 text-muted-foreground">Discover popular tattoo designs from our community</p>

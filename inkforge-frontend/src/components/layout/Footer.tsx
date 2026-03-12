@@ -7,14 +7,14 @@ export function Footer() {
         <div className="grid gap-8 md:grid-cols-4">
           <div>
             <Link href="/" className="flex items-center gap-2 mb-4">
-              <span className="font-display text-xl font-bold tracking-widest">TatooInkify</span>
+              <span className="font-display text-xl font-bold tracking-normal">TatooInkify</span>
             </Link>
             <p className="text-sm text-muted-foreground">
               Curated tattoo reference library with searchable designs for your next ink idea.
             </p>
           </div>
           <div>
-            <h4 className="mb-3 font-display text-sm font-semibold text-foreground tracking-widest">Product</h4>
+            <h4 className="mb-3 font-display text-sm font-semibold text-foreground tracking-normal">Product</h4>
             <div className="flex flex-col gap-2">
               {["Explore"].map((item) => (
                 <Link key={item} href={`/${item.toLowerCase()}`} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
@@ -24,7 +24,7 @@ export function Footer() {
             </div>
           </div>
           <div>
-            <h4 className="mb-3 font-display text-sm font-semibold text-foreground tracking-widest">Company</h4>
+            <h4 className="mb-3 font-display text-sm font-semibold text-foreground tracking-normal">Company</h4>
             <div className="flex flex-col gap-2">
               {["Blog", "Privacy", "Terms"].map((item) => (
                 <Link key={item} href={`/${item.toLowerCase()}`} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
@@ -34,7 +34,7 @@ export function Footer() {
             </div>
           </div>
           <div>
-            <h4 className="mb-3 font-display text-sm font-semibold text-foreground tracking-widest">Social</h4>
+            <h4 className="mb-3 font-display text-sm font-semibold text-foreground tracking-normal">Social</h4>
             <div className="flex flex-col gap-2">
               {["Twitter / X", "Instagram", "TikTok"].map((item) => (
                 <Link key={item} href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">

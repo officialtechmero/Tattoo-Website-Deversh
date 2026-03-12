@@ -2,10 +2,12 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { ChevronLeft, ChevronRight, Download, Search } from "lucide-react";
 import { makeSlugId, slugify } from "@/lib/slug";
+import { categoryFromSlug, categoryToSlug, getPrimaryCategory } from "@/lib/explore-categories";
 
 type ExploreImage = {
   id: string;
@@ -60,6 +62,8 @@ const stripMayContain = (value: string): string => {
 };
 
 export default function Explore() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [page, setPage] = useState(1);
@@ -69,6 +73,7 @@ export default function Explore() {
   const [totalPages, setTotalPages] = useState<number | null>(null);
   const [total, setTotal] = useState<number | null>(null);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const slugMapRef = useRef<Record<string, string>>({});
   const cacheRef = useRef<Map<string, CachedPage>>(new Map());
 
@@ -106,6 +111,12 @@ export default function Explore() {
   useEffect(() => {
     setPage(1);
   }, [debouncedSearch]);
+
+  useEffect(() => {
+    const categoryParam = searchParams.get("category");
+    const resolvedCategory = categoryFromSlug(categoryParam);
+    setSelectedCategory(resolvedCategory ?? "All");
+  }, [searchParams]);
 
   const fetchPage = useCallback(
     async (targetPage: number, includeTotal: boolean, signal?: AbortSignal): Promise<CachedPage> => {
@@ -298,6 +309,45 @@ export default function Explore() {
     [getSlugId]
   );
 
+  const getItemCategory = useCallback(
+    (item: ExploreImage) => {
+      return getPrimaryCategory(stripMayContain(item.imageAlt || item.query || ""));
+    },
+    []
+  );
+
+  const categoryOptions = useMemo(() => {
+    const counts = new Map<string, number>();
+    images.forEach((item) => {
+      const category = getItemCategory(item);
+      counts.set(category, (counts.get(category) ?? 0) + 1);
+    });
+
+    return Array.from(counts.entries())
+      .sort((a, b) => b[1] - a[1])
+      .map(([label, count]) => ({ label, count, slug: categoryToSlug(label) }));
+  }, [images, getItemCategory]);
+
+  const filteredImages = useMemo(() => {
+    if (selectedCategory === "All") return images;
+    return images.filter((item) => getItemCategory(item) === selectedCategory);
+  }, [images, selectedCategory, getItemCategory]);
+
+  const handleCategorySelect = useCallback(
+    (nextCategory: string, nextSlug: string) => {
+      setSelectedCategory(nextCategory);
+      const params = new URLSearchParams(searchParams.toString());
+      if (nextCategory === "All") {
+        params.delete("category");
+      } else {
+        params.set("category", nextSlug);
+      }
+      const query = params.toString();
+      router.replace(query ? `/explore?${query}` : "/explore");
+    },
+    [router, searchParams]
+  );
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -321,6 +371,42 @@ export default function Explore() {
           </div>
         </div>
 
+        <div className="mb-8">
+          <div className="mb-2 flex items-center justify-between">
+            <p className="text-xs font-semibold uppercase tracking-normal text-muted-foreground">Categories</p>
+            <p className="text-xs text-muted-foreground">{images.length} items on this page</p>
+          </div>
+          <div className="flex gap-2 overflow-x-auto pb-2 filter-scroll">
+            <button
+              type="button"
+              onClick={() => handleCategorySelect("All", "all")}
+              className={`rounded-full border px-4 py-1.5 text-xs font-semibold transition-colors ${
+                selectedCategory === "All"
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border bg-card text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              All
+              <span className="ml-1 text-[11px] opacity-80">({images.length})</span>
+            </button>
+            {categoryOptions.map((category) => (
+              <button
+                key={category.slug}
+                type="button"
+                onClick={() => handleCategorySelect(category.label, category.slug)}
+                className={`rounded-full border px-4 py-1.5 text-xs font-semibold transition-colors ${
+                  selectedCategory === category.label
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-border bg-card text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {category.label}
+                <span className="ml-1 text-[11px] opacity-80">({category.count})</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
         {error && <p className="mb-4 text-sm text-red-400">{error}</p>}
 
         {loading && images.length === 0 ? (
@@ -332,12 +418,12 @@ export default function Explore() {
               />
             ))}
           </div>
-        ) : images.length === 0 ? (
+        ) : filteredImages.length === 0 ? (
           <p className="text-sm text-muted-foreground">No images found.</p>
         ) : (
           <>
             <div className="columns-2 gap-4 md:columns-3 lg:columns-4 xl:columns-5">
-              {images.map((item) => (
+              {filteredImages.map((item) => (
                 <article
                   key={item.id}
                   className="group relative mb-4 break-inside-avoid overflow-hidden rounded-2xl border border-border bg-card"
@@ -355,6 +441,9 @@ export default function Explore() {
                       Open design page
                     </span>
                   </Link>
+                  <span className="pointer-events-none absolute left-3 top-3 rounded-full bg-background/90 px-2.5 py-1 text-[11px] font-semibold text-foreground">
+                    {getItemCategory(item)}
+                  </span>
                   <button
                     type="button"
                     onClick={(event) => {

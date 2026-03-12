@@ -6,7 +6,7 @@ export function Testimonials() {
     <section className="py-24 bg-secondary/30">
       <div className="container mx-auto px-4">
         <div className="mb-16 text-center">
-          <h2 className="font-display text-3xl font-bold md:text-4xl tracking-wider">
+          <h2 className="font-display text-3xl font-bold md:text-4xl tracking-normal">
             Loved by <span className="text-gradient">Creators</span>
           </h2>
           <p className="mt-4 text-muted-foreground">See what our users are saying</p>

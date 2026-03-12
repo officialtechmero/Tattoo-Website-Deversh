@@ -8,7 +8,7 @@ export function StyleGallery({ images }: { images: string[] }) {
     <section className="py-24 bg-secondary/30">
       <div className="container mx-auto px-4">
         <div className="mb-12 text-center">
-          <h2 className="font-display text-3xl font-bold md:text-4xl tracking-wider">
+          <h2 className="font-display text-3xl font-bold md:text-4xl tracking-normal">
             Explore Tattoo <span className="text-gradient">Styles</span>
           </h2>
           <p className="mt-4 text-muted-foreground">8 unique artistic styles to choose from</p>
@@ -34,7 +34,7 @@ export function StyleGallery({ images }: { images: string[] }) {
                 </div>
                 <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-transparent" />
                 <div className="absolute bottom-0 w-full p-3 text-center">
-                  <h3 className="font-display text-sm font-semibold tracking-widest">{style}</h3>
+                  <h3 className="font-display text-sm font-semibold tracking-normal">{style}</h3>
                 </div>
               </div>
             </div>

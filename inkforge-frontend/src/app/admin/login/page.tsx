@@ -39,7 +39,7 @@ export default function AdminLoginPage() {
   return (
     <main className="min-h-screen bg-background px-4 py-16">
       <div className="mx-auto w-full max-w-md rounded-2xl border border-border bg-card p-8">
-        <h1 className="font-display text-3xl font-bold tracking-wider">Admin Login</h1>
+        <h1 className="font-display text-3xl font-bold tracking-normal">Admin Login</h1>
         <p className="mt-2 text-sm text-muted-foreground">
           Login with username and password
         </p>

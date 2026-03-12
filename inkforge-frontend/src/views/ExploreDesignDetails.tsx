@@ -8,7 +8,8 @@ import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { makeSlugId, slugify, splitSlugId } from "@/lib/slug";
-import place_holder from '../../public/placeholder.svg';
+import { categoryToSlug, getPrimaryCategory } from "@/lib/explore-categories";
+import place_holder from "../../public/placeholder.svg";
 
 type ShowcaseDesign = {
   id: string;
@@ -218,6 +219,8 @@ export default function ExploreDesignDetails() {
   const [similar, setSimilar] = useState<ShowcaseDesign[]>([]);
   const heroImage = currentDesign?.imageLink || place_holder;
   const heroAlt = cleanedTitle || `${title} tattoo design`;
+  const category = getPrimaryCategory(stripMayContain(currentDesign?.imageAlt || currentDesign?.query || title));
+  const categorySlug = categoryToSlug(category);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -310,11 +313,25 @@ export default function ExploreDesignDetails() {
     <div className="min-h-screen bg-background">
       <Navbar />
       <div className="container mx-auto px-4 pb-16 pt-24">
-        <Button asChild className="bg-transparent hover:text-black mb-6 text-muted-foreground">
+        <Button asChild className="bg-transparent hover:text-black mb-3 text-muted-foreground">
           <Link href="/explore">
             <ArrowLeft /> Back to explore
           </Link>
         </Button>
+        <nav className="mb-6 flex flex-wrap items-center gap-2 text-xs text-muted-foreground" aria-label="Breadcrumb">
+          <Link href="/explore" className="hover:text-foreground transition-colors">
+            Explore
+          </Link>
+          <span>/</span>
+          <Link
+            href={`/explore?category=${encodeURIComponent(categorySlug)}`}
+            className="hover:text-foreground transition-colors"
+          >
+            {category}
+          </Link>
+          <span>/</span>
+          <span className="text-foreground">{title}</span>
+        </nav>
         <div className="grid gap-10 md:grid-cols-2">
           <div className="rounded-2xl border border-border bg-card p-3">
             <img
@@ -325,8 +342,8 @@ export default function ExploreDesignDetails() {
             />
           </div>
           <div>
-            {/* <p className="text-xs uppercase tracking-[0.3em] text-primary">Design #{id || "X"}</p> */}
-            <h1 className="font-display text-3xl font-bold mb-4 tracking-wider">{title}</h1>
+            {/* <p className="text-xs uppercase tracking-normal text-primary">Design #{id || "X"}</p> */}
+            <h1 className="font-display text-3xl font-bold mb-4 tracking-normal">{title}</h1>
             <p className="text-sm text-muted-foreground leading-relaxed">{description}</p>
           </div>
         </div>
@@ -335,8 +352,8 @@ export default function ExploreDesignDetails() {
           <section className="mt-20">
             <div className="mb-6 flex items-end justify-between">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-widest text-primary mb-1">Top Picks</p>
-                <h2 className="font-display text-2xl font-bold tracking-wider">
+                <p className="text-[11px] font-semibold uppercase tracking-normal text-primary mb-1">Top Picks</p>
+                <h2 className="font-display text-2xl font-bold tracking-normal">
                   Top <span className="text-gradient">Picks</span>
                 </h2>
                 <p className="text-sm text-muted-foreground mt-1">Hand-picked references that match this vibe</p>
@@ -360,8 +377,8 @@ export default function ExploreDesignDetails() {
           <section className="mt-20">
             <div className="mb-6 flex items-end justify-between">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-widest text-primary mb-1">Similar Designs</p>
-                <h2 className="font-display text-2xl font-bold tracking-wider">
+                <p className="text-[11px] font-semibold uppercase tracking-normal text-primary mb-1">Similar Designs</p>
+                <h2 className="font-display text-2xl font-bold tracking-normal">
                   Similar <span className="text-gradient">Designs</span>
                 </h2>
                 <p className="text-sm text-muted-foreground mt-1">Other directions with complementary energy</p>

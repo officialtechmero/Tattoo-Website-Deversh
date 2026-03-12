@@ -52,7 +52,7 @@ export function HeroSection({ images }: { images: string[] }) {
             Curated Tattoo References
           </div>
 
-          <h1 className="font-display text-5xl font-extrabold leading-tight tracking-wide md:text-7xl">
+          <h1 className="font-display text-5xl font-extrabold leading-tight tracking-normal md:text-7xl">
             <span className="block text-9xl">Design Your </span>
             <span className="text-gradient text-8xl">Dream Ink</span>
           </h1>

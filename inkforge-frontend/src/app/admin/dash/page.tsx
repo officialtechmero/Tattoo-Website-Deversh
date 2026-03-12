@@ -178,7 +178,7 @@ export default function AdminDashboardPage() {
       <div className="mx-auto max-w-7xl space-y-8">
         <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="font-display text-3xl font-bold tracking-wider">Admin Dashboard</h1>
+            <h1 className="font-display text-3xl font-bold tracking-normal">Admin Dashboard</h1>
             <p className="text-sm text-muted-foreground">Queue scrape jobs, monitor status, and manage images.</p>
           </div>
           <button
@@ -191,7 +191,7 @@ export default function AdminDashboardPage() {
         </header>
 
         <section className="rounded-2xl border border-border bg-card p-6">
-          <h2 className="font-display text-2xl font-bold tracking-wider">Start Scraping</h2>
+          <h2 className="font-display text-2xl font-bold tracking-normal">Start Scraping</h2>
           <form onSubmit={onScrapeSubmit} className="mt-4 grid gap-4 md:grid-cols-4">
             <textarea
               value={queryInput}
@@ -236,7 +236,7 @@ export default function AdminDashboardPage() {
         </section>
 
         <section className="rounded-2xl border border-border bg-card p-6">
-          <h2 className="font-display text-2xl font-bold tracking-wider">Scraping Jobs</h2>
+          <h2 className="font-display text-2xl font-bold tracking-normal">Scraping Jobs</h2>
           {jobsError ? <p className="mt-2 text-sm text-red-500">{jobsError}</p> : null}
           <div className="mt-4 overflow-x-auto">
             <table className="w-full min-w-[620px] border-collapse text-sm">
@@ -274,7 +274,7 @@ export default function AdminDashboardPage() {
 
         <section className="rounded-2xl border border-border bg-card p-6">
           <div className="flex items-center justify-between">
-            <h2 className="font-display text-2xl font-bold tracking-wider">Manage Images</h2>
+            <h2 className="font-display text-2xl font-bold tracking-normal">Manage Images</h2>
             <div className="flex items-center gap-2">
               <button
                 type="button"

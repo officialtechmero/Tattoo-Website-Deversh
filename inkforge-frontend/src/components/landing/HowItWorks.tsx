@@ -26,7 +26,7 @@ export function HowItWorks() {
     <section className="py-24">
       <div className="container mx-auto px-4">
         <div className="mb-16 text-center">
-          <h2 className="font-display text-3xl font-bold md:text-4xl tracking-wider">
+          <h2 className="font-display text-3xl font-bold md:text-4xl tracking-normal">
             How It <span className="text-gradient">Works</span>
           </h2>
           <p className="mt-4 text-muted-foreground">Three simple steps to find your next tattoo reference</p>
@@ -42,7 +42,7 @@ export function HowItWorks() {
                 <step.icon className="h-7 w-7 text-primary" />
               </div>
               <span className="font-display text-lg font-bold text-primary">{step.step}</span>
-              <h3 className="mt-2 font-display text-xl font-bold tracking-wider">{step.title}</h3>
+              <h3 className="mt-2 font-display text-xl font-bold tracking-normal">{step.title}</h3>
               <p className="mt-3 text-sm text-muted-foreground">{step.description}</p>
             </div>
           ))}

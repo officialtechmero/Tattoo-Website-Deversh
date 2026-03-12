@@ -24,12 +24,12 @@ const NotFound = () => {
             <Compass className="h-7 w-7 text-primary" />
           </div>
 
-          <p className="mb-3 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary">
+          <p className="mb-3 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-normal text-primary">
             <Sparkles className="h-3.5 w-3.5" />
             Lost In The Gallery
           </p>
 
-          <h1 className="font-display text-6xl font-bold leading-none tracking-wider text-gradient md:text-8xl">
+          <h1 className="font-display text-6xl font-bold leading-none tracking-normal text-gradient md:text-8xl">
             404
           </h1>
           <p className="mx-auto mt-5 max-w-xl text-base text-muted-foreground md:text-lg">
