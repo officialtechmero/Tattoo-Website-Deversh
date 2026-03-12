@@ -295,6 +295,49 @@ export const getExplore = async (req: FastifyRequest, res: FastifyReply) => {
   }
 };
 
+export const getExploreById = async (req: FastifyRequest, res: FastifyReply) => {
+  try {
+    const { id } = req.params as { id?: string };
+    if (!id) {
+      return res.status(400).send({
+        status: "Error",
+        message: "Image id is required",
+      });
+    }
+
+    const images = await db
+      .select({
+        id: scrapeImages.id,
+        query: scrapeImages.query,
+        imageLink: scrapeImages.imageLink,
+        imageAlt: scrapeImages.imageAlt,
+        created_at: scrapeImages.created_at,
+      })
+      .from(scrapeImages)
+      .where(eq(scrapeImages.id, id))
+      .limit(1);
+
+    const image = images?.[0];
+    if (!image) {
+      return res.status(404).send({
+        status: "Error",
+        message: "Image not found",
+      });
+    }
+
+    return res.send({
+      status: "Okay",
+      data: image,
+    });
+  } catch (e) {
+    console.error("Error in explore by id route", e);
+    return res.status(500).send({
+      status: "Error",
+      message: "Failed to fetch explore image",
+    });
+  }
+};
+
 export const scraperInit = async (req: FastifyRequest, res: FastifyReply) => {
   try{
     const { query, limit, scrolls } = req.body as

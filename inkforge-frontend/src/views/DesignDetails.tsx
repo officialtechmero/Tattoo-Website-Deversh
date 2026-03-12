@@ -8,6 +8,7 @@ import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { Heart, Download, ArrowLeft } from "lucide-react";
 import { flashDesigns } from "@/lib/data";
+import { extractNumericId, makeSlugId } from "@/lib/slug";
 
 function getTattooDescription(style: string, category: string): string {
   const s = (style || "").toLowerCase();
@@ -71,7 +72,8 @@ export default function DesignDetails() {
       return { ...prev, [designId]: !wasLiked };
     });
   }, []);
-  const design = flashDesigns.find((d) => d.id === Number(id));
+  const numericId = extractNumericId(id || "");
+  const design = flashDesigns.find((d) => d.id === Number(numericId));
   const similarDesigns = useMemo(() => {
     if (!design) return [];
     return flashDesigns.filter((d) => d.id !== design.id && d.style === design.style).slice(0, 6);
@@ -119,7 +121,7 @@ export default function DesignDetails() {
               height={1500}
               sizes="(max-width: 768px) 100vw, 50vw"
               priority
-              className="w-full rounded-xl object-cover"
+              className="w-full max-h-[560px] rounded-xl object-contain"
             />
           </div>
           <div>
@@ -232,8 +234,9 @@ function DesignCard({
   displayLikes: number;
   onLike: (e: React.MouseEvent, id: number) => void;
 }) {
+  const slugId = makeSlugId(design.name || design.style || "tattoo-design", design.id);
   return (
-    <Link href={`/design/${design.id}`} className="block mb-3 break-inside-avoid">
+    <Link href={`/design/${slugId}`} className="block mb-3 break-inside-avoid">
       <article className="group overflow-hidden rounded-2xl border border-border bg-card cursor-pointer">
         <div className="relative overflow-hidden">
           <Image

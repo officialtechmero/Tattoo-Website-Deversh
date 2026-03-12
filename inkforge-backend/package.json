@@ -4,7 +4,8 @@
   "private": true,
   "type": "commonjs",
   "scripts": {
-    "dev": "cross-env NODE_ENV=development NEXT_DISABLE_TURBOPACK=1 tsx watch src/index.ts",
+    "dev": "tsx watch src/index.ts",
+    "add-in-dev-if-error": "cross-env NODE_ENV=development NEXT_DISABLE_TURBOPACK=1",
     "build": "tsc -p tsconfig.json",
     "session:login": "tsx watch src/session/login.session.ts",
     "scrap": "tsx watch src/queues/scrapingImages.queue.ts",

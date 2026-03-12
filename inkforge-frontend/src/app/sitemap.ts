@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { siteUrl } from "@/lib/site";
 import { flashDesigns } from "@/lib/data";
+import { makeSlugId } from "@/lib/slug";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
@@ -20,7 +21,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   ];
 
   const designRoutes: MetadataRoute.Sitemap = flashDesigns.map((design) => ({
-    url: `${siteUrl}/design/${design.id}`,
+    url: `${siteUrl}/design/${makeSlugId(design.name || design.style || "tattoo-design", design.id)}`,
     lastModified: now,
     changeFrequency: "weekly",
     priority: 0.6,

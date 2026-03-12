@@ -1,9 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
-import { ChevronLeft, ChevronRight, Download, Search, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Download, Search } from "lucide-react";
+import { makeSlugId, slugify } from "@/lib/slug";
 
 type ExploreImage = {
   id: string;
@@ -37,6 +39,26 @@ const CACHE_TTL_MS = 5 * 60 * 1000;
 const CACHE_CLEANUP_MS = 60 * 1000;
 const SCROLL_TO_TOP_TIMEOUT_MS = 900;
 
+const stripMayContain = (value: string): string => {
+  const trimmed = value.trim();
+  if (!trimmed) return "";
+
+  const lines = trimmed
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+  const filtered = lines.filter((line) => !line.toLowerCase().startsWith("this may contain"));
+  if (filtered.length) return filtered.join(" ");
+
+  const marker = "this may contain";
+  const index = trimmed.toLowerCase().indexOf(marker);
+  if (index === -1) return trimmed;
+
+  const after = trimmed.slice(index + marker.length);
+  const cleaned = after.replace(/^[\s:.-]+/, "").trim();
+  return cleaned || trimmed;
+};
+
 export default function Explore() {
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -47,7 +69,7 @@ export default function Explore() {
   const [totalPages, setTotalPages] = useState<number | null>(null);
   const [total, setTotal] = useState<number | null>(null);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
-  const [activeImage, setActiveImage] = useState<ExploreImage | null>(null);
+  const slugMapRef = useRef<Record<string, string>>({});
   const cacheRef = useRef<Map<string, CachedPage>>(new Map());
 
   const getCachedPage = useCallback((cacheKey: string): CachedPage | null => {
@@ -261,23 +283,20 @@ export default function Explore() {
     window.requestAnimationFrame(waitUntilTop);
   }, [page, totalPages]);
 
-  useEffect(() => {
-    if (!activeImage) return;
+  const getSlugId = useCallback((item: ExploreImage) => {
+    if (slugMapRef.current[item.id]) return slugMapRef.current[item.id];
+    const base = slugify(stripMayContain(item.imageAlt || item.query || "design"));
+    const slugId = makeSlugId(base, item.id);
+    slugMapRef.current[item.id] = slugId;
+    return slugId;
+  }, []);
 
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setActiveImage(null);
-      }
-    };
-
-    document.body.style.overflow = "hidden";
-    window.addEventListener("keydown", onKeyDown);
-
-    return () => {
-      document.body.style.overflow = "";
-      window.removeEventListener("keydown", onKeyDown);
-    };
-  }, [activeImage]);
+  const getDesignHref = useCallback(
+    (item: ExploreImage) => {
+      return `/design/${getSlugId(item)}`;
+    },
+    [getSlugId]
+  );
 
   return (
     <div className="min-h-screen bg-background">
@@ -323,21 +342,26 @@ export default function Explore() {
                   key={item.id}
                   className="group relative mb-4 break-inside-avoid overflow-hidden rounded-2xl border border-border bg-card"
                 >
-                  <img
-                    src={item.imageLink}
-                    alt={item.imageAlt || item.query || "Scraped tattoo image"}
-                    loading="lazy"
-                    decoding="async"
-                    className="h-auto w-full cursor-zoom-in object-contain"
-                    onClick={() => setActiveImage(item)}
-                  />
-                  <div className="pointer-events-none absolute inset-0 bg-black/0 transition-colors duration-200 group-hover:bg-black/20" />
-                  <span className="pointer-events-none absolute bottom-3 left-3 rounded-full bg-background/85 px-3 py-1 text-xs text-foreground opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-                    View larger
-                  </span>
+                  <Link href={getDesignHref(item)} className="block">
+                    <img
+                      src={item.imageLink}
+                      alt={item.imageAlt || item.query || "Scraped tattoo image"}
+                      loading="lazy"
+                      decoding="async"
+                      className="h-auto w-full cursor-pointer object-contain"
+                    />
+                    <div className="pointer-events-none absolute inset-0 bg-black/0 transition-colors duration-200 group-hover:bg-black/20" />
+                    <span className="pointer-events-none absolute bottom-3 left-3 rounded-full bg-background/85 px-3 py-1 text-xs text-foreground opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                      Open design page
+                    </span>
+                  </Link>
                   <button
                     type="button"
-                    onClick={() => void handleDownload(item)}
+                    onClick={(event) => {
+                      event.preventDefault();
+                      event.stopPropagation();
+                      void handleDownload(item);
+                    }}
                     className="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-background/90 text-foreground opacity-0 shadow-sm transition-opacity duration-200 hover:bg-background group-hover:opacity-100"
                     aria-label="Download image"
                   >
@@ -384,31 +408,6 @@ export default function Explore() {
         )}
       </main>
 
-      {activeImage && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm"
-          onClick={() => setActiveImage(null)}
-        >
-          <div
-            className="relative max-h-[95vh] max-w-5xl overflow-hidden rounded-2xl border border-border bg-card"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              type="button"
-              onClick={() => setActiveImage(null)}
-              className="absolute right-3 top-3 z-10 inline-flex h-9 w-9 items-center justify-center rounded-full bg-background/90 text-foreground"
-              aria-label="Close image preview"
-            >
-              <X className="h-4 w-4" />
-            </button>
-            <img
-              src={activeImage.imageLink}
-              alt={activeImage.imageAlt || activeImage.query || "Tattoo preview"}
-              className="max-h-[95vh] w-full object-contain"
-            />
-          </div>
-        </div>
-      )}
       <Footer />
     </div>
   );
