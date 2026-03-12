@@ -6,7 +6,8 @@ export async function GET(req: NextRequest) {
   if (!token) return unauthorizedResponse();
 
   try {
-    const response = await fetch(`${backendBaseUrl}/api/admin/jobs/stream`, {
+    const upstream = new URL("/api/admin/jobs/stream", backendBaseUrl);
+    const response = await fetch(upstream.toString(), {
       method: "GET",
       headers: {
         accept: "text/event-stream",

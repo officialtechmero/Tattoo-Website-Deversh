@@ -7,7 +7,8 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const response = await fetch(`${backendBaseUrl}/api/admin/scrap`, {
+    const upstream = new URL("/api/admin/scrap", backendBaseUrl);
+    const response = await fetch(upstream.toString(), {
       method: "POST",
       headers: {
         "content-type": "application/json",

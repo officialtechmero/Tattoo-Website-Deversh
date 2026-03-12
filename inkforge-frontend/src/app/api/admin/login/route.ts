@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
+import { backendBaseUrl } from "../_shared";
 
 const ADMIN_COOKIE = "tatoo_inkify_admin";
 const TOKEN_MAX_AGE_SECONDS = 60 * 60 * 12;
-const backendBaseUrl = (process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:5000").replace(/\/+$/, "");
 
 export async function POST(req: NextRequest) {
   try {
@@ -17,7 +17,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const response = await fetch(`${backendBaseUrl}/api/admin/auth/login`, {
+    const loginUrl = new URL("/api/admin/auth/login", backendBaseUrl);
+    const response = await fetch(loginUrl.toString(), {
       method: "POST",
       headers: { "content-type": "application/json", accept: "application/json" },
       body: JSON.stringify({ username, password }),

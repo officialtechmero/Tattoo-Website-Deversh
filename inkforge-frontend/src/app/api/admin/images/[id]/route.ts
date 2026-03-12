@@ -18,7 +18,8 @@ export async function DELETE(req: NextRequest, { params }: Params) {
   }
 
   try {
-    const response = await fetch(`${backendBaseUrl}/api/admin/images/${id}`, {
+    const upstream = new URL(`/api/admin/images/${id}`, backendBaseUrl);
+    const response = await fetch(upstream.toString(), {
       method: "DELETE",
       headers: {
         accept: "application/json",
