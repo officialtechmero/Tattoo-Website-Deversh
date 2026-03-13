@@ -7,7 +7,7 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { ChevronLeft, ChevronRight, Download, Search } from "lucide-react";
 import { makeSlugId, slugify } from "@/lib/slug";
-import { categoryFromSlug, categoryToSlug, getPrimaryCategory } from "@/lib/explore-categories";
+import { categoryFromSlug, categoryToSlug, getPrimaryCategory, listCategoryDefinitions } from "@/lib/explore-categories";
 
 type ExploreImage = {
   id: string;
@@ -110,7 +110,7 @@ export default function Explore() {
 
   useEffect(() => {
     setPage(1);
-  }, [debouncedSearch]);
+  }, [debouncedSearch, selectedCategory]);
 
   useEffect(() => {
     const categoryParam = searchParams.get("category");
@@ -120,7 +120,8 @@ export default function Explore() {
 
   const fetchPage = useCallback(
     async (targetPage: number, includeTotal: boolean, signal?: AbortSignal): Promise<CachedPage> => {
-      const cacheKey = `${debouncedSearch}::${targetPage}`;
+      const categoryParam = selectedCategory !== "All" ? categoryToSlug(selectedCategory) : "all";
+      const cacheKey = `${debouncedSearch}::${categoryParam}::${targetPage}`;
       const cached = getCachedPage(cacheKey);
       if (cached) return cached;
 
@@ -132,6 +133,12 @@ export default function Explore() {
 
       if (debouncedSearch) {
         params.set("search", debouncedSearch);
+      }
+      if (selectedCategory !== "All") {
+        params.set("category", categoryToSlug(selectedCategory));
+      } else if (!debouncedSearch) {
+        // If "All" is selected and there's no search query, randomize the results
+        params.set("random", "1");
       }
 
       const response = await fetch(`/api/explore?${params.toString()}`, {
@@ -154,13 +161,14 @@ export default function Explore() {
       cacheRef.current.set(cacheKey, payload);
       return payload;
     },
-    [debouncedSearch, getCachedPage]
+    [debouncedSearch, selectedCategory, getCachedPage]
   );
 
   const prefetchPage = useCallback(
     async (targetPage: number) => {
       if (targetPage < 1) return;
-      const cacheKey = `${debouncedSearch}::${targetPage}`;
+      const categoryParam = selectedCategory !== "All" ? categoryToSlug(selectedCategory) : "all";
+      const cacheKey = `${debouncedSearch}::${categoryParam}::${targetPage}`;
       if (getCachedPage(cacheKey)) return;
 
       try {
@@ -169,7 +177,7 @@ export default function Explore() {
         // Best effort prefetch; ignore failures here.
       }
     },
-    [debouncedSearch, fetchPage, getCachedPage]
+    [debouncedSearch, selectedCategory, fetchPage, getCachedPage]
   );
 
   const getDownloadUrl = useCallback((item: ExploreImage) => {
@@ -216,7 +224,8 @@ export default function Explore() {
     const controller = new AbortController();
 
     const run = async () => {
-      const cacheKey = `${debouncedSearch}::${page}`;
+      const categoryParam = selectedCategory !== "All" ? categoryToSlug(selectedCategory) : "all";
+      const cacheKey = `${debouncedSearch}::${categoryParam}::${page}`;
       const cached = getCachedPage(cacheKey);
       setLoading(!cached);
       setError(null);
@@ -253,7 +262,7 @@ export default function Explore() {
     return () => {
       controller.abort();
     };
-  }, [page, debouncedSearch, fetchPage, prefetchPage, totalPages, getCachedPage]);
+  }, [page, debouncedSearch, selectedCategory, fetchPage, prefetchPage, totalPages, getCachedPage]);
 
   const pageLabel = useMemo(() => {
     const maxPages = Math.max(1, totalPages ?? 1);
@@ -317,21 +326,13 @@ export default function Explore() {
   );
 
   const categoryOptions = useMemo(() => {
-    const counts = new Map<string, number>();
-    images.forEach((item) => {
-      const category = getItemCategory(item);
-      counts.set(category, (counts.get(category) ?? 0) + 1);
-    });
+    return listCategoryDefinitions().map((def) => ({
+      label: def.label,
+      slug: def.slug,
+    }));
+  }, []);
 
-    return Array.from(counts.entries())
-      .sort((a, b) => b[1] - a[1])
-      .map(([label, count]) => ({ label, count, slug: categoryToSlug(label) }));
-  }, [images, getItemCategory]);
-
-  const filteredImages = useMemo(() => {
-    if (selectedCategory === "All") return images;
-    return images.filter((item) => getItemCategory(item) === selectedCategory);
-  }, [images, selectedCategory, getItemCategory]);
+  const filteredImages = images;
 
   const handleCategorySelect = useCallback(
     (nextCategory: string, nextSlug: string) => {
@@ -376,32 +377,28 @@ export default function Explore() {
             <p className="text-xs font-semibold uppercase tracking-normal text-muted-foreground">Categories</p>
             <p className="text-xs text-muted-foreground">{images.length} items on this page</p>
           </div>
-          <div className="flex gap-2 overflow-x-auto pb-2 filter-scroll">
+          <div className="flex flex-wrap gap-2 pb-2">
             <button
               type="button"
               onClick={() => handleCategorySelect("All", "all")}
-              className={`rounded-full border px-4 py-1.5 text-xs font-semibold transition-colors ${
-                selectedCategory === "All"
-                  ? "border-primary bg-primary text-primary-foreground"
-                  : "border-border bg-card text-muted-foreground hover:text-foreground"
-              }`}
+              className={`rounded-full border px-4 py-1.5 text-xs font-semibold transition-colors whitespace-nowrap ${selectedCategory === "All"
+                ? "border-primary bg-primary text-primary-foreground"
+                : "border-border bg-card text-muted-foreground hover:text-foreground"
+                }`}
             >
               All
-              <span className="ml-1 text-[11px] opacity-80">({images.length})</span>
             </button>
             {categoryOptions.map((category) => (
               <button
                 key={category.slug}
                 type="button"
                 onClick={() => handleCategorySelect(category.label, category.slug)}
-                className={`rounded-full border px-4 py-1.5 text-xs font-semibold transition-colors ${
-                  selectedCategory === category.label
-                    ? "border-primary bg-primary text-primary-foreground"
-                    : "border-border bg-card text-muted-foreground hover:text-foreground"
-                }`}
+                className={`rounded-full border px-4 py-1.5 text-xs font-semibold transition-colors whitespace-nowrap ${selectedCategory === category.label
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border bg-card text-muted-foreground hover:text-foreground"
+                  }`}
               >
                 {category.label}
-                <span className="ml-1 text-[11px] opacity-80">({category.count})</span>
               </button>
             ))}
           </div>

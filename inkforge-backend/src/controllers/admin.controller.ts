@@ -4,6 +4,7 @@ import { imageScraperJobs, scrapeImages } from "../db/schema";
 import scrapingImagesQueue from "../queues/scrapingImages.queue";
 import { and, desc, eq, ilike, or, sql } from "drizzle-orm";
 import { generateAdminToken, verifyAdminCredentials } from "../utils/adminAuth";
+import { getKeywordsForCategory } from "../utils/categories";
 
 const normalizeQueryToken = (value: string): string => {
   return value
@@ -43,7 +44,7 @@ const parseQueriesInput = (input: unknown): string[] => {
 };
 
 export const getAdmin = async (req: FastifyRequest, res: FastifyReply) => {
-  try{
+  try {
     const { page = "1", limit = "20" } = req.query as { page?: string, limit?: string };
 
     const pageNumber = Math.max(1, Number(page));
@@ -81,7 +82,7 @@ export const getAdmin = async (req: FastifyRequest, res: FastifyReply) => {
       },
     });
   }
-  catch(e) {
+  catch (e) {
     console.error("Error in get admin route", e);
     return null;
   }
@@ -149,12 +150,13 @@ export const adminLogout = async (_req: FastifyRequest, res: FastifyReply) => {
 
 export const getExplore = async (req: FastifyRequest, res: FastifyReply) => {
   try {
-    const { page = "1", limit = "30", search = "", withTotal = "1", random = "0" } = req.query as {
+    const { page = "1", limit = "30", search = "", withTotal = "1", random = "0", category = "" } = req.query as {
       page?: string;
       limit?: string;
       search?: string;
       withTotal?: string;
       random?: string;
+      category?: string;
     };
 
     const pageNumber = Math.max(1, Number(page) || 1);
@@ -168,23 +170,61 @@ export const getExplore = async (req: FastifyRequest, res: FastifyReply) => {
       .filter(Boolean);
     const shouldCount = withTotal !== "0";
     const randomOrder = random === "1";
+
     const searchConditions = searchWords.map((word) => {
       const pattern = `%${word}%`;
       return sql`(${scrapeImages.imageAlt} ILIKE ${pattern} OR ${scrapeImages.query} ILIKE ${pattern})`;
     });
-    const rawWhereClause = searchConditions.length
-      ? sql`WHERE ${sql.join(searchConditions, sql` AND `)}`
+
+    const categorySlug = category.trim().toLowerCase();
+    const categoryKeywords = categorySlug && categorySlug !== "all" ? getKeywordsForCategory(categorySlug) : null;
+
+    let categoryConditionSql = sql``;
+    let categoryConditionDrizzle = undefined;
+    let hasCategoryFilter = false;
+
+    if (categoryKeywords && categoryKeywords.length > 0) {
+      hasCategoryFilter = true;
+      const keywordConditions = categoryKeywords.map((kw) => {
+        const pattern = `%${kw}%`;
+        return sql`(${scrapeImages.imageAlt} ILIKE ${pattern})`;
+      });
+      categoryConditionSql = sql`(${sql.join(keywordConditions, sql` OR `)})`;
+
+      categoryConditionDrizzle = or(
+        ...categoryKeywords.map((kw) => ilike(scrapeImages.imageAlt, `%${kw}%`))
+      );
+    }
+
+    const allSqlConditions = [];
+    if (searchConditions.length) {
+      allSqlConditions.push(...searchConditions);
+    }
+    if (hasCategoryFilter) {
+      allSqlConditions.push(categoryConditionSql);
+    }
+
+    const rawWhereClause = allSqlConditions.length
+      ? sql`WHERE ${sql.join(allSqlConditions, sql` AND `)}`
       : sql``;
 
-    const whereClause = searchWords.length
-      ? and(
-          ...searchWords.map((word) =>
-            or(
-              ilike(scrapeImages.imageAlt, `%${word}%`),
-              ilike(scrapeImages.query, `%${word}%`)
-            )
+    const allDrizzleConditions = [];
+    if (searchWords.length) {
+      allDrizzleConditions.push(
+        ...searchWords.map((word) =>
+          or(
+            ilike(scrapeImages.imageAlt, `%${word}%`),
+            ilike(scrapeImages.query, `%${word}%`)
           )
-      )
+        )
+      );
+    }
+    if (categoryConditionDrizzle) {
+      allDrizzleConditions.push(categoryConditionDrizzle);
+    }
+
+    const whereClause = allDrizzleConditions.length
+      ? and(...allDrizzleConditions)
       : undefined;
 
     let images: Array<{
@@ -339,7 +379,7 @@ export const getExploreById = async (req: FastifyRequest, res: FastifyReply) => 
 };
 
 export const scraperInit = async (req: FastifyRequest, res: FastifyReply) => {
-  try{
+  try {
     const { query, limit, scrolls } = req.body as
       { query: string | string[], limit?: number | string, scrolls?: number | string };
     const queries = parseQueriesInput(query);
@@ -385,7 +425,7 @@ export const scraperInit = async (req: FastifyRequest, res: FastifyReply) => {
       data: queuedJobs.length === 1 ? queuedJobs[0] : queuedJobs
     });
   }
-  catch(e) {
+  catch (e) {
     console.error("Error in scraper init route", e);
     return res.status(500).send({
       status: "Error",
