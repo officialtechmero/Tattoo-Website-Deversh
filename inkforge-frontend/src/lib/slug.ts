@@ -1,3 +1,49 @@
+export function cleanTattooDescription(value: string): string {
+  if (!value) return "";
+  let cleaned = value.trim();
+
+  // Strip "this may contain" prefix
+  const lines = cleaned.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+  const filtered = lines.filter(l => !l.toLowerCase().startsWith("this may contain"));
+  if (filtered.length) {
+    cleaned = filtered.join(" ");
+  } else {
+    const marker = "this may contain";
+    const index = cleaned.toLowerCase().indexOf(marker);
+    if (index !== -1) {
+      cleaned = cleaned.slice(index + marker.length).replace(/^[\s:.-]+/, "").trim();
+    }
+  }
+
+  // Common filler patterns to remove
+  const patterns = [
+    /^(a\s+)?(person|man|woman|guy|girl|hand|arm|shoulder|leg|back|chest|body)\s+(with|having|showing|featuring|displaying|wearing)\s+a?\s*tattoo\s+(of|on|on\s+their|on\s+his|on\s+her)\s+[\w\s]+\s+(holding|showing|featuring|displaying)\s+a/i,
+    /^(a\s+)?(person|man|woman|guy|girl|body)\s+(with|having|showing|featuring|displaying|wearing)\s+a?\s*tattoo\s+(of|on\s+their|on\s+his|on\s+her)\s+[\w\s]+/i,
+    /^(a\s+)?(person|man|woman|guy|girl|body)\s+(with|having|showing|featuring|displaying|wearing)\s+a?\s*tattoo\s+of\s+/i,
+    /^(a\s+)?(person|man|woman|guy|girl)\s+with\s+a\s+/i,
+    /^(a\s+)?(person|man|woman|guy|girl)\s+holding\s+a\s+/i,
+    /^(a\s+)?tattoo\s+(of|on|on\s+their|on\s+his|on\s+her)\s+/i,
+    /^(a\s+)?tattoo\s+of\s+/i,
+    /\s+(in|on|at|around)\s+(his|her|their)\s+(hand|arm|shoulder|leg|back|chest|body)/gi,
+    /\s+holding\s+a\s+/gi,
+    /\s+showing\s+a\s+/gi,
+  ];
+
+  for (const pattern of patterns) {
+    const next = cleaned.replace(pattern, "").trim();
+    if (next && next !== cleaned) {
+      cleaned = next;
+    }
+  }
+
+  // Capitalize first letter if it's a letter
+  if (cleaned && /^[a-z]/i.test(cleaned)) {
+    cleaned = cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
+  }
+
+  return cleaned || value;
+}
+
 export function slugify(value: string): string {
   return value
     .toLowerCase()
@@ -49,7 +95,8 @@ export function extractNumericId(slugId: string): number | null {
 }
 
 export function makeSlugId(slugBase: string, id: string | number): string {
-  const fullSlug = slugify(slugBase || "design");
+  const cleaned = cleanTattooDescription(slugBase || "design");
+  const fullSlug = slugify(cleaned);
   // Shorten slug to max 50 chars or ~6 words
   const slug = fullSlug.split("-").slice(0, 6).join("-").slice(0, 50).replace(/-+$/, "");
   

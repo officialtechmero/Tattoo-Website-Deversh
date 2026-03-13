@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 import { siteUrl } from "@/lib/site";
 import { flashDesigns } from "@/lib/data";
 import { makeSlugId } from "@/lib/slug";
+import { categoryToSlug, getPrimaryCategory } from "@/lib/explore-categories";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
@@ -20,12 +21,17 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
   ];
 
-  const designRoutes: MetadataRoute.Sitemap = flashDesigns.map((design) => ({
-    url: `${siteUrl}/design/${makeSlugId(design.name || design.style || "tattoo-design", design.id)}`,
-    lastModified: now,
-    changeFrequency: "weekly",
-    priority: 0.6,
-  }));
+  const designRoutes: MetadataRoute.Sitemap = flashDesigns.map((design) => {
+    const category = getPrimaryCategory(design.name || design.style || "Tattoo");
+    const categorySlug = categoryToSlug(category);
+    const slugId = makeSlugId(design.name || design.style || "tattoo-design", design.id);
+    return {
+      url: `${siteUrl}/design/${categorySlug}/${slugId}`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.6,
+    };
+  });
 
   return [...staticRoutes, ...designRoutes];
 }

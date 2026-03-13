@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { ChevronLeft, ChevronRight, Download, Search } from "lucide-react";
-import { makeSlugId, slugify } from "@/lib/slug";
+import { cleanTattooDescription, makeSlugId, slugify } from "@/lib/slug";
 import { categoryFromSlug, categoryToSlug, getPrimaryCategory, listCategoryDefinitions } from "@/lib/explore-categories";
 
 type ExploreImage = {
@@ -41,25 +41,7 @@ const CACHE_TTL_MS = 5 * 60 * 1000;
 const CACHE_CLEANUP_MS = 60 * 1000;
 const SCROLL_TO_TOP_TIMEOUT_MS = 900;
 
-const stripMayContain = (value: string): string => {
-  const trimmed = value.trim();
-  if (!trimmed) return "";
 
-  const lines = trimmed
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter(Boolean);
-  const filtered = lines.filter((line) => !line.toLowerCase().startsWith("this may contain"));
-  if (filtered.length) return filtered.join(" ");
-
-  const marker = "this may contain";
-  const index = trimmed.toLowerCase().indexOf(marker);
-  if (index === -1) return trimmed;
-
-  const after = trimmed.slice(index + marker.length);
-  const cleaned = after.replace(/^[\s:.-]+/, "").trim();
-  return cleaned || trimmed;
-};
 
 export default function Explore() {
   const router = useRouter();
@@ -305,24 +287,26 @@ export default function Explore() {
 
   const getSlugId = useCallback((item: ExploreImage) => {
     if (slugMapRef.current[item.id]) return slugMapRef.current[item.id];
-    const base = slugify(stripMayContain(item.imageAlt || item.query || "design"));
+    const base = cleanTattooDescription(item.imageAlt || item.query || "design");
     const slugId = makeSlugId(base, item.id);
     slugMapRef.current[item.id] = slugId;
     return slugId;
   }, []);
 
-  const getDesignHref = useCallback(
-    (item: ExploreImage) => {
-      return `/design/${getSlugId(item)}`;
-    },
-    [getSlugId]
-  );
-
   const getItemCategory = useCallback(
     (item: ExploreImage) => {
-      return getPrimaryCategory(stripMayContain(item.imageAlt || item.query || ""));
+      return getPrimaryCategory(cleanTattooDescription(item.imageAlt || item.query || ""));
     },
     []
+  );
+
+  const getDesignHref = useCallback(
+    (item: ExploreImage) => {
+      const category = getItemCategory(item);
+      const categorySlug = categoryToSlug(category);
+      return `/design/${categorySlug}/${getSlugId(item)}`;
+    },
+    [getSlugId, getItemCategory]
   );
 
   const categoryOptions = useMemo(() => {
