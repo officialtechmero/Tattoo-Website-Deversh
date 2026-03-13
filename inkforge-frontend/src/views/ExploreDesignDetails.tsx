@@ -319,6 +319,10 @@ export default function ExploreDesignDetails() {
           </Link>
         </Button>
         <nav className="mb-6 flex flex-wrap items-center gap-2 text-xs text-muted-foreground" aria-label="Breadcrumb">
+          <Link href="/" className="hover:text-foreground transition-colors">
+            Home
+          </Link>
+          <span>/</span>
           <Link href="/explore" className="hover:text-foreground transition-colors">
             Explore
           </Link>
@@ -330,7 +334,9 @@ export default function ExploreDesignDetails() {
             {category}
           </Link>
           <span>/</span>
-          <span className="text-foreground">{title}</span>
+          <span className="text-foreground">
+            {title.length > 25 ? `${title.slice(0, 25)}...` : title}
+          </span>
         </nav>
         <div className="grid gap-10 md:grid-cols-2">
           <div className="rounded-2xl border border-border bg-card p-3">
@@ -404,9 +410,11 @@ export default function ExploreDesignDetails() {
 }
 
 function DesignCard({ design, index }: { design: ShowcaseDesign; index: number }) {
+  const category = getPrimaryCategory(design.title);
+  const categorySlug = categoryToSlug(category);
   const slugId = makeSlugId(slugify(stripMayContain(design.title)), design.id);
   return (
-    <Link href={`/design/${slugId}`} className="block">
+    <Link href={`/design/${categorySlug}/${slugId}`} className="block">
       <article className="group overflow-hidden rounded-2xl border border-border bg-card cursor-pointer">
         <div className="relative overflow-hidden">
           <img

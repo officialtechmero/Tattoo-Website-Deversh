@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Heart, Download, ArrowLeft } from "lucide-react";
 import { flashDesigns } from "@/lib/data";
 import { extractNumericId, makeSlugId } from "@/lib/slug";
+import { categoryToSlug, getPrimaryCategory } from "@/lib/explore-categories";
 
 function getTattooDescription(style: string, category: string): string {
   const s = (style || "").toLowerCase();
@@ -112,6 +113,26 @@ export default function DesignDetails() {
         >
           <ArrowLeft /> Back
         </Button>
+        <nav className="mb-6 flex flex-wrap items-center gap-2 text-xs text-muted-foreground" aria-label="Breadcrumb">
+          <Link href="/" className="hover:text-foreground transition-colors">
+            Home
+          </Link>
+          <span>/</span>
+          <Link href="/explore" className="hover:text-foreground transition-colors">
+            Explore
+          </Link>
+          <span>/</span>
+          <Link
+            href={`/explore?category=${encodeURIComponent(design.category || design.style || "")}`}
+            className="hover:text-foreground transition-colors"
+          >
+            {design.category || design.style}
+          </Link>
+          <span>/</span>
+          <span className="text-foreground">
+            {(design.name || design.style || "Design").length > 25 ? `${(design.name || design.style || "Design").slice(0, 25)}...` : (design.name || design.style || "Design")}
+          </span>
+        </nav>
         <div className="grid gap-10 md:grid-cols-2">
           <div className="rounded-2xl border border-border bg-card p-3">
             <Image
@@ -234,9 +255,11 @@ function DesignCard({
   displayLikes: number;
   onLike: (e: React.MouseEvent, id: number) => void;
 }) {
+  const category = getPrimaryCategory(design.name || design.style || "Tattoo");
+  const categorySlug = categoryToSlug(category);
   const slugId = makeSlugId(design.name || design.style || "tattoo-design", design.id);
   return (
-    <Link href={`/design/${slugId}`} className="block mb-3 break-inside-avoid">
+    <Link href={`/design/${categorySlug}/${slugId}`} className="block mb-3 break-inside-avoid">
       <article className="group overflow-hidden rounded-2xl border border-border bg-card cursor-pointer">
         <div className="relative overflow-hidden">
           <Image

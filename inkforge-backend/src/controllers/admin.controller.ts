@@ -345,6 +345,9 @@ export const getExploreById = async (req: FastifyRequest, res: FastifyReply) => 
       });
     }
 
+    const isFullUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+    const condition = isFullUuid ? eq(scrapeImages.id, id) : sql`${scrapeImages.id}::text ILIKE ${id + "%"}`;
+
     const images = await db
       .select({
         id: scrapeImages.id,
@@ -354,7 +357,7 @@ export const getExploreById = async (req: FastifyRequest, res: FastifyReply) => 
         created_at: scrapeImages.created_at,
       })
       .from(scrapeImages)
-      .where(eq(scrapeImages.id, id))
+      .where(condition)
       .limit(1);
 
     const image = images?.[0];
