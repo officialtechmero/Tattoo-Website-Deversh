@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { cleanTattooDescription } from "@/lib/slug";
 import { landingStyles, type LandingDesign } from "@/lib/landing";
 
 const filterTabs = ["All", ...landingStyles] as const;
@@ -61,7 +62,7 @@ export function FlashLibrary({ designs }: { designs: LandingDesign[] }) {
               <div className="relative aspect-[4/5] overflow-hidden">
                 <Image
                   src={design.image}
-                  alt={design.alt || `${design.style} tattoo design`}
+                  alt={cleanTattooDescription(design.alt || `${design.style} tattoo design`)}
                   fill
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                   loading="lazy"

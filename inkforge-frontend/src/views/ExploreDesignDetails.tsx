@@ -7,7 +7,7 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
-import { makeSlugId, slugify, splitSlugId } from "@/lib/slug";
+import { cleanTattooDescription, makeSlugId, slugify, splitSlugId } from "@/lib/slug";
 import { categoryToSlug, getPrimaryCategory } from "@/lib/explore-categories";
 import place_holder from "../../public/placeholder.svg";
 
@@ -175,29 +175,9 @@ function buildDescription(seed: number, wordCount = 300): string {
   return withPunctuation;
 }
 
-function stripMayContain(value: string): string {
-  const trimmed = value.trim();
-  if (!trimmed) return "";
-
-  const lines = trimmed
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter(Boolean);
-  const filtered = lines.filter((line) => !line.toLowerCase().startsWith("this may contain"));
-  if (filtered.length) return filtered.join(" ");
-
-  const marker = "this may contain";
-  const index = trimmed.toLowerCase().indexOf(marker);
-  if (index === -1) return trimmed;
-
-  const after = trimmed.slice(index + marker.length);
-  const cleaned = after.replace(/^[\s:.-]+/, "").trim();
-  return cleaned || trimmed;
-}
-
 function mapExploreItem(item: ExploreImage): ShowcaseDesign {
-  const title = stripMayContain(item.imageAlt || item.query || "Design");
-  const tag = stripMayContain(item.query || item.imageAlt || "Design");
+  const title = cleanTattooDescription(item.imageAlt || item.query || "Design");
+  const tag = cleanTattooDescription(item.query || item.imageAlt || "Design");
   return {
     id: item.id,
     title: title || "Design",
@@ -211,7 +191,7 @@ export default function ExploreDesignDetails() {
   const slugId = params?.id || "";
   const { slug, id } = splitSlugId(slugId);
   const [currentDesign, setCurrentDesign] = useState<ExploreImage | null>(null);
-  const cleanedTitle = stripMayContain(currentDesign?.imageAlt || currentDesign?.query || "");
+  const cleanedTitle = cleanTattooDescription(currentDesign?.imageAlt || currentDesign?.query || "");
   const title = cleanedTitle || toTitleCase(slug || "custom design");
   const seed = seedFromString(slugId);
   const description = useMemo(() => buildDescription(seed, 300), [seed]);
@@ -219,7 +199,7 @@ export default function ExploreDesignDetails() {
   const [similar, setSimilar] = useState<ShowcaseDesign[]>([]);
   const heroImage = currentDesign?.imageLink || place_holder;
   const heroAlt = cleanedTitle || `${title} tattoo design`;
-  const category = getPrimaryCategory(stripMayContain(currentDesign?.imageAlt || currentDesign?.query || title));
+  const category = getPrimaryCategory(cleanTattooDescription(currentDesign?.imageAlt || currentDesign?.query || title));
   const categorySlug = categoryToSlug(category);
 
   useEffect(() => {
@@ -255,7 +235,7 @@ export default function ExploreDesignDetails() {
   useEffect(() => {
     const controller = new AbortController();
     const load = async () => {
-      const searchTerm = stripMayContain(currentDesign?.query || currentDesign?.imageAlt || "").trim();
+      const searchTerm = cleanTattooDescription(currentDesign?.query || currentDesign?.imageAlt || "").trim();
 
       const topParams = new URLSearchParams({
         limit: "6",
@@ -412,7 +392,7 @@ export default function ExploreDesignDetails() {
 function DesignCard({ design, index }: { design: ShowcaseDesign; index: number }) {
   const category = getPrimaryCategory(design.title);
   const categorySlug = categoryToSlug(category);
-  const slugId = makeSlugId(slugify(stripMayContain(design.title)), design.id);
+  const slugId = makeSlugId(cleanTattooDescription(design.title), design.id);
   return (
     <Link href={`/design/${categorySlug}/${slugId}`} className="block">
       <article className="group overflow-hidden rounded-2xl border border-border bg-card cursor-pointer">

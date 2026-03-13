@@ -412,7 +412,7 @@ export default function Explore() {
                   <Link href={getDesignHref(item)} className="block">
                     <img
                       src={item.imageLink}
-                      alt={item.imageAlt || item.query || "Scraped tattoo image"}
+                      alt={cleanTattooDescription(item.imageAlt || item.query || "Scraped tattoo image")}
                       loading="lazy"
                       decoding="async"
                       className="h-auto w-full cursor-pointer object-contain"

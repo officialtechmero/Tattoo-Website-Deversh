@@ -8,7 +8,7 @@ import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { Heart, Download, ArrowLeft } from "lucide-react";
 import { flashDesigns } from "@/lib/data";
-import { extractNumericId, makeSlugId } from "@/lib/slug";
+import { cleanTattooDescription, extractNumericId, makeSlugId } from "@/lib/slug";
 import { categoryToSlug, getPrimaryCategory } from "@/lib/explore-categories";
 
 function getTattooDescription(style: string, category: string): string {
@@ -130,14 +130,16 @@ export default function DesignDetails() {
           </Link>
           <span>/</span>
           <span className="text-foreground">
-            {(design.name || design.style || "Design").length > 25 ? `${(design.name || design.style || "Design").slice(0, 25)}...` : (design.name || design.style || "Design")}
+            {cleanTattooDescription(design.name || design.style || "Design").length > 25 
+              ? `${cleanTattooDescription(design.name || design.style || "Design").slice(0, 25)}...` 
+              : cleanTattooDescription(design.name || design.style || "Design")}
           </span>
         </nav>
         <div className="grid gap-10 md:grid-cols-2">
           <div className="rounded-2xl border border-border bg-card p-3">
             <Image
               src={design.image}
-              alt={design.name || `${design.style} tattoo`}
+              alt={cleanTattooDescription(design.name || `${design.style} tattoo`)}
               width={1200}
               height={1500}
               sizes="(max-width: 768px) 100vw, 50vw"
@@ -147,7 +149,7 @@ export default function DesignDetails() {
           </div>
           <div>
             <h1 className="font-display text-3xl font-bold mb-2 tracking-wider">
-              {design.name || "Untitled Tattoo"}
+              {cleanTattooDescription(design.name || "Untitled Tattoo")}
             </h1>
             <p className="text-muted-foreground mb-6">Created by {design.artist || "Unknown Artist"}</p>
             <div className="space-y-3 text-sm">
@@ -257,7 +259,7 @@ function DesignCard({
 }) {
   const category = getPrimaryCategory(design.name || design.style || "Tattoo");
   const categorySlug = categoryToSlug(category);
-  const slugId = makeSlugId(design.name || design.style || "tattoo-design", design.id);
+  const slugId = makeSlugId(cleanTattooDescription(design.name || design.style || "tattoo-design"), design.id);
   return (
     <Link href={`/design/${categorySlug}/${slugId}`} className="block mb-3 break-inside-avoid">
       <article className="group overflow-hidden rounded-2xl border border-border bg-card cursor-pointer">

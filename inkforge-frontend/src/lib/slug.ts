@@ -2,20 +2,37 @@ export function cleanTattooDescription(value: string): string {
   if (!value) return "";
   let cleaned = value.trim();
 
-  // Strip "this may contain" prefix
+  // Strip common AI prefixes/markers
+  const markers = [
+    "this contains an image of",
+    "this contains",
+    "contains",
+    "this may contain",
+    "image of",
+    "a photo of",
+    "a close up of",
+  ];
+  
+  // First, handle line-by-line cleaning
   const lines = cleaned.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
-  const filtered = lines.filter(l => !l.toLowerCase().startsWith("this may contain"));
-  if (filtered.length) {
+  const filtered = lines.filter(line => !markers.some(marker => line.toLowerCase().startsWith(marker)));
+  
+  if (filtered.length > 0) {
     cleaned = filtered.join(" ");
-  } else {
-    const marker = "this may contain";
-    const index = cleaned.toLowerCase().indexOf(marker);
+  }
+
+  // Then, handle substring markers within the text (e.g. "This may contain: ...")
+  for (const marker of markers) {
+    const lower = cleaned.toLowerCase();
+    const index = lower.indexOf(marker);
     if (index !== -1) {
-      cleaned = cleaned.slice(index + marker.length).replace(/^[\s:.-]+/, "").trim();
+      const rest = cleaned.slice(index + marker.length).trim();
+      // Remove leading colons, dots, spaces
+      cleaned = rest.replace(/^[\s:.-]+/, "").trim();
     }
   }
 
-  // Common filler patterns to remove
+  // Common filler patterns to remove (regex)
   const patterns = [
     /^(a\s+)?(person|man|woman|guy|girl|hand|arm|shoulder|leg|back|chest|body)\s+(with|having|showing|featuring|displaying|wearing)\s+a?\s*tattoo\s+(of|on|on\s+their|on\s+his|on\s+her)\s+[\w\s]+\s+(holding|showing|featuring|displaying)\s+a/i,
     /^(a\s+)?(person|man|woman|guy|girl|body)\s+(with|having|showing|featuring|displaying|wearing)\s+a?\s*tattoo\s+(of|on\s+their|on\s+his|on\s+her)\s+[\w\s]+/i,
