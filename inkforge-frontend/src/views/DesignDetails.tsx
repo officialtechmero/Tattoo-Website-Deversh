@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Heart, Download, ArrowLeft } from "lucide-react";
 import { flashDesigns } from "@/lib/data";
 import { cleanTattooDescription, extractNumericId, makeSlugId } from "@/lib/slug";
-import { categoryToSlug, getPrimaryCategory } from "@/lib/explore-categories";
+import { categoryToSlug, extractTagsFromText, getPrimaryCategory } from "@/lib/explore-categories";
 
 function getTattooDescription(style: string, category: string): string {
   const s = (style || "").toLowerCase();
@@ -95,6 +95,9 @@ export default function DesignDetails() {
       )
       .slice(0, 6);
   }, [design]);
+  const titleText = cleanTattooDescription(design?.name || "Untitled Tattoo");
+  const tags = useMemo(() => extractTagsFromText(titleText), [titleText]);
+
   if (!design) {
     return <div className="p-10">Design not found</div>;
   }
@@ -195,8 +198,15 @@ export default function DesignDetails() {
           </div>
           <div>
             <h1 className="font-display text-3xl font-bold mb-2 tracking-wider">
-              {cleanTattooDescription(design.name || "Untitled Tattoo")}
+              {titleText}
             </h1>
+            <div className="flex flex-wrap gap-2 mb-4">
+              {tags.map((tag, i) => (
+                <span key={i} className="px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider bg-secondary text-secondary-foreground rounded-md border border-border">
+                  {tag}
+                </span>
+              ))}
+            </div>
             <p className="text-muted-foreground mb-6">Created by {design.artist || "Unknown Artist"}</p>
             <div className="space-y-3 text-sm">
               <Detail label="Category" value={design.category || design.style} />

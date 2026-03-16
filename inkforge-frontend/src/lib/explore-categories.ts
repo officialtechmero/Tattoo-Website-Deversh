@@ -1,3 +1,5 @@
+import { cleanTattooDescription } from "./slug";
+
 type CategoryDefinition = {
   label: string;
   slug: string;
@@ -126,4 +128,41 @@ export function categoryFromSlug(slug: string | null): string | null {
 
 export function listCategoryDefinitions(): { label: string; slug: string }[] {
   return CATEGORY_DEFINITIONS.map((category) => ({ label: category.label, slug: category.slug }));
+}
+
+export function extractTagsFromText(text: string): string[] {
+  if (!text) return [];
+  
+  // Clean using the same logic as title
+  const cleaned = cleanTattooDescription(text);
+  
+  // Split by common separators
+  const parts = cleaned.split(/[,;&]|\s+and\s+/i);
+  
+  const tags: string[] = [];
+  const stopWords = new Set(["a", "an", "the", "with", "showing", "featuring", "displaying", "tattoo", "tattoos", "design", "designs", "in", "on", "of", "their", "his", "her", "on", "at", "around"]);
+  const bodyParts = new Set(["arm", "hand", "shoulder", "leg", "back", "chest", "body", "forearm", "wrist", "ankle", "thigh", "neck"]);
+
+  parts.forEach(part => {
+    const trimmed = part.trim();
+    if (!trimmed) return;
+    
+    // If it's a multi-word part (like "black and grey") preserve it if it's short, or split if it looks like a phrase
+    if (trimmed.toLowerCase() === "black and grey" || trimmed.toLowerCase() === "black & grey") {
+      tags.push("black and grey");
+      return;
+    }
+    
+    // Further split by spaces to get individual words
+    const words = trimmed.split(/\s+/);
+    words.forEach(word => {
+      const lowerWord = word.toLowerCase().replace(/[^\w]/g, "");
+      if (lowerWord.length > 2 && !stopWords.has(lowerWord) && !bodyParts.has(lowerWord)) {
+        tags.push(lowerWord);
+      }
+    });
+  });
+
+  // Return unique tags
+  return Array.from(new Set(tags));
 }

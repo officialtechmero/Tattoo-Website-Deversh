@@ -8,7 +8,7 @@ import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Download } from "lucide-react";
 import { cleanTattooDescription, makeSlugId, slugify, splitSlugId } from "@/lib/slug";
-import { categoryToSlug, getPrimaryCategory } from "@/lib/explore-categories";
+import { categoryToSlug, extractTagsFromText, getPrimaryCategory } from "@/lib/explore-categories";
 import place_holder from "../../public/placeholder.svg";
 
 type ShowcaseDesign = {
@@ -198,6 +198,7 @@ export default function ExploreDesignDetails() {
   const [topPicks, setTopPicks] = useState<ShowcaseDesign[]>([]);
   const [similar, setSimilar] = useState<ShowcaseDesign[]>([]);
   const [isDownloading, setIsDownloading] = useState(false);
+  const tags = useMemo(() => extractTagsFromText(title), [title]);
   const heroImage = currentDesign?.imageLink || place_holder;
   const heroAlt = cleanedTitle || `${title} tattoo design`;
   const category = getPrimaryCategory(cleanTattooDescription(currentDesign?.imageAlt || currentDesign?.query || title));
@@ -372,6 +373,13 @@ export default function ExploreDesignDetails() {
           <div>
             {/* <p className="text-xs uppercase tracking-normal text-primary">Design #{id || "X"}</p> */}
             <h1 className="font-open-sans text-3xl font-bold mb-4 tracking-normal">{title}</h1>
+            <div className="flex flex-wrap gap-2 mb-6">
+              {tags.map((tag, i) => (
+                <span key={i} className="px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider bg-secondary text-secondary-foreground rounded-md border border-border">
+                  {tag}
+                </span>
+              ))}
+            </div>
             <p className="font-open-sans text-sm text-muted-foreground leading-relaxed mb-6">{description}</p>
             <Button
               variant="outline"
