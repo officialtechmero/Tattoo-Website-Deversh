@@ -17,6 +17,7 @@ export default {
         sans: ["DM Sans", "system-ui", "sans-serif"],
         display: ["Bebas Neue", "DM Serif Display", "sans-serif"],
         serif: ["DM Serif Display", "serif"],
+        "open-sans": ["var(--font-open-sans)", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",

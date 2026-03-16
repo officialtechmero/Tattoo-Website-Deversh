@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import type { Viewport } from "next";
 import type { ReactNode } from "react";
-import { Bebas_Neue, DM_Sans, DM_Serif_Display } from "next/font/google";
+import { Bebas_Neue, DM_Sans, DM_Serif_Display, Open_Sans } from "next/font/google";
 import "../index.css";
 import { Providers } from "@/components/providers";
 import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
@@ -24,6 +24,12 @@ const dmSerifDisplay = DM_Serif_Display({
   subsets: ["latin"],
   weight: ["400"],
   variable: "--font-serif",
+  display: "swap",
+});
+
+const openSans = Open_Sans({
+  subsets: ["latin"],
+  variable: "--font-open-sans",
   display: "swap",
 });
 
@@ -89,7 +95,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${bebasNeue.variable} ${dmSans.variable} ${dmSerifDisplay.variable}`}
+      className={`${bebasNeue.variable} ${dmSans.variable} ${dmSerifDisplay.variable} ${openSans.variable}`}
     >
       <body>
         <ServiceWorkerRegister />

@@ -293,11 +293,6 @@ export default function ExploreDesignDetails() {
     <div className="min-h-screen bg-background">
       <Navbar />
       <div className="container mx-auto px-4 pb-16 pt-24">
-        <Button asChild className="bg-transparent hover:text-black mb-3 text-muted-foreground">
-          <Link href="/explore">
-            <ArrowLeft /> Back to explore
-          </Link>
-        </Button>
         <nav className="mb-6 flex flex-wrap items-center gap-2 text-xs text-muted-foreground" aria-label="Breadcrumb">
           <Link href="/" className="hover:text-foreground transition-colors">
             Home
@@ -329,8 +324,8 @@ export default function ExploreDesignDetails() {
           </div>
           <div>
             {/* <p className="text-xs uppercase tracking-normal text-primary">Design #{id || "X"}</p> */}
-            <h1 className="font-display text-3xl font-bold mb-4 tracking-normal">{title}</h1>
-            <p className="text-sm text-muted-foreground leading-relaxed">{description}</p>
+            <h1 className="font-open-sans text-3xl font-bold mb-4 tracking-normal">{title}</h1>
+            <p className="font-open-sans text-sm text-muted-foreground leading-relaxed">{description}</p>
           </div>
         </div>
 
