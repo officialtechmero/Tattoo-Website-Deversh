@@ -14,6 +14,22 @@ const normalizeQueryToken = (value: string): string => {
     .trim();
 };
 
+const sanitizeFileName = (input: string) => {
+  return input
+    .trim()
+    .replace(/[^\w.-]+/g, "_")
+    .replace(/^_+|_+$/g, "")
+    .slice(0, 80);
+};
+
+const CONTENT_TYPE_TO_EXT: Record<string, string> = {
+  "image/jpeg": "jpg",
+  "image/png": "png",
+  "image/webp": "webp",
+  "image/gif": "gif",
+  "image/svg+xml": "svg",
+};
+
 const parseQueriesInput = (input: unknown): string[] => {
   if (Array.isArray(input)) {
     return input
@@ -578,5 +594,50 @@ export const deleteScrapedImage = async (req: FastifyRequest, res: FastifyReply)
       status: "Error",
       message: "Failed to delete image",
     });
+  }
+};
+
+export const downloadImage = async (req: FastifyRequest, res: FastifyReply) => {
+  try {
+    const { url: urlParam, name: nameParam = "tattoo-image" } = req.query as {
+      url?: string;
+      name?: string;
+    };
+
+    if (!urlParam) {
+      return res.status(400).send({ message: "Missing url parameter" });
+    }
+
+    let imageUrl = urlParam;
+    if (urlParam.startsWith("/")) {
+      const host = req.headers.host || "localhost:5051";
+      const protocol = req.protocol || "http";
+      imageUrl = `${protocol}://${host}${urlParam}`;
+    }
+
+    const upstream = await fetch(imageUrl, {
+      method: "GET",
+      headers: { accept: "image/*" },
+    });
+
+    if (!upstream.ok) {
+      return res.status(502).send({ message: "Failed to fetch source image" });
+    }
+
+    const contentType = upstream.headers.get("content-type")?.split(";")[0].trim() || "image/jpeg";
+    const ext = CONTENT_TYPE_TO_EXT[contentType] ?? "jpg";
+    const safeName = sanitizeFileName(String(nameParam)) || "tattoo-image";
+    const fileName = `${safeName}.${ext}`;
+    
+    const buffer = Buffer.from(await upstream.arrayBuffer());
+
+    return res
+      .header("Content-Type", contentType)
+      .header("Content-Disposition", `attachment; filename="${fileName}"`)
+      .header("Cache-Control", "no-store")
+      .send(buffer);
+  } catch (error) {
+    console.error("Download Image Error:", error);
+    return res.status(500).send({ message: "Image download failed" });
   }
 };

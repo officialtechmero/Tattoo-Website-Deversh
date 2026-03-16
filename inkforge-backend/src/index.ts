@@ -8,6 +8,7 @@ import Fastify, { FastifyReply, FastifyRequest } from "fastify";
 import { pool } from "./db/client";
 import adminRoutes from './routes/admin.route';
 import exploreRoutes from './routes/explore.route';
+import { downloadImage } from './controllers/admin.controller';
 import './workers/scrapingImages.worker';
 import { startBunnyUploadService } from './services/bunnyUpload.service';
 import cors from '@fastify/cors';
@@ -53,6 +54,7 @@ app.get("/ready", async (_, reply) => {
 
 app.register(adminRoutes, { prefix: '/api/admin' });
 app.register(exploreRoutes, { prefix: '/api/explore' });
+app.get("/api/download-image", downloadImage);
 
 const start = async () => {
   try {

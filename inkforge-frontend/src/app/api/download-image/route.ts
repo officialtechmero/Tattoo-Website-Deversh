@@ -22,21 +22,39 @@ export async function GET(req: NextRequest) {
     const nameParam = req.nextUrl.searchParams.get("name") ?? "tattoo-image";
 
     if (!urlParam) {
+      console.error("Download Image API: Missing url parameter");
       return NextResponse.json({ message: "Missing url parameter" }, { status: 400 });
     }
 
-    const parsedUrl = new URL(urlParam);
-    if (!["http:", "https:"].includes(parsedUrl.protocol)) {
-      return NextResponse.json({ message: "Invalid image URL protocol" }, { status: 400 });
+    console.log(`Download Image API: Fetching from ${urlParam}`);
+
+    let imageUrl = urlParam;
+    try {
+      const parsedUrl = new URL(urlParam);
+      if (!["http:", "https:"].includes(parsedUrl.protocol)) {
+        console.error(`Download Image API: Invalid image URL protocol: ${parsedUrl.protocol}`);
+        return NextResponse.json({ message: "Invalid image URL protocol" }, { status: 400 });
+      }
+    } catch {
+      // If it's not a valid absolute URL, check if it's a relative path
+      if (urlParam.startsWith("/")) {
+        const origin = req.nextUrl.origin;
+        imageUrl = `${origin}${urlParam}`;
+        console.log(`Download Image API: Resolved relative URL to ${imageUrl}`);
+      } else {
+        console.error(`Download Image API: Invalid URL: ${urlParam}`);
+        return NextResponse.json({ message: "Invalid URL" }, { status: 400 });
+      }
     }
 
-    const upstream = await fetch(parsedUrl.toString(), {
+    const upstream = await fetch(imageUrl, {
       method: "GET",
       cache: "no-store",
       headers: { accept: "image/*" },
     });
 
     if (!upstream.ok) {
+      console.error(`Download Image API: Failed to fetch source image. Status: ${upstream.status}`);
       return NextResponse.json({ message: "Failed to fetch source image" }, { status: 502 });
     }
 
@@ -55,7 +73,8 @@ export async function GET(req: NextRequest) {
         "content-disposition": `attachment; filename="${fileName}"`,
       },
     });
-  } catch {
+  } catch (error) {
+    console.error("Download Image API: Unexpected error:", error);
     return NextResponse.json({ message: "Image download failed" }, { status: 500 });
   }
 }

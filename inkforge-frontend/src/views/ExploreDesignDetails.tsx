@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Download } from "lucide-react";
 import { cleanTattooDescription, makeSlugId, slugify, splitSlugId } from "@/lib/slug";
 import { categoryToSlug, getPrimaryCategory } from "@/lib/explore-categories";
 import place_holder from "../../public/placeholder.svg";
@@ -197,6 +197,7 @@ export default function ExploreDesignDetails() {
   const description = useMemo(() => buildDescription(seed, 300), [seed]);
   const [topPicks, setTopPicks] = useState<ShowcaseDesign[]>([]);
   const [similar, setSimilar] = useState<ShowcaseDesign[]>([]);
+  const [isDownloading, setIsDownloading] = useState(false);
   const heroImage = currentDesign?.imageLink || place_holder;
   const heroAlt = cleanedTitle || `${title} tattoo design`;
   const category = getPrimaryCategory(cleanTattooDescription(currentDesign?.imageAlt || currentDesign?.query || title));
@@ -289,6 +290,52 @@ export default function ExploreDesignDetails() {
     return () => controller.abort();
   }, [currentDesign?.imageAlt, currentDesign?.query, id]);
 
+  const handleDownload = async () => {
+    if (!currentDesign?.imageLink) return;
+    try {
+      setIsDownloading(true);
+      const name = title || "tattoo-design";
+      const params = new URLSearchParams({
+        url: currentDesign.imageLink,
+        name,
+      });
+
+      const response = await fetch(`/api/download-image?${params.toString()}`, {
+        method: "GET",
+        cache: "no-store",
+      });
+
+      if (!response.ok) {
+        console.warn("API download failed, trying direct download fallback");
+        const directResponse = await fetch(currentDesign.imageLink, { mode: 'no-cors' });
+        const blob = await directResponse.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${name.replace(/[^\w.-]+/g, "_")}.jpg`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        return;
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${name.replace(/[^\w.-]+/g, "_")}.jpg`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error("Error downloading image:", error);
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -325,7 +372,15 @@ export default function ExploreDesignDetails() {
           <div>
             {/* <p className="text-xs uppercase tracking-normal text-primary">Design #{id || "X"}</p> */}
             <h1 className="font-open-sans text-3xl font-bold mb-4 tracking-normal">{title}</h1>
-            <p className="font-open-sans text-sm text-muted-foreground leading-relaxed">{description}</p>
+            <p className="font-open-sans text-sm text-muted-foreground leading-relaxed mb-6">{description}</p>
+            <Button
+              variant="outline"
+              className="gap-2"
+              onClick={handleDownload}
+              disabled={isDownloading || !currentDesign}
+            >
+              <Download className="h-4 w-4" /> {isDownloading ? "Downloading..." : "Download Original"}
+            </Button>
           </div>
         </div>
 

@@ -61,6 +61,7 @@ export default function DesignDetails() {
   const router = useRouter();
   const [likedIds, setLikedIds] = useState<Record<number, boolean>>({});
   const [extraLikes, setExtraLikes] = useState<Record<number, number>>({});
+  const [isDownloading, setIsDownloading] = useState(false);
   const toggleLike = useCallback((e: React.MouseEvent, designId: number) => {
     e.preventDefault();
     e.stopPropagation();
@@ -102,6 +103,51 @@ export default function DesignDetails() {
   const tip = design.tip || 40;
   const total = sessionCost * sessions + tip;
   const tattooDescription = getTattooDescription(design.style || "", design.category || "");
+
+  const handleDownload = async () => {
+    try {
+      setIsDownloading(true);
+      const name = cleanTattooDescription(design.name || design.style || "tattoo-design");
+      const params = new URLSearchParams({
+        url: design.image,
+        name,
+      });
+
+      const response = await fetch(`/api/download-image?${params.toString()}`, {
+        method: "GET",
+        cache: "no-store",
+      });
+
+      if (!response.ok) {
+        console.warn("API download failed, trying direct download fallback");
+        const directResponse = await fetch(design.image, { mode: 'no-cors' });
+        const blob = await directResponse.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${name.replace(/[^\w.-]+/g, "_")}.jpg`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        return;
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${name.replace(/[^\w.-]+/g, "_")}.jpg`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error("Error downloading image:", error);
+    } finally {
+      setIsDownloading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -165,8 +211,13 @@ export default function DesignDetails() {
               <Button className="gap-2">
                 <Heart className="h-4 w-4" /> Favorite
               </Button>
-              <Button variant="outline" className="gap-2">
-                <Download className="h-4 w-4" /> Download
+              <Button
+                variant="outline"
+                className="gap-2"
+                onClick={handleDownload}
+                disabled={isDownloading}
+              >
+                <Download className="h-4 w-4" /> {isDownloading ? "Downloading..." : "Download"}
               </Button>
             </div>
             <p className="mt-6 text-sm text-muted-foreground leading-relaxed">
