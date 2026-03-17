@@ -11,6 +11,8 @@ export const scrapeImages = pgTable("scrap_images", {
   query: text("query").notNull(),
   imageLink: text("image_link").unique().notNull(),
   imageAlt: text("image_alt").notNull().default(""),
+  title: text("title"),
+  description: text("description"),
   ...timestamps
 });
 

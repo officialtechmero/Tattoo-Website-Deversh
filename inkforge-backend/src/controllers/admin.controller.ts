@@ -5,6 +5,7 @@ import scrapingImagesQueue from "../queues/scrapingImages.queue";
 import { and, desc, eq, ilike, or, sql } from "drizzle-orm";
 import { generateAdminToken, verifyAdminCredentials } from "../utils/adminAuth";
 import { getKeywordsForCategory } from "../utils/categories";
+import main_thread from "../services/textGeneration.service";
 
 const normalizeQueryToken = (value: string): string => {
   return value
@@ -641,3 +642,10 @@ export const downloadImage = async (req: FastifyRequest, res: FastifyReply) => {
     return res.status(500).send({ message: "Image download failed" });
   }
 };
+
+export const textGeneration = async (req: FastifyRequest, res: FastifyReply) => {
+  const data = await main_thread();
+  res.send({
+    data
+  })
+}

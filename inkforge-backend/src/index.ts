@@ -8,7 +8,7 @@ import Fastify, { FastifyReply, FastifyRequest } from "fastify";
 import { pool } from "./db/client";
 import adminRoutes from './routes/admin.route';
 import exploreRoutes from './routes/explore.route';
-import { downloadImage } from './controllers/admin.controller';
+import { downloadImage, textGeneration } from './controllers/admin.controller';
 import './workers/scrapingImages.worker';
 import { startBunnyUploadService } from './services/bunnyUpload.service';
 import cors from '@fastify/cors';
@@ -42,6 +42,8 @@ app.get("/api/status", async () => ({
   status: "Ok",
   uptime: process.uptime()
 }));
+
+app.post("/test/generate", textGeneration);
 
 app.get("/ready", async (_, reply) => {
   try {
