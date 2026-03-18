@@ -1,6 +1,6 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { db } from "../db/client";
-import { imageScraperJobs, scrapeImages } from "../db/schema";
+import { imageScraperJobs, scrapeImages, textGenerationJobs } from "../db/schema";
 import scrapingImagesQueue from "../queues/scrapingImages.queue";
 import { and, desc, eq, ilike, or, sql } from "drizzle-orm";
 import { generateAdminToken, verifyAdminCredentials } from "../utils/adminAuth";
@@ -673,6 +673,11 @@ export const textGeneration = async (req: FastifyRequest, res: FastifyReply) => 
       if (!Number.isFinite(jobId)) {
         throw new Error(`Invalid BullMQ job id: ${String(job.id)}`);
       }
+      await db.insert(textGenerationJobs).values({
+        JobId: jobId,
+        status: "queued",
+        total_images: chunk.length,
+      });
       jobs.push({ jobId, count: chunk.length });
     }
 
@@ -690,3 +695,53 @@ export const textGeneration = async (req: FastifyRequest, res: FastifyReply) => 
     });
   }
 }
+
+export const getTextGenerationJobs = async (req: FastifyRequest, res: FastifyReply) => {
+  try {
+    const { page = "1", limit = "10" } = req.query as { page?: string; limit?: string };
+    const pageNumber = Math.max(1, Number(page) || 1);
+    const limitNumber = Math.min(100, Math.max(1, Number(limit) || 20));
+    const offset = (pageNumber - 1) * limitNumber;
+
+    const [jobs, totalResult] = await Promise.all([
+      db
+        .select({
+          id: textGenerationJobs.id,
+          JobId: textGenerationJobs.JobId,
+          status: textGenerationJobs.status,
+          total_images: textGenerationJobs.total_images,
+          updated: textGenerationJobs.updated,
+          skipped: textGenerationJobs.skipped,
+          failed: textGenerationJobs.failed,
+          error_message: textGenerationJobs.error_message,
+          created_at: textGenerationJobs.created_at,
+          updated_at: textGenerationJobs.updated_at,
+        })
+        .from(textGenerationJobs)
+        .orderBy(desc(textGenerationJobs.updated_at))
+        .limit(limitNumber)
+        .offset(offset),
+      db.select({ count: sql<number>`count(*)` }).from(textGenerationJobs),
+    ]);
+
+    const total = Number(totalResult?.[0]?.count ?? 0);
+    const totalPages = Math.max(1, Math.ceil(total / limitNumber));
+
+    return res.send({
+      status: "Okay",
+      data: jobs,
+      pagination: {
+        page: pageNumber,
+        limit: limitNumber,
+        total,
+        totalPages,
+      },
+    });
+  } catch (e) {
+    console.error("Error in text generation jobs route", e);
+    return res.status(500).send({
+      status: "Error",
+      message: "Failed to fetch text generation jobs",
+    });
+  }
+};

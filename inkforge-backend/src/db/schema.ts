@@ -29,6 +29,23 @@ export const imageScraperJobs = pgTable("image_scraper_jobs", {
   ...timestamps
 });
 
+export const textGenerationJobsEnum = pgEnum(
+  "text_generation_jobs_status",
+  ["queued", "running", "success", "failed"]
+);
+
+export const textGenerationJobs = pgTable("text_generation_jobs", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  JobId: integer().notNull().unique(),
+  status: textGenerationJobsEnum().default("queued").notNull(),
+  total_images: integer("total_images").notNull(),
+  updated: integer("updated").notNull().default(0),
+  skipped: integer("skipped").notNull().default(0),
+  failed: integer("failed").notNull().default(0),
+  error_message: text("error_message"),
+  ...timestamps
+});
+
 export const statusEnumUsers = pgEnum("user_status", ["active", "suspended", "deleted"]);
 
 export const users = pgTable("users", {

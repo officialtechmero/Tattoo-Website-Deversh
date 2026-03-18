@@ -135,11 +135,13 @@ export async function generateTextForImageIds(imageIds: string[]): Promise<Gener
         continue;
       }
 
-      const completion = await openai.chat.completions.create({
-        model: "google/gemma-2-27b-it",
-        messages: [{
-          "role": "user",
-          "content": `
+      let completion;
+      try {
+        completion = await openai.chat.completions.create({
+          model: "google/gemma-2-27b-it",
+          messages: [{
+            "role": "user",
+            "content": `
             Use the following content as context:
             ${content}
 
@@ -174,10 +176,18 @@ export async function generateTextForImageIds(imageIds: string[]): Promise<Gener
               "tags": ["string"]
             }
         `}],
-        temperature: 0.5,
-        max_tokens: null,
-        stream: false,
-      });
+          temperature: 0.2,
+          top_p: 0.7,
+          max_tokens: 1024,
+          stream: false,
+        });
+      } catch (err: any) {
+        failed++;
+        const status = typeof err?.status === "number" ? `status ${err.status}` : "unknown status";
+        const message = typeof err?.message === "string" ? err.message : "OpenAI request failed";
+        failures.push({ id: image.id, reason: `OpenAI ${status}: ${message}` });
+        continue;
+      }
 
       const raw = completion.choices[0]?.message?.content ?? "";
       const jsonText = extractJsonObject(raw);
@@ -187,7 +197,7 @@ export async function generateTextForImageIds(imageIds: string[]): Promise<Gener
         continue;
       }
 
-      let parsed: { title?: unknown; description?: unknown };
+      let parsed: { title?: unknown; description?: unknown; tags?: unknown };
       try {
         parsed = JSON.parse(jsonText);
       } catch (err) {

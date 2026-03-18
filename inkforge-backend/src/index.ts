@@ -8,7 +8,7 @@ import Fastify, { FastifyReply, FastifyRequest } from "fastify";
 import { pool } from "./db/client";
 import adminRoutes from './routes/admin.route';
 import exploreRoutes from './routes/explore.route';
-import { downloadImage, textGeneration } from './controllers/admin.controller';
+import { downloadImage, getTextGenerationJobs, textGeneration } from './controllers/admin.controller';
 import './workers/scrapingImages.worker';
 import './workers/textGeneration.worker';
 import { startBunnyUploadService } from './services/bunnyUpload.service';
@@ -45,6 +45,7 @@ app.get("/api/status", async () => ({
 }));
 
 app.post("/test/generate", textGeneration);
+app.get("/test/generate/status", getTextGenerationJobs);
 
 app.get("/ready", async (_, reply) => {
   try {
