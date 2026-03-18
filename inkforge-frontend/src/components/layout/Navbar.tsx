@@ -20,8 +20,8 @@ export function Navbar() {
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <Link href="/" className="flex items-center gap-2">
           {/* <Droplet className="h-7 w-7 text-primary" /> */}
-          <span className="font-display text-2xl font-bold text-foreground tracking-normal">
-            TatooInkify
+          <span className="flex justify-center items-center font-display text-2xl font-bold text-foreground tracking-widest">
+            Tatoo Inkify
           </span>
         </Link>
 
