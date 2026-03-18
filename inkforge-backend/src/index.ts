@@ -10,6 +10,7 @@ import adminRoutes from './routes/admin.route';
 import exploreRoutes from './routes/explore.route';
 import { downloadImage, textGeneration } from './controllers/admin.controller';
 import './workers/scrapingImages.worker';
+import './workers/textGeneration.worker';
 import { startBunnyUploadService } from './services/bunnyUpload.service';
 import cors from '@fastify/cors';
 

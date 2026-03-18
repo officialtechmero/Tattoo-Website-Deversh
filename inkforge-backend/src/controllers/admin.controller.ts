@@ -5,7 +5,7 @@ import scrapingImagesQueue from "../queues/scrapingImages.queue";
 import { and, desc, eq, ilike, or, sql } from "drizzle-orm";
 import { generateAdminToken, verifyAdminCredentials } from "../utils/adminAuth";
 import { getKeywordsForCategory } from "../utils/categories";
-import main_thread from "../services/textGeneration.service";
+import textGenerationQueue from "../queues/textGeneration.queue";
 
 const normalizeQueryToken = (value: string): string => {
   return value
@@ -644,8 +644,49 @@ export const downloadImage = async (req: FastifyRequest, res: FastifyReply) => {
 };
 
 export const textGeneration = async (req: FastifyRequest, res: FastifyReply) => {
-  const data = await main_thread();
-  res.send({
-    data
-  })
+  try {
+    const images = await db
+      .select({
+        id: scrapeImages.id,
+        title: scrapeImages.title,
+        description: scrapeImages.description,
+        tags: scrapeImages.tags,
+      })
+      .from(scrapeImages);
+
+    const pendingIds = images
+      .filter((image) => {
+        const hasTitle = typeof image.title === "string" && image.title.trim().length > 0;
+        const hasDescription = typeof image.description === "string" && image.description.trim().length > 0;
+        const hasTags = Array.isArray(image.tags) && image.tags.length > 0;
+        return !(hasTitle && hasDescription && hasTags);
+      })
+      .map((image) => image.id);
+
+    const MAX_IMAGES_PER_JOB = 100;
+    const jobs: Array<{ jobId: number; count: number }> = [];
+
+    for (let i = 0; i < pendingIds.length; i += MAX_IMAGES_PER_JOB) {
+      const chunk = pendingIds.slice(i, i + MAX_IMAGES_PER_JOB);
+      const job = await textGenerationQueue.add("textGeneration", { imageIds: chunk });
+      const jobId = Number(job.id);
+      if (!Number.isFinite(jobId)) {
+        throw new Error(`Invalid BullMQ job id: ${String(job.id)}`);
+      }
+      jobs.push({ jobId, count: chunk.length });
+    }
+
+    return res.send({
+      status: "Okay",
+      totalImages: pendingIds.length,
+      totalJobs: jobs.length,
+      jobs,
+    });
+  } catch (error) {
+    console.error("Error in text generation route", error);
+    return res.status(500).send({
+      status: "Error",
+      message: "Failed to queue text generation jobs",
+    });
+  }
 }

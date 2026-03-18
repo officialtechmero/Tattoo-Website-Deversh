@@ -13,6 +13,7 @@ export const scrapeImages = pgTable("scrap_images", {
   imageAlt: text("image_alt").notNull().default(""),
   title: text("title"),
   description: text("description"),
+  tags: text("tags").array(),
   ...timestamps
 });
 
