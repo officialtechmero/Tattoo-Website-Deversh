@@ -1,6 +1,6 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { db } from "../db/client";
-import { imageScraperJobs, scrapeImages, textGenerationJobs } from "../db/schema";
+import { imageScraperJobs, scrapeImageDownloads, scrapeImageViews, scrapeImages, textGenerationJobs } from "../db/schema";
 import scrapingImagesQueue from "../queues/scrapingImages.queue";
 import { and, desc, eq, ilike, or, sql } from "drizzle-orm";
 import { generateAdminToken, verifyAdminCredentials } from "../utils/adminAuth";
@@ -21,6 +21,20 @@ const sanitizeFileName = (input: string) => {
     .replace(/[^\w.-]+/g, "_")
     .replace(/^_+|_+$/g, "")
     .slice(0, 80);
+};
+
+const getClientIp = (req: FastifyRequest): string | null => {
+  const forwarded = req.headers["x-forwarded-for"];
+  if (typeof forwarded === "string" && forwarded.trim()) {
+    return forwarded.split(",")[0].trim();
+  }
+  if (Array.isArray(forwarded) && forwarded.length) {
+    return String(forwarded[0] ?? "").trim() || null;
+  }
+  const ip = (req as { ip?: string }).ip;
+  if (ip) return String(ip);
+  const socketIp = req.socket?.remoteAddress;
+  return socketIp ? String(socketIp) : null;
 };
 
 const CONTENT_TYPE_TO_EXT: Record<string, string> = {
@@ -75,6 +89,11 @@ export const getAdmin = async (req: FastifyRequest, res: FastifyReply) => {
           query: scrapeImages.query,
           imageLink: scrapeImages.imageLink,
           imageAlt: scrapeImages.imageAlt,
+          title: scrapeImages.title,
+          description: scrapeImages.description,
+          tags: scrapeImages.tags,
+          views: scrapeImages.views,
+          downloads: scrapeImages.downloads,
           created_at: scrapeImages.created_at,
         })
         .from(scrapeImages)
@@ -190,7 +209,7 @@ export const getExplore = async (req: FastifyRequest, res: FastifyReply) => {
 
     const searchConditions = searchWords.map((word) => {
       const pattern = `%${word}%`;
-      return sql`(${scrapeImages.imageAlt} ILIKE ${pattern} OR ${scrapeImages.query} ILIKE ${pattern})`;
+      return sql`(${scrapeImages.imageAlt} ILIKE ${pattern} OR ${scrapeImages.query} ILIKE ${pattern} OR ${scrapeImages.tags}::text ILIKE ${pattern})`;
     });
 
     const categorySlug = category.trim().toLowerCase();
@@ -231,7 +250,8 @@ export const getExplore = async (req: FastifyRequest, res: FastifyReply) => {
         ...searchWords.map((word) =>
           or(
             ilike(scrapeImages.imageAlt, `%${word}%`),
-            ilike(scrapeImages.query, `%${word}%`)
+            ilike(scrapeImages.query, `%${word}%`),
+            sql`${scrapeImages.tags}::text ILIKE ${`%${word}%`}`
           )
         )
       );
@@ -249,6 +269,11 @@ export const getExplore = async (req: FastifyRequest, res: FastifyReply) => {
       query: string;
       imageLink: string;
       imageAlt: string;
+      title: string | null;
+      description: string | null;
+      tags: string[] | null;
+      views: number | null;
+      downloads: number | null;
       created_at: Date;
     }> = [];
     const mapRandomRows = (rows: Record<string, unknown>[]) =>
@@ -257,6 +282,11 @@ export const getExplore = async (req: FastifyRequest, res: FastifyReply) => {
         query: String(row.query ?? ""),
         imageLink: String(row.imageLink ?? ""),
         imageAlt: String(row.imageAlt ?? ""),
+        title: row.title ? String(row.title) : null,
+        description: row.description ? String(row.description) : null,
+        tags: Array.isArray(row.tags) ? (row.tags as string[]) : null,
+        views: typeof row.views === "number" ? row.views : row.views ? Number(row.views) : null,
+        downloads: typeof row.downloads === "number" ? row.downloads : row.downloads ? Number(row.downloads) : null,
         created_at: row.created_at instanceof Date
           ? row.created_at
           : new Date(String(row.created_at ?? "")),
@@ -266,13 +296,18 @@ export const getExplore = async (req: FastifyRequest, res: FastifyReply) => {
 
     if (randomOrder) {
       const randomRowsPromise = db.execute(sql`
-        SELECT id, query, image_link AS "imageLink", image_alt AS "imageAlt", created_at
+        SELECT id, query, image_link AS "imageLink", image_alt AS "imageAlt", title, description, tags, views, downloads, created_at
         FROM (
           SELECT DISTINCT ON (lower(${scrapeImages.query}))
             ${scrapeImages.id} AS id,
             ${scrapeImages.query} AS query,
             ${scrapeImages.imageLink} AS image_link,
             ${scrapeImages.imageAlt} AS image_alt,
+            ${scrapeImages.title} AS title,
+            ${scrapeImages.description} AS description,
+            ${scrapeImages.tags} AS tags,
+            ${scrapeImages.views} AS views,
+            ${scrapeImages.downloads} AS downloads,
             ${scrapeImages.created_at} AS created_at
           FROM ${scrapeImages}
           ${rawWhereClause}
@@ -301,13 +336,18 @@ export const getExplore = async (req: FastifyRequest, res: FastifyReply) => {
       }
     } else {
       const baseQuery = db
-        .select({
-          id: scrapeImages.id,
-          query: scrapeImages.query,
-          imageLink: scrapeImages.imageLink,
-          imageAlt: scrapeImages.imageAlt,
-          created_at: scrapeImages.created_at,
-        })
+      .select({
+        id: scrapeImages.id,
+        query: scrapeImages.query,
+        imageLink: scrapeImages.imageLink,
+        imageAlt: scrapeImages.imageAlt,
+        title: scrapeImages.title,
+        description: scrapeImages.description,
+        tags: scrapeImages.tags,
+        views: scrapeImages.views,
+        downloads: scrapeImages.downloads,
+        created_at: scrapeImages.created_at,
+      })
         .from(scrapeImages)
         .where(whereClause);
 
@@ -371,18 +411,47 @@ export const getExploreById = async (req: FastifyRequest, res: FastifyReply) => 
         query: scrapeImages.query,
         imageLink: scrapeImages.imageLink,
         imageAlt: scrapeImages.imageAlt,
+        title: scrapeImages.title,
+        description: scrapeImages.description,
+        tags: scrapeImages.tags,
+        views: scrapeImages.views,
+        downloads: scrapeImages.downloads,
         created_at: scrapeImages.created_at,
       })
       .from(scrapeImages)
       .where(condition)
       .limit(1);
 
-    const image = images?.[0];
+    let image = images?.[0];
     if (!image) {
       return res.status(404).send({
         status: "Error",
         message: "Image not found",
       });
+    }
+
+    const clientIp = getClientIp(req);
+    if (clientIp) {
+      try {
+        const inserted = await db
+          .insert(scrapeImageViews)
+          .values({ image_id: image.id, ip: clientIp })
+          .onConflictDoNothing()
+          .returning({ id: scrapeImageViews.id });
+
+        if (inserted.length) {
+          await db
+            .update(scrapeImages)
+            .set({ views: sql`COALESCE(${scrapeImages.views}, 0) + 1` })
+            .where(eq(scrapeImages.id, image.id));
+          image = {
+            ...image,
+            views: (image.views ?? 0) + 1,
+          };
+        }
+      } catch (error) {
+        console.error("Error updating view count", error);
+      }
     }
 
     return res.send({
@@ -600,9 +669,10 @@ export const deleteScrapedImage = async (req: FastifyRequest, res: FastifyReply)
 
 export const downloadImage = async (req: FastifyRequest, res: FastifyReply) => {
   try {
-    const { url: urlParam, name: nameParam = "tattoo-image" } = req.query as {
+    const { url: urlParam, name: nameParam = "tattoo-image", imageId } = req.query as {
       url?: string;
       name?: string;
+      imageId?: string;
     };
 
     if (!urlParam) {
@@ -631,6 +701,28 @@ export const downloadImage = async (req: FastifyRequest, res: FastifyReply) => {
     const fileName = `${safeName}.${ext}`;
     
     const buffer = Buffer.from(await upstream.arrayBuffer());
+
+    if (imageId) {
+      const clientIp = getClientIp(req);
+      if (clientIp) {
+        try {
+          const inserted = await db
+            .insert(scrapeImageDownloads)
+            .values({ image_id: imageId, ip: clientIp })
+            .onConflictDoNothing()
+            .returning({ id: scrapeImageDownloads.id });
+
+          if (inserted.length) {
+            await db
+              .update(scrapeImages)
+              .set({ downloads: sql`COALESCE(${scrapeImages.downloads}, 0) + 1` })
+              .where(eq(scrapeImages.id, imageId));
+          }
+        } catch (error) {
+          console.error("Error updating download count", error);
+        }
+      }
+    }
 
     return res
       .header("Content-Type", contentType)

@@ -14,8 +14,36 @@ export const scrapeImages = pgTable("scrap_images", {
   title: text("title"),
   description: text("description"),
   tags: text("tags").array(),
+  views: integer().default(0),
+  downloads: integer().default(0),
   ...timestamps
 });
+
+export const scrapeImageViews = pgTable(
+  "scrape_image_views",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    image_id: uuid("image_id").references(() => scrapeImages.id).notNull(),
+    ip: text("ip").notNull(),
+    created_at: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => ({
+    uniqueView: uniqueIndex("scrape_image_views_unique").on(table.image_id, table.ip),
+  })
+);
+
+export const scrapeImageDownloads = pgTable(
+  "scrape_image_downloads",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    image_id: uuid("image_id").references(() => scrapeImages.id).notNull(),
+    ip: text("ip").notNull(),
+    created_at: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => ({
+    uniqueDownload: uniqueIndex("scrape_image_downloads_unique").on(table.image_id, table.ip),
+  })
+);
 
 export const imageScraperJobsEnum = pgEnum(
   "image_scraper_jobs_status",

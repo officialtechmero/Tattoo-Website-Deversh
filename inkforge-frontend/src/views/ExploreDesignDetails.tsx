@@ -23,6 +23,9 @@ type ExploreImage = {
   query: string;
   imageLink: string;
   imageAlt: string;
+  title?: string | null;
+  description?: string | null;
+  tags?: string[] | null;
   created_at: string;
 };
 
@@ -176,11 +179,12 @@ function buildDescription(seed: number, wordCount = 300): string {
 }
 
 function mapExploreItem(item: ExploreImage): ShowcaseDesign {
-  const title = cleanTattooDescription(item.imageAlt || item.query || "Design");
+  const resolvedTitle = (item.title || "").trim()
+    || cleanTattooDescription(item.imageAlt || item.query || "Design");
   const tag = cleanTattooDescription(item.query || item.imageAlt || "Design");
   return {
     id: item.id,
-    title: title || "Design",
+    title: resolvedTitle || "Design",
     tag: tag || "Design",
     image: item.imageLink,
   };
@@ -191,14 +195,22 @@ export default function ExploreDesignDetails() {
   const slugId = params?.id || "";
   const { slug, id } = splitSlugId(slugId);
   const [currentDesign, setCurrentDesign] = useState<ExploreImage | null>(null);
+  const dbTitle = (currentDesign?.title || "").trim();
   const cleanedTitle = cleanTattooDescription(currentDesign?.imageAlt || currentDesign?.query || "");
-  const title = cleanedTitle || toTitleCase(slug || "custom design");
+  const title = dbTitle || cleanedTitle || toTitleCase(slug || "custom design");
   const seed = seedFromString(slugId);
-  const description = useMemo(() => buildDescription(seed, 300), [seed]);
+  const description = useMemo(() => {
+    const dbDescription = (currentDesign?.description || "").trim();
+    return dbDescription || buildDescription(seed, 300);
+  }, [currentDesign?.description, seed]);
   const [topPicks, setTopPicks] = useState<ShowcaseDesign[]>([]);
   const [similar, setSimilar] = useState<ShowcaseDesign[]>([]);
   const [isDownloading, setIsDownloading] = useState(false);
-  const tags = useMemo(() => extractTagsFromText(title), [title]);
+  const tags = useMemo(() => {
+    const dbTags = currentDesign?.tags;
+    if (Array.isArray(dbTags) && dbTags.length > 0) return dbTags;
+    return extractTagsFromText(title);
+  }, [currentDesign?.tags, title]);
   const heroImage = currentDesign?.imageLink || place_holder;
   const heroAlt = cleanedTitle || `${title} tattoo design`;
   const category = getPrimaryCategory(cleanTattooDescription(currentDesign?.imageAlt || currentDesign?.query || title));
@@ -299,6 +311,7 @@ export default function ExploreDesignDetails() {
       const params = new URLSearchParams({
         url: currentDesign.imageLink,
         name,
+        imageId: currentDesign.id,
       });
 
       const response = await fetch(`/api/download-image?${params.toString()}`, {
@@ -375,9 +388,13 @@ export default function ExploreDesignDetails() {
             <h1 className="font-open-sans text-3xl font-bold mb-4 tracking-normal">{title}</h1>
             <div className="flex flex-wrap gap-2 mb-6">
               {tags.map((tag, i) => (
-                <span key={i} className="px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider bg-secondary text-secondary-foreground rounded-md border border-border">
+                <Link
+                  key={i}
+                  href={`/explore?search=${encodeURIComponent(tag)}`}
+                  className="px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider bg-secondary text-secondary-foreground rounded-md border border-border hover:bg-secondary/80 transition-colors"
+                >
                   {tag}
-                </span>
+                </Link>
               ))}
             </div>
             <p className="font-open-sans text-sm text-muted-foreground leading-relaxed mb-6">{description}</p>

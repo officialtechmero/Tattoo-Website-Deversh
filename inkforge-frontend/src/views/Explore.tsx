@@ -14,6 +14,9 @@ type ExploreImage = {
   query: string;
   imageLink: string;
   imageAlt: string;
+  title?: string | null;
+  description?: string | null;
+  tags?: string[] | null;
   created_at: string;
 };
 
@@ -100,6 +103,13 @@ export default function Explore() {
     setSelectedCategory(resolvedCategory ?? "All");
   }, [searchParams]);
 
+  useEffect(() => {
+    const searchParam = searchParams.get("search") || "";
+    if (searchParam !== search) {
+      setSearch(searchParam);
+    }
+  }, [searchParams, search]);
+
   const fetchPage = useCallback(
     async (targetPage: number, includeTotal: boolean, signal?: AbortSignal): Promise<CachedPage> => {
       const categoryParam = selectedCategory !== "All" ? categoryToSlug(selectedCategory) : "all";
@@ -167,6 +177,7 @@ export default function Explore() {
     const params = new URLSearchParams({
       url: item.imageLink,
       name,
+      imageId: item.id,
     });
     return `/api/download-image?${params.toString()}`;
   }, []);
@@ -287,7 +298,7 @@ export default function Explore() {
 
   const getSlugId = useCallback((item: ExploreImage) => {
     if (slugMapRef.current[item.id]) return slugMapRef.current[item.id];
-    const base = cleanTattooDescription(item.imageAlt || item.query || "design");
+    const base = cleanTattooDescription(item.title || item.imageAlt || item.query || "design");
     const slugId = makeSlugId(base, item.id);
     slugMapRef.current[item.id] = slugId;
     return slugId;
