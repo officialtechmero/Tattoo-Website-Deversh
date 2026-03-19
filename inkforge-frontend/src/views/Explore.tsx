@@ -135,9 +135,6 @@ export default function Explore() {
       }
       if (selectedCategory !== "All") {
         params.set("category", categoryToSlug(selectedCategory));
-      } else if (!debouncedSearch) {
-        // If "All" is selected and there's no search query, randomize the results
-        params.set("random", "1");
       }
 
       const response = await fetch(`/api/explore?${params.toString()}`, {
