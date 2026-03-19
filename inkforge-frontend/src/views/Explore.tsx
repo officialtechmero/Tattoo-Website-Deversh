@@ -54,6 +54,7 @@ export default function Explore() {
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [isFetching, setIsFetching] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [images, setImages] = useState<ExploreImage[]>([]);
   const [totalPages, setTotalPages] = useState<number | null>(null);
@@ -226,6 +227,7 @@ export default function Explore() {
       const cacheKey = `${debouncedSearch}::${categoryParam}::${page}`;
       const cached = getCachedPage(cacheKey);
       setLoading(!cached);
+      setIsFetching(true);
       setError(null);
 
       try {
@@ -252,6 +254,7 @@ export default function Explore() {
         setImages([]);
       } finally {
         setLoading(false);
+        setIsFetching(false);
       }
     };
 
@@ -406,11 +409,11 @@ export default function Explore() {
 
         {error && <p className="mb-4 text-sm text-red-400">{error}</p>}
 
-        {loading && images.length === 0 ? (
+        {isFetching && images.length === 0 ? (
           <div className="flex min-h-[320px] items-center justify-center">
             <LoaderRing />
           </div>
-        ) : filteredImages.length === 0 ? (
+        ) : !isFetching && filteredImages.length === 0 ? (
           <p className="text-sm text-muted-foreground">No images found.</p>
         ) : (
           <>
@@ -480,7 +483,7 @@ export default function Explore() {
                 <ChevronRight className="h-5 w-5" />
               </button>
             </div>
-            {loading && (
+            {isFetching && (
               <p className="mt-3 text-center text-xs text-muted-foreground" aria-live="polite">
                 Updating page...
               </p>
