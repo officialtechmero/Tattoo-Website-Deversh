@@ -49,6 +49,7 @@ const SCROLL_TO_TOP_TIMEOUT_MS = 900;
 export default function Explore() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const tagParam = searchParams.get("tag") || "";
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [page, setPage] = useState(1);
@@ -105,10 +106,11 @@ export default function Explore() {
 
   useEffect(() => {
     const searchParam = searchParams.get("search") || "";
-    if (searchParam !== search) {
-      setSearch(searchParam);
+    const nextValue = tagParam || searchParam;
+    if (nextValue !== search) {
+      setSearch(nextValue);
     }
-  }, [searchParams, search]);
+  }, [searchParams, search, tagParam]);
 
   const fetchPage = useCallback(
     async (targetPage: number, includeTotal: boolean, signal?: AbortSignal): Promise<CachedPage> => {
@@ -125,6 +127,9 @@ export default function Explore() {
 
       if (debouncedSearch) {
         params.set("search", debouncedSearch);
+      }
+      if (tagParam) {
+        params.set("tag", tagParam);
       }
       if (selectedCategory !== "All") {
         params.set("category", categoryToSlug(selectedCategory));
@@ -153,7 +158,7 @@ export default function Explore() {
       cacheRef.current.set(cacheKey, payload);
       return payload;
     },
-    [debouncedSearch, selectedCategory, getCachedPage]
+    [debouncedSearch, selectedCategory, getCachedPage, tagParam]
   );
 
   const prefetchPage = useCallback(

@@ -390,7 +390,7 @@ export default function ExploreDesignDetails() {
               {tags.map((tag, i) => (
                 <Link
                   key={i}
-                  href={`/explore?search=${encodeURIComponent(tag)}`}
+                  href={`/explore?tag=${encodeURIComponent(tag)}`}
                   className="px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider bg-secondary text-secondary-foreground rounded-md border border-border hover:bg-secondary/80 transition-colors"
                 >
                   {tag}

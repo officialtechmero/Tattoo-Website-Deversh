@@ -186,10 +186,11 @@ export const adminLogout = async (_req: FastifyRequest, res: FastifyReply) => {
 
 export const getExplore = async (req: FastifyRequest, res: FastifyReply) => {
   try {
-    const { page = "1", limit = "30", search = "", withTotal = "1", random = "0", category = "" } = req.query as {
+    const { page = "1", limit = "30", search = "", tag = "", withTotal = "1", random = "0", category = "" } = req.query as {
       page?: string;
       limit?: string;
       search?: string;
+      tag?: string;
       withTotal?: string;
       random?: string;
       category?: string;
@@ -206,6 +207,10 @@ export const getExplore = async (req: FastifyRequest, res: FastifyReply) => {
       .filter(Boolean);
     const shouldCount = withTotal !== "0";
     const randomOrder = random === "1";
+    const tagValue = tag.trim().toLowerCase();
+    const tagConditionSql = tagValue
+      ? sql`EXISTS (SELECT 1 FROM unnest(${scrapeImages.tags}) AS t WHERE lower(t) = ${tagValue})`
+      : null;
 
     const searchConditions = searchWords.map((word) => {
       const pattern = `%${word}%`;
@@ -239,6 +244,9 @@ export const getExplore = async (req: FastifyRequest, res: FastifyReply) => {
     if (hasCategoryFilter) {
       allSqlConditions.push(categoryConditionSql);
     }
+    if (tagConditionSql) {
+      allSqlConditions.push(tagConditionSql);
+    }
 
     const rawWhereClause = allSqlConditions.length
       ? sql`WHERE ${sql.join(allSqlConditions, sql` AND `)}`
@@ -258,6 +266,9 @@ export const getExplore = async (req: FastifyRequest, res: FastifyReply) => {
     }
     if (categoryConditionDrizzle) {
       allDrizzleConditions.push(categoryConditionDrizzle);
+    }
+    if (tagConditionSql) {
+      allDrizzleConditions.push(tagConditionSql);
     }
 
     const whereClause = allDrizzleConditions.length
