@@ -6,8 +6,9 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { ChevronLeft, ChevronRight, Download, Search } from "lucide-react";
-import { cleanTattooDescription, makeSlugId, slugify } from "@/lib/slug";
+import { cleanTattooDescription, makeSlugId } from "@/lib/slug";
 import { categoryFromSlug, categoryToSlug, getPrimaryCategory, listCategoryDefinitions } from "@/lib/explore-categories";
+import { LoaderRing } from "@/components/ui/loader-ring";
 
 type ExploreImage = {
   id: string;
@@ -39,7 +40,6 @@ type CachedPage = {
 };
 
 const ITEMS_PER_PAGE = 30;
-const SKELETON_ITEMS = 12;
 const CACHE_TTL_MS = 5 * 60 * 1000;
 const CACHE_CLEANUP_MS = 60 * 1000;
 const SCROLL_TO_TOP_TIMEOUT_MS = 900;
@@ -407,13 +407,8 @@ export default function Explore() {
         {error && <p className="mb-4 text-sm text-red-400">{error}</p>}
 
         {loading && images.length === 0 ? (
-          <div className="columns-2 gap-4 md:columns-3 lg:columns-4 xl:columns-5">
-            {Array.from({ length: SKELETON_ITEMS }).map((_, idx) => (
-              <div
-                key={`skeleton-${idx}`}
-                className="mb-4 h-56 break-inside-avoid animate-pulse rounded-2xl border border-border bg-card"
-              />
-            ))}
+          <div className="flex min-h-[320px] items-center justify-center">
+            <LoaderRing />
           </div>
         ) : filteredImages.length === 0 ? (
           <p className="text-sm text-muted-foreground">No images found.</p>

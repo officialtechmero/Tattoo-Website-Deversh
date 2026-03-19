@@ -2,6 +2,7 @@
 
 import { FormEvent, useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { LoaderRing } from "@/components/ui/loader-ring";
 
 type Job = {
   id: string;
@@ -251,7 +252,11 @@ export default function AdminDashboardPage() {
               <tbody>
                 {jobsLoading ? (
                   <tr>
-                    <td className="py-4 text-muted-foreground" colSpan={4}>Loading jobs...</td>
+                    <td className="py-6" colSpan={4}>
+                      <div className="flex justify-center">
+                        <LoaderRing size="sm" />
+                      </div>
+                    </td>
                   </tr>
                 ) : jobs.length === 0 ? (
                   <tr>
@@ -300,7 +305,9 @@ export default function AdminDashboardPage() {
 
           <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {imagesLoading ? (
-              <p className="text-sm text-muted-foreground">Loading images...</p>
+              <div className="col-span-full flex justify-center py-8">
+                <LoaderRing />
+              </div>
             ) : images.length === 0 ? (
               <p className="text-sm text-muted-foreground">No images found.</p>
             ) : (
