@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { ChevronLeft, ChevronRight, Download, Search } from "lucide-react";
+import Image from "next/image";
 import { cleanTattooDescription, makeSlugId } from "@/lib/slug";
 import { categoryFromSlug, categoryToSlug, getPrimaryCategory, listCategoryDefinitions } from "@/lib/explore-categories";
 import { LoaderRing } from "@/components/ui/loader-ring";
@@ -424,11 +425,13 @@ export default function Explore() {
                   className="group relative mb-4 break-inside-avoid overflow-hidden rounded-2xl border border-border bg-card"
                 >
                   <Link href={getDesignHref(item)} className="block">
-                    <img
+                    <Image
                       src={item.imageLink}
                       alt={cleanTattooDescription(item.imageAlt || item.query || "Scraped tattoo image")}
+                      width={600}
+                      height={800}
+                      sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
                       loading="lazy"
-                      decoding="async"
                       className="h-auto w-full cursor-pointer object-contain"
                     />
                     <div className="pointer-events-none absolute inset-0 bg-black/0 transition-colors duration-200 group-hover:bg-black/20" />

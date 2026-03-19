@@ -209,7 +209,7 @@ export const getExplore = async (req: FastifyRequest, res: FastifyReply) => {
     const randomOrder = random === "1";
     const tagValue = tag.trim().toLowerCase();
     const tagConditionSql = tagValue
-      ? sql`EXISTS (SELECT 1 FROM unnest(${scrapeImages.tags}) AS t WHERE lower(t) = ${tagValue})`
+      ? sql`${scrapeImages.tags} @> ARRAY[${tagValue}]::text[]`
       : null;
 
     const searchConditions = searchWords.map((word) => {
@@ -384,6 +384,8 @@ export const getExplore = async (req: FastifyRequest, res: FastifyReply) => {
       }
     }
 
+    const cacheControl = randomOrder ? "no-store" : "public, max-age=60, stale-while-revalidate=120";
+    res.header("Cache-Control", cacheControl);
     return res.send({
       status: "Okay",
       data: images,
@@ -465,6 +467,7 @@ export const getExploreById = async (req: FastifyRequest, res: FastifyReply) => 
       }
     }
 
+    res.header("Cache-Control", "no-store");
     return res.send({
       status: "Okay",
       data: image,

@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
@@ -376,11 +377,14 @@ export default function ExploreDesignDetails() {
         </nav>
         <div className="grid gap-10 md:grid-cols-2">
           <div className="rounded-2xl border border-border bg-card p-3">
-            <img
+            <Image
               src={heroImage}
               alt={heroAlt}
+              width={1200}
+              height={1500}
+              sizes="(max-width: 768px) 100vw, 50vw"
+              priority
               className="w-full max-h-[560px] rounded-xl object-contain"
-              loading="eager"
             />
           </div>
           <div>
@@ -472,10 +476,14 @@ function DesignCard({ design, index }: { design: ShowcaseDesign; index: number }
     <Link href={`/design/${categorySlug}/${slugId}`} className="block">
       <article className="group overflow-hidden rounded-2xl border border-border bg-card cursor-pointer">
         <div className="relative overflow-hidden">
-          <img
+          <Image
             src={design.image}
             alt={design.title}
-            loading={index < 4 ? "eager" : "lazy"}
+            width={600}
+            height={800}
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 16vw"
+            priority={index < 4}
+            loading={index < 4 ? undefined : "lazy"}
             className="w-full aspect-[3/4] object-cover grayscale transition-all duration-500 group-hover:grayscale-0 group-hover:scale-105"
           />
           <div className="absolute inset-0 flex items-center justify-center bg-background/60 opacity-0 transition-opacity duration-300 group-hover:opacity-100">

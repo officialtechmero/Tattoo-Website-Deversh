@@ -13,6 +13,7 @@ import './workers/scrapingImages.worker';
 import './workers/textGeneration.worker';
 import { startBunnyUploadService } from './services/bunnyUpload.service';
 import cors from '@fastify/cors';
+import compress from "@fastify/compress";
 
 import next from "next";
 import path from "path";
@@ -30,6 +31,7 @@ const app = Fastify({
   logger: process.env.NODE_ENV === "production"
     ? { level: process.env.LOG_LEVEL ?? "info" }
     : true,
+  trustProxy: true,
 });
 
 const port = Number(process.env.PORT ?? 3000);
@@ -37,6 +39,11 @@ const host = process.env.HOST ?? "0.0.0.0";
 
 app.register(cors, {
   origin: process.env.FRONTEND_URL,
+});
+
+app.register(compress, {
+  global: true,
+  encodings: ["br", "gzip", "deflate"],
 });
 
 app.get("/api/status", async () => ({
