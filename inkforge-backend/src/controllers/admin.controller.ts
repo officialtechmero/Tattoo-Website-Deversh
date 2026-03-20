@@ -445,29 +445,7 @@ export const getExploreById = async (req: FastifyRequest, res: FastifyReply) => 
       });
     }
 
-    const clientIp = getClientIp(req);
-    if (clientIp) {
-      try {
-        const inserted = await db
-          .insert(scrapeImageViews)
-          .values({ image_id: image.id, ip: clientIp })
-          .onConflictDoNothing()
-          .returning({ id: scrapeImageViews.id });
-
-        if (inserted.length) {
-          await db
-            .update(scrapeImages)
-            .set({ views: sql`COALESCE(${scrapeImages.views}, 0) + 1` })
-            .where(eq(scrapeImages.id, image.id));
-          image = {
-            ...image,
-            views: (image.views ?? 0) + 1,
-          };
-        }
-      } catch (error) {
-        console.error("Error updating view count", error);
-      }
-    }
+    // View tracking disabled: scrapeImageViews table removed from schema.
 
     res.header("Cache-Control", "no-store");
     return res.send({
@@ -755,27 +733,7 @@ export const downloadImage = async (req: FastifyRequest, res: FastifyReply) => {
     
     const buffer = Buffer.from(await upstream.arrayBuffer());
 
-    if (imageId) {
-      const clientIp = getClientIp(req);
-      if (clientIp) {
-        try {
-          const inserted = await db
-            .insert(scrapeImageDownloads)
-            .values({ image_id: imageId, ip: clientIp })
-            .onConflictDoNothing()
-            .returning({ id: scrapeImageDownloads.id });
-
-          if (inserted.length) {
-            await db
-              .update(scrapeImages)
-              .set({ downloads: sql`COALESCE(${scrapeImages.downloads}, 0) + 1` })
-              .where(eq(scrapeImages.id, imageId));
-          }
-        } catch (error) {
-          console.error("Error updating download count", error);
-        }
-      }
-    }
+    // Download tracking disabled: scrapeImageDownloads table removed from schema.
 
     return res
       .header("Content-Type", contentType)
