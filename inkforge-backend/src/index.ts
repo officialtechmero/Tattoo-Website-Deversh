@@ -11,7 +11,6 @@ import exploreRoutes from './routes/explore.route';
 import { downloadImage, getTextGenerationJobs, textGeneration } from './controllers/admin.controller';
 import './workers/scrapingImages.worker';
 import './workers/textGeneration.worker';
-import { startBunnyUploadService } from './services/bunnyUpload.service';
 import cors from '@fastify/cors';
 import compress from "@fastify/compress";
 
@@ -114,4 +113,3 @@ process.on("uncaughtException", failFast);
 process.on("unhandledRejection", failFast);
 
 start();
-startBunnyUploadService();

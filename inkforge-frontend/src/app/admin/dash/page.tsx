@@ -23,7 +23,8 @@ type ImageItem = {
 export default function AdminDashboardPage() {
   const router = useRouter();
   const [queryInput, setQueryInput] = useState("");
-  const [limit, setLimit] = useState(50);
+  const [totalImages, setTotalImages] = useState(100);
+  const [perJob, setPerJob] = useState(100);
   const [scrolls, setScrolls] = useState(8);
   const [submitting, setSubmitting] = useState(false);
   const [scrapeMessage, setScrapeMessage] = useState<string | null>(null);
@@ -126,7 +127,8 @@ export default function AdminDashboardPage() {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
           query: queryInput,
-          limit,
+          totalImages,
+          perJob,
           scrolls,
         }),
       });
@@ -203,12 +205,23 @@ export default function AdminDashboardPage() {
             />
             <div className="space-y-4">
               <div>
-                <label className="mb-1 block text-sm font-medium">Limit</label>
+                <label className="mb-1 block text-sm font-medium">Total Images</label>
                 <input
                   type="number"
                   min={1}
-                  value={limit}
-                  onChange={(e) => setLimit(Number(e.target.value) || 1)}
+                  value={totalImages}
+                  onChange={(e) => setTotalImages(Number(e.target.value) || 1)}
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium">Per Job</label>
+                <input
+                  type="number"
+                  min={1}
+                  max={100}
+                  value={perJob}
+                  onChange={(e) => setPerJob(Number(e.target.value) || 1)}
                   className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
                 />
               </div>

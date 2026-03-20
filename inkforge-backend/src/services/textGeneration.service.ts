@@ -29,6 +29,7 @@ const openai = new OpenAI({
 
 type ImageRow = {
   id: string;
+  query: string;
   imageAlt: string;
   title: string | null;
   description: string | null;
@@ -44,10 +45,55 @@ type GenerationResult = {
 
 const extractJsonObject = (text: string | null | undefined): string | null => {
   if (!text) return null;
-  const start = text.indexOf("{");
-  const end = text.lastIndexOf("}");
+
+  let candidate = text.trim();
+
+  // Handle markdown code fences if present.
+  const fenceStart = candidate.indexOf("```");
+  if (fenceStart !== -1) {
+    const fenceEnd = candidate.lastIndexOf("```");
+    if (fenceEnd > fenceStart) {
+      candidate = candidate.slice(fenceStart + 3, fenceEnd).trim();
+      if (candidate.toLowerCase().startsWith("json")) {
+        candidate = candidate.slice(4).trim();
+      }
+    }
+  }
+
+  const start = candidate.indexOf("{");
+  const end = candidate.lastIndexOf("}");
   if (start === -1 || end === -1 || end <= start) return null;
-  return text.slice(start, end + 1);
+  return candidate.slice(start, end + 1).trim();
+};
+
+const normalizeJsonString = (value: string): string => {
+  let normalized = value
+    .replace(/[\u201C\u201D]/g, "\"") // smart double quotes
+    .replace(/[\u2018\u2019]/g, "'") // smart single quotes
+    .replace(/^\uFEFF/, "") // BOM
+    .trim();
+
+  // If the payload appears to use single quotes consistently, swap to double quotes.
+  if (!normalized.includes("\"") && normalized.includes("'")) {
+    normalized = normalized.replace(/'/g, "\"");
+  }
+
+  // Remove trailing commas before } or ]
+  normalized = normalized.replace(/,\s*([}\]])/g, "$1");
+
+  return normalized;
+};
+
+const parseJsonPayload = (raw: string): { title?: unknown; description?: unknown; tags?: unknown } | null => {
+  const candidate = extractJsonObject(raw);
+  if (!candidate) return null;
+
+  const normalized = normalizeJsonString(candidate);
+  try {
+    return JSON.parse(normalized);
+  } catch {
+    return null;
+  }
 };
 
 const normalizeTags = (value: unknown): string[] => {
@@ -96,6 +142,14 @@ const buildUpdatePayload = (
   return update;
 };
 
+const RETRY_DELAY_MS = 3000;
+const MAX_GENERATION_ATTEMPTS = 3;
+
+const delay = async (ms: number) =>
+  new Promise<void>((resolve) => {
+    setTimeout(resolve, ms);
+  });
+
 export async function generateTextForImageIds(imageIds: string[]): Promise<GenerationResult | null> {
   try {
     if (!imageIds.length) {
@@ -106,6 +160,7 @@ export async function generateTextForImageIds(imageIds: string[]): Promise<Gener
     const images = await db
       .select({
         id: scrapeImages.id,
+        query: scrapeImages.query,
         imageAlt: scrapeImages.imageAlt,
         title: scrapeImages.title,
         description: scrapeImages.description,
@@ -121,13 +176,13 @@ export async function generateTextForImageIds(imageIds: string[]): Promise<Gener
 
     for (let i = 0; i < images.length; i++) {
       const image = images[i];
-      const content = String(image.imageAlt ?? "").trim();
+      const content = String(image.imageAlt ?? "").trim() || String(image.query ?? "").trim();
 
       const needs = shouldGenerateForImage(image);
 
       if (!content) {
-        skipped++;
-        failures.push({ id: image.id, reason: "Missing imageAlt context" });
+        failed++;
+        failures.push({ id: image.id, reason: "Missing imageAlt or query context" });
         continue;
       }
       if (!needs.needsTitle && !needs.needsDescription && !needs.needsTags) {
@@ -135,13 +190,20 @@ export async function generateTextForImageIds(imageIds: string[]): Promise<Gener
         continue;
       }
 
-      let completion;
-      try {
-        completion = await openai.chat.completions.create({
-          model: "google/gemma-2-27b-it",
-          messages: [{
-            "role": "user",
-            "content": `
+      let attempt = 0;
+      while (attempt < MAX_GENERATION_ATTEMPTS) {
+        attempt += 1;
+        const retryNote =
+          attempt > 1
+            ? "\nYour previous response was invalid JSON. Return ONLY a valid JSON object."
+            : "";
+        let completion;
+        try {
+          completion = await openai.chat.completions.create({
+            model: "google/gemma-2-27b-it",
+            messages: [{
+              "role": "user",
+              "content": `
             Use the following content as context:
             ${content}
 
@@ -167,6 +229,8 @@ export async function generateTextForImageIds(imageIds: string[]): Promise<Gener
             Do not add extra fields.
             Do not add "data".
             Return plain JSON object only.
+            Use double quotes only and no trailing commas.
+            Output must be a single JSON object on one line.
 
             Output format:
 
@@ -175,50 +239,62 @@ export async function generateTextForImageIds(imageIds: string[]): Promise<Gener
               "description": "string",
               "tags": ["string"]
             }
+            ${retryNote}
         `}],
-          temperature: 0.2,
-          top_p: 0.7,
-          max_tokens: 1024,
-          stream: false,
-        });
-      } catch (err: any) {
-        failed++;
-        const status = typeof err?.status === "number" ? `status ${err.status}` : "unknown status";
-        const message = typeof err?.message === "string" ? err.message : "OpenAI request failed";
-        failures.push({ id: image.id, reason: `OpenAI ${status}: ${message}` });
-        continue;
+            temperature: 0.1,
+            top_p: 0.7,
+            max_tokens: 2048,
+            stream: false,
+          });
+        } catch (err: any) {
+          const status = typeof err?.status === "number" ? `status ${err.status}` : "unknown status";
+          const message = typeof err?.message === "string" ? err.message : "OpenAI request failed";
+          console.warn(`[text-generation] ${image.id} attempt ${attempt} failed (${status}). ${message}`);
+          if (attempt < MAX_GENERATION_ATTEMPTS) {
+            await delay(RETRY_DELAY_MS);
+          }
+          continue;
+        }
+
+        const raw = completion.choices[0]?.message?.content ?? "";
+        const parsed = parseJsonPayload(raw);
+        if (!parsed) {
+          console.warn(`[text-generation] ${image.id} attempt ${attempt} failed: Invalid JSON`);
+          if (attempt < MAX_GENERATION_ATTEMPTS) {
+            await delay(RETRY_DELAY_MS);
+          }
+          continue;
+        }
+
+        const update = buildUpdatePayload(parsed, needs);
+        if (!update) {
+          console.warn(`[text-generation] ${image.id} attempt ${attempt} failed: Missing fields`);
+          if (attempt < MAX_GENERATION_ATTEMPTS) {
+            await delay(RETRY_DELAY_MS);
+          }
+          continue;
+        }
+
+        try {
+          await db
+            .update(scrapeImages)
+            .set(update)
+            .where(eq(scrapeImages.id, image.id));
+          updated++;
+          break;
+        } catch (err) {
+          console.warn(`[text-generation] ${image.id} attempt ${attempt} failed: DB update error`);
+          if (attempt < MAX_GENERATION_ATTEMPTS) {
+            await delay(RETRY_DELAY_MS);
+          }
+        }
       }
 
-      const raw = completion.choices[0]?.message?.content ?? "";
-      const jsonText = extractJsonObject(raw);
-      if (!jsonText) {
+      if (attempt >= MAX_GENERATION_ATTEMPTS) {
         failed++;
-        failures.push({ id: image.id, reason: "No JSON object returned" });
-        continue;
+        failures.push({ id: image.id, reason: `Failed after ${MAX_GENERATION_ATTEMPTS} attempts` });
+        await db.delete(scrapeImages).where(eq(scrapeImages.id, image.id));
       }
-
-      let parsed: { title?: unknown; description?: unknown; tags?: unknown };
-      try {
-        parsed = JSON.parse(jsonText);
-      } catch (err) {
-        failed++;
-        failures.push({ id: image.id, reason: "Invalid JSON returned" });
-        continue;
-      }
-
-      const update = buildUpdatePayload(parsed, needs);
-      if (!update) {
-        failed++;
-        failures.push({ id: image.id, reason: "Missing title, description, or tags" });
-        continue;
-      }
-
-      await db
-        .update(scrapeImages)
-        .set(update)
-        .where(eq(scrapeImages.id, image.id));
-
-      updated++;
     }
 
     return { updated, skipped, failed, failures };

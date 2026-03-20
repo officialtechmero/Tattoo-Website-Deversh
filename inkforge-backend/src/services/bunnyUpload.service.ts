@@ -31,7 +31,7 @@ const getStorageHost = () => {
   return region ? `${region}.storage.bunnycdn.com` : "storage.bunnycdn.com";
 };
 
-const hasBunnyConfig = () => {
+export const hasBunnyConfig = () => {
   return Boolean(BUNNY_STORAGE_ZONE && BUNNY_STORAGE_PASSWORD && BUNNY_PUBLIC_BASE_URL);
 };
 
@@ -95,6 +95,14 @@ const uploadToBunny = async (localPath: string, remoteObjectPath: string): Promi
 
   const publicBase = BUNNY_PUBLIC_BASE_URL.replace(/\/+$/, "");
   return `${publicBase}/${encodedRemotePath}`;
+};
+
+export const uploadLocalFileToBunny = async (localPath: string, alt: string): Promise<string> => {
+  if (!hasBunnyConfig()) {
+    throw new Error("Bunny CDN is not configured");
+  }
+  const remotePath = buildSafeRemotePath(localPath, alt);
+  return uploadToBunny(localPath, remotePath);
 };
 
 const readManifest = async (jobId: number): Promise<JobManifest | null> => {

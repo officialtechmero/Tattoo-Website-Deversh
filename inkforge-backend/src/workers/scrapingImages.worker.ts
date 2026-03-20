@@ -5,12 +5,16 @@ import scrapePinterest from '../services/scraper.service';
 import { db } from '../db/client';
 import { imageScraperJobs, scrapeImages } from '../db/schema';
 import { eq, inArray } from 'drizzle-orm';
-import { mkdir, writeFile, access } from 'node:fs/promises';
+import { mkdir, writeFile, access, unlink } from 'node:fs/promises';
 import path from 'node:path';
+import { generateTextForImageIds } from '../services/textGeneration.service';
+import { hasBunnyConfig, uploadLocalFileToBunny } from '../services/bunnyUpload.service';
 
 const REQUIRED_PINIMG_PREFIX = "https://i.pinimg.com/736x/";
 const DOWNLOAD_DIR = path.resolve(process.cwd(), "downloads");
-const manifestPathForJob = (jobId: number) => path.join(DOWNLOAD_DIR, `job-${jobId}.json`);
+const SCRAPER_RETRY_DELAY_MS = 3000;
+// 0 or less means retry forever
+const SCRAPER_MAX_ATTEMPTS = Number(process.env.SCRAPER_MAX_ATTEMPTS ?? "0");
 
 const CONTENT_TYPE_EXTENSIONS: Record<string, string> = {
   "image/jpeg": "jpg",
@@ -64,6 +68,11 @@ const resolveUniqueFilePath = async (dir: string, baseName: string, ext: string)
   }
 };
 
+const delay = async (ms: number) =>
+  new Promise<void>((resolve) => {
+    setTimeout(resolve, ms);
+  });
+
 const downloadImageToDisk = async (url: string, alt: string, index: number): Promise<string> => {
   const response = await fetch(url, {
     method: "GET",
@@ -87,6 +96,21 @@ const downloadImageToDisk = async (url: string, alt: string, index: number): Pro
   return targetPath;
 };
 
+const scrapeWithRetry = async (query: string, limit: number, scrolls: number) => {
+  let attempt = 0;
+  while (true) {
+    attempt += 1;
+    const results = await scrapePinterest(query, limit, scrolls);
+    if (results?.length) return results;
+
+    const shouldRetry = SCRAPER_MAX_ATTEMPTS <= 0 || attempt < SCRAPER_MAX_ATTEMPTS;
+    if (!shouldRetry) return [];
+
+    console.warn(`[scraper] No results for "${query}". Retrying in ${SCRAPER_RETRY_DELAY_MS}ms (attempt ${attempt}).`);
+    await delay(SCRAPER_RETRY_DELAY_MS);
+  }
+};
+
 const scrapingImagesWorker = new Worker(
   'scrapingImages',
   async (job) => {
@@ -98,7 +122,7 @@ const scrapingImagesWorker = new Worker(
     try {
       const { query, limit, scrolls } = job.data;
 
-      const results = await scrapePinterest(query, limit, scrolls);
+      const results = await scrapeWithRetry(query, limit, scrolls);
       if(!results?.length) {
         await db.update(imageScraperJobs).set({ status: 'failed' }).where(eq(imageScraperJobs.JobId, jobId));
         return;
@@ -151,13 +175,59 @@ const scrapingImagesWorker = new Worker(
         imageAlt: file.alt
       }));
 
-      await db.insert(scrapeImages).values(rows).onConflictDoNothing();
-      await writeFile(
-        manifestPathForJob(jobId),
-        JSON.stringify({ jobId, files: manifest }, null, 2),
-        "utf-8"
+      const insertedRows = await db
+        .insert(scrapeImages)
+        .values(rows)
+        .onConflictDoNothing()
+        .returning({ id: scrapeImages.id, imageLink: scrapeImages.imageLink });
+
+      const insertedIdBySource = new Map<string, string>(
+        insertedRows.map((row) => [row.imageLink, row.id])
       );
-      await db.update(imageScraperJobs).set({ status: 'ready to upload' }).where(eq(imageScraperJobs.JobId, jobId));
+
+      const uploadTargets = manifest.filter((file) => insertedIdBySource.has(file.sourceUrl));
+      if (!uploadTargets.length) {
+        for (const file of manifest) {
+          await unlink(file.localPath).catch(() => undefined);
+        }
+        await db.update(imageScraperJobs).set({ status: 'completed' }).where(eq(imageScraperJobs.JobId, jobId));
+        return;
+      }
+
+      if (!hasBunnyConfig()) {
+        for (const file of uploadTargets) {
+          await unlink(file.localPath).catch(() => undefined);
+        }
+        await db.update(imageScraperJobs).set({ status: 'failed' }).where(eq(imageScraperJobs.JobId, jobId));
+        return;
+      }
+
+      const uploadedIds: string[] = [];
+      for (const file of uploadTargets) {
+        const id = insertedIdBySource.get(file.sourceUrl);
+        if (!id) continue;
+        try {
+          const publicUrl = await uploadLocalFileToBunny(file.localPath, file.alt);
+          await db
+            .update(scrapeImages)
+            .set({ imageLink: publicUrl })
+            .where(eq(scrapeImages.id, id));
+          uploadedIds.push(id);
+        } catch (error) {
+          console.error(`[scraper] Failed to upload image: ${file.sourceUrl}`, error);
+          await db.delete(scrapeImages).where(eq(scrapeImages.id, id));
+        } finally {
+          await unlink(file.localPath).catch(() => undefined);
+        }
+      }
+
+      if (!uploadedIds.length) {
+        await db.update(imageScraperJobs).set({ status: 'failed' }).where(eq(imageScraperJobs.JobId, jobId));
+        return;
+      }
+
+      await generateTextForImageIds(uploadedIds);
+      await db.update(imageScraperJobs).set({ status: 'completed' }).where(eq(imageScraperJobs.JobId, jobId));
     } catch (error) {
       console.error(`[scraper] Job ${jobId} failed`, error);
       await db.update(imageScraperJobs).set({ status: 'failed' }).where(eq(imageScraperJobs.JobId, jobId));

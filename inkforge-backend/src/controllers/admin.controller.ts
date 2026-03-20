@@ -1,11 +1,13 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { db } from "../db/client";
-import { imageScraperJobs, scrapeImageDownloads, scrapeImageViews, scrapeImages, textGenerationJobs } from "../db/schema";
+import { imageScraperJobs, scrapeImages, textGenerationJobs } from "../db/schema";
 import scrapingImagesQueue from "../queues/scrapingImages.queue";
 import { and, desc, eq, ilike, or, sql } from "drizzle-orm";
 import { generateAdminToken, verifyAdminCredentials } from "../utils/adminAuth";
 import { getKeywordsForCategory } from "../utils/categories";
 import textGenerationQueue from "../queues/textGeneration.queue";
+import { hasBunnyConfig } from "../services/bunnyUpload.service";
+import { randomUUID } from "node:crypto";
 
 const normalizeQueryToken = (value: string): string => {
   return value
@@ -483,8 +485,21 @@ export const getExploreById = async (req: FastifyRequest, res: FastifyReply) => 
 
 export const scraperInit = async (req: FastifyRequest, res: FastifyReply) => {
   try {
-    const { query, limit, scrolls } = req.body as
-      { query: string | string[], limit?: number | string, scrolls?: number | string };
+    if (!hasBunnyConfig()) {
+      return res.status(400).send({
+        status: "Error",
+        message: "Bunny CDN is not configured. Set BUNNY_STORAGE_ZONE, BUNNY_STORAGE_PASSWORD, and BUNNY_PUBLIC_BASE_URL."
+      });
+    }
+
+    const { query, limit, scrolls, totalImages, perJob } = req.body as
+      {
+        query: string | string[];
+        limit?: number | string;
+        scrolls?: number | string;
+        totalImages?: number | string;
+        perJob?: number | string;
+      };
     const queries = parseQueriesInput(query);
     if (!queries.length) {
       return res.status(400).send({
@@ -495,35 +510,59 @@ export const scraperInit = async (req: FastifyRequest, res: FastifyReply) => {
 
     const limitNumber = Math.max(1, Math.floor(Number(limit) || 50));
     const scrollsNumber = Math.max(1, Math.floor(Number(scrolls) || 8));
+    const totalImagesNumber = Math.max(0, Math.floor(Number(totalImages) || 0));
+    const perJobNumberRaw = Math.max(0, Math.floor(Number(perJob) || 0));
+
+    const useTotal = totalImagesNumber > 0;
+    const perJobNumber = useTotal
+      ? Math.min(100, Math.max(1, perJobNumberRaw || 100))
+      : limitNumber;
+    const totalRequested = useTotal ? Math.max(1, totalImagesNumber) : limitNumber;
+    const jobsPerQuery = Math.max(1, Math.ceil(totalRequested / perJobNumber));
+
     const queuedJobs: Array<{ JobId: number; query: string; status: "processing" }> = [];
+    const pipelineId = randomUUID();
+    const pipelineCreatedAt = new Date().toISOString();
 
     for (const singleQuery of queries) {
-      const job = await scrapingImagesQueue.add('scrapingImages', {
-        query: singleQuery,
-        limit: limitNumber,
-        scrolls: scrollsNumber
-      });
-      const jobId = Number(job.id);
-      if (!Number.isFinite(jobId)) {
-        throw new Error(`Invalid BullMQ job id: ${String(job.id)}`);
+      for (let jobIndex = 0; jobIndex < jobsPerQuery; jobIndex++) {
+        const remaining = totalRequested - jobIndex * perJobNumber;
+        if (remaining <= 0) break;
+        const jobLimit = Math.min(perJobNumber, remaining);
+
+        const job = await scrapingImagesQueue.add('scrapingImages', {
+          query: singleQuery,
+          limit: jobLimit,
+          scrolls: scrollsNumber
+        });
+        const jobId = Number(job.id);
+        if (!Number.isFinite(jobId)) {
+          throw new Error(`Invalid BullMQ job id: ${String(job.id)}`);
+        }
+
+        await db.insert(imageScraperJobs).values({
+          JobId: jobId,
+          status: 'processing'
+        });
+
+        queuedJobs.push({
+          JobId: jobId,
+          query: singleQuery,
+          status: 'processing'
+        });
       }
-
-      await db.insert(imageScraperJobs).values({
-        JobId: jobId,
-        status: 'processing'
-      });
-
-      queuedJobs.push({
-        JobId: jobId,
-        query: singleQuery,
-        status: 'processing'
-      });
     }
 
     return res.send({
       status: "Okay",
       message: queuedJobs.length === 1 ? "Scraping job queued" : "Scraping jobs queued",
       totalJobs: queuedJobs.length,
+      pipeline: {
+        id: pipelineId,
+        status: "queued",
+        createdAt: pipelineCreatedAt,
+        totalJobs: queuedJobs.length,
+      },
       jobs: queuedJobs,
       data: queuedJobs.length === 1 ? queuedJobs[0] : queuedJobs
     });

@@ -11,8 +11,9 @@ Fastify + TypeScript backend for scraping tattoo references from Pinterest, stor
 - Image persistence flow:
   - scrape Pinterest image URLs
   - dedupe against existing rows
-  - save local manifest + files
-  - optional BunnyCDN upload service
+  - save local files
+  - upload to BunnyCDN
+  - generate title/description/tags
 - Explore API with search, pagination, and random ordering.
 - Admin scraper init endpoint supporting single query, comma-separated query, and array input.
 
@@ -84,7 +85,7 @@ REDIS_PORT=6379
 PINTEREST_EMAIL=
 PINTEREST_PASSWORD=
 
-# Bunny upload service (optional)
+# Bunny upload service
 BUNNY_STORAGE_ZONE=
 BUNNY_STORAGE_PASSWORD=
 BUNNY_STORAGE_REGION=
@@ -93,7 +94,7 @@ BUNNY_PUBLIC_BASE_URL=
 
 Notes:
 - `DATABASE_URL` is required.
-- Bunny upload loop only runs when Bunny env vars are provided.
+- Bunny env vars are required to run the scraper pipeline.
 
 ## Run locally
 
@@ -143,5 +144,5 @@ Server default: `http://localhost:5000`
 
 1. `POST /api/admin/scrap` enqueues one or more jobs.
 2. Worker scrapes Pinterest, filters/normalizes image URLs, dedupes, and stores DB rows.
-3. Worker writes local files + manifest in `downloads/`.
-4. Bunny upload service polls `ready to upload` jobs and replaces `imageLink` with Bunny public URLs.
+3. Worker downloads images locally, uploads them to BunnyCDN, and updates `imageLink`.
+4. Worker generates title/description/tags for uploaded images.
