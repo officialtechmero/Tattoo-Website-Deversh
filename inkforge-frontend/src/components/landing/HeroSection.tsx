@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { isRemoteImageUrl } from "@/lib/image-url";
 
 const INK_PARTICLE_COUNT = 20;
 
@@ -96,6 +97,7 @@ export function HeroSection({ images }: { images: string[] }) {
                 sizes="224px"
                 priority={i === 0}
                 loading={i === 0 ? undefined : "lazy"}
+                unoptimized={isRemoteImageUrl(img)}
                 className="h-full w-full object-cover grayscale hover:grayscale-0 transition-all duration-500"
               />
             </div>

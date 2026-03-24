@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Download } from "lucide-react";
 import { cleanTattooDescription, makeSlugId, slugify, splitSlugId } from "@/lib/slug";
 import { categoryToSlug, extractTagsFromText, getPrimaryCategory } from "@/lib/explore-categories";
+import { isRemoteImageUrl, normalizeImageUrl } from "@/lib/image-url";
 import place_holder from "../../public/placeholder.svg";
 
 type ShowcaseDesign = {
@@ -187,7 +188,7 @@ function mapExploreItem(item: ExploreImage): ShowcaseDesign {
     id: item.id,
     title: resolvedTitle || "Design",
     tag: tag || "Design",
-    image: item.imageLink,
+    image: normalizeImageUrl(item.imageLink),
   };
 }
 
@@ -212,7 +213,7 @@ export default function ExploreDesignDetails() {
     if (Array.isArray(dbTags) && dbTags.length > 0) return dbTags;
     return extractTagsFromText(title);
   }, [currentDesign?.tags, title]);
-  const heroImage = currentDesign?.imageLink || place_holder;
+  const heroImage = currentDesign?.imageLink ? normalizeImageUrl(currentDesign.imageLink) : place_holder;
   const heroAlt = cleanedTitle || `${title} tattoo design`;
   const category = getPrimaryCategory(cleanTattooDescription(currentDesign?.imageAlt || currentDesign?.query || title));
   const categorySlug = categoryToSlug(category);
@@ -309,8 +310,9 @@ export default function ExploreDesignDetails() {
     try {
       setIsDownloading(true);
       const name = title || "tattoo-design";
+      const imageUrl = normalizeImageUrl(currentDesign.imageLink);
       const params = new URLSearchParams({
-        url: currentDesign.imageLink,
+        url: imageUrl,
         name,
         imageId: currentDesign.id,
       });
@@ -322,7 +324,7 @@ export default function ExploreDesignDetails() {
 
       if (!response.ok) {
         console.warn("API download failed, trying direct download fallback");
-        const directResponse = await fetch(currentDesign.imageLink, { mode: 'no-cors' });
+        const directResponse = await fetch(imageUrl, { mode: 'no-cors' });
         const blob = await directResponse.blob();
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement("a");
@@ -384,6 +386,7 @@ export default function ExploreDesignDetails() {
               height={1500}
               sizes="(max-width: 768px) 100vw, 50vw"
               priority
+              unoptimized={typeof heroImage === "string" && isRemoteImageUrl(heroImage)}
               className="w-full max-h-[560px] rounded-xl object-contain"
             />
           </div>
@@ -484,6 +487,7 @@ function DesignCard({ design, index }: { design: ShowcaseDesign; index: number }
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 16vw"
             priority={index < 4}
             loading={index < 4 ? undefined : "lazy"}
+            unoptimized={isRemoteImageUrl(design.image)}
             className="w-full aspect-[3/4] object-cover grayscale transition-all duration-500 group-hover:grayscale-0 group-hover:scale-105"
           />
           <div className="absolute inset-0 flex items-center justify-center bg-background/60 opacity-0 transition-opacity duration-300 group-hover:opacity-100">

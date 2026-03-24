@@ -10,6 +10,7 @@ import Image from "next/image";
 import { cleanTattooDescription, makeSlugId } from "@/lib/slug";
 import { categoryFromSlug, categoryToSlug, getPrimaryCategory, listCategoryDefinitions } from "@/lib/explore-categories";
 import { LoaderRing } from "@/components/ui/loader-ring";
+import { isRemoteImageUrl, normalizeImageUrl } from "@/lib/image-url";
 
 type ExploreImage = {
   id: string;
@@ -179,7 +180,7 @@ export default function Explore() {
   const getDownloadUrl = useCallback((item: ExploreImage) => {
     const name = (item.imageAlt || item.query || `tattoo-${item.id}`).trim();
     const params = new URLSearchParams({
-      url: item.imageLink,
+      url: normalizeImageUrl(item.imageLink),
       name,
       imageId: item.id,
     });
@@ -416,19 +417,22 @@ export default function Explore() {
         ) : (
           <>
             <div className="columns-2 gap-4 md:columns-3 lg:columns-4 xl:columns-5">
-              {filteredImages.map((item) => (
+              {filteredImages.map((item) => {
+                const imageSrc = normalizeImageUrl(item.imageLink);
+                return (
                 <article
                   key={item.id}
                   className="group relative mb-4 break-inside-avoid overflow-hidden rounded-2xl border border-border bg-card"
                 >
                   <Link href={getDesignHref(item)} className="block">
                     <Image
-                      src={item.imageLink}
+                      src={imageSrc}
                       alt={cleanTattooDescription(item.imageAlt || item.query || "Scraped tattoo image")}
                       width={600}
                       height={800}
                       sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
                       loading="lazy"
+                      unoptimized={isRemoteImageUrl(imageSrc)}
                       className="h-auto w-full cursor-pointer object-contain"
                     />
                     <div className="pointer-events-none absolute inset-0 bg-black/0 transition-colors duration-200 group-hover:bg-black/20" />
@@ -456,7 +460,7 @@ export default function Explore() {
                     )}
                   </button>
                 </article>
-              ))}
+              )})}
             </div>
 
             <div className="mt-8 flex items-center justify-center gap-4">

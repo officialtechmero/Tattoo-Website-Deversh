@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { landingStyles } from "@/lib/landing";
+import { isRemoteImageUrl } from "@/lib/image-url";
 
 export function StyleGallery({ images }: { images: string[] }) {
   const sourceImages = images.length > 0 ? images : ["/placeholder.svg"];
@@ -29,6 +30,7 @@ export function StyleGallery({ images }: { images: string[] }) {
                     height={176}
                     sizes="176px"
                     loading="lazy"
+                    unoptimized={isRemoteImageUrl(sourceImages[i % sourceImages.length])}
                     className="h-full w-full object-cover grayscale transition-all duration-500 group-hover:grayscale-0 group-hover:scale-110"
                   />
                 </div>
