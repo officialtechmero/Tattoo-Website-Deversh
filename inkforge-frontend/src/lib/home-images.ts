@@ -1,4 +1,5 @@
 import { landingStyles, type LandingDesign } from "@/lib/landing";
+import { normalizeImageUrl } from "@/lib/image-url";
 
 type ExploreImage = {
   id: string;
@@ -16,11 +17,6 @@ const HOME_LIMIT = 48;
 const HOME_REVALIDATE_SECONDS = 300;
 
 const seededLikes = (index: number) => 100 + ((index * 97 + 211) % 900);
-
-const sanitizeImageUrl = (url: string) => {
-  if (!url) return "/placeholder.svg";
-  return url;
-};
 
 export async function getHomeDesigns(): Promise<LandingDesign[]> {
   try {
@@ -49,7 +45,7 @@ export async function getHomeDesigns(): Promise<LandingDesign[]> {
 
     return uniqueItems.map((item, index) => ({
       id: item.id,
-      image: sanitizeImageUrl(item.imageLink),
+      image: normalizeImageUrl(item.imageLink),
       style: landingStyles[index % landingStyles.length],
       likes: seededLikes(index),
       alt: item.imageAlt || item.query || "Tattoo design",
